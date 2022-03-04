@@ -1,0 +1,8 @@
+[".local/share/zprezto"]
+  type= "git-repo"
+  url = "https://github.com/sorin-ionescu/prezto.git"
+  refreshPeriod = "168h"
+  [".local/share/zprezto".clone]
+    args = ["--recursive"]
+  [".local/share/zprezto".update]
+    args = ["--recurse-submodules"]

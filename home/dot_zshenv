@@ -1,0 +1,5 @@
+# Using this home dotfile to set a new root folder to zsh search for config
+# files
+
+ZDOTDIR=$HOME/.shell.d/zshrc.d
+. $ZDOTDIR/.zshenv

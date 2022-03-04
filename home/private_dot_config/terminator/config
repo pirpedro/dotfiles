@@ -1,0 +1,103 @@
+[global_config]
+  handle_size = 0
+  tab_position = hidden
+  title_hide_sizetext = True
+  title_transmit_fg_color = "#bd93f9"
+  title_transmit_bg_color = "#282a36"
+  title_receive_fg_color = "#8be9fd"
+  title_receive_bg_color = "#282a36"
+  title_inactive_fg_color = "#f8f8f2"
+  title_inactive_bg_color = "#282a36"
+  suppress_multiple_term_dialog = True
+[keybindings]
+[profiles]
+  [[default]]
+    background_type = transparent
+    cursor_color = "#aaaaaa"
+  [[dracula]]
+    background_color = "#1e1f29"
+    cursor_blink = False
+    cursor_shape = underline
+    cursor_color = "#bbbbbb"
+    font = Hack 12
+    foreground_color = "#f8f8f2"
+    scrollbar_position = hidden
+    scrollback_infinite = True
+    palette = "#000000:#ff5555:#50fa7b:#f1fa8c:#bd93f9:#ff79c6:#8be9fd:#bbbbbb:#555555:#ff5555:#50fa7b:#f1fa8c:#bd93f9:#ff79c6:#8be9fd:#ffffff"
+    login_shell = True
+    use_system_font = False
+    copy_on_selection = True
+  [[solarized-dark]]
+    background_color = "#002b36"
+    cursor_color = "#eee8d5"
+    foreground_color = "#eee8d5"
+    palette = "#073642:#dc322f:#859900:#b58900:#268bd2:#d33682:#2aa198:#eee8d5:#586e75:#cb4b16:#586e75:#657b83:#839496:#6c71c4:#93a1a1:#fdf6e3"
+    copy_on_selection = True
+  [[solarized-light]]
+    background_color = "#eee8d5"
+    cursor_color = "#002b36"
+    foreground_color = "#002b36"
+    palette = "#073642:#dc322f:#859900:#b58900:#268bd2:#d33682:#2aa198:#eee8d5:#002b36:#cb4b16:#586e75:#657b83:#839496:#6c71c4:#93a1a1:#fdf6e3"
+[layouts]
+  [[simple]]
+    [[[child0]]]
+      type = Window
+      parent = ""
+      order = 0
+      position = 2395:347
+      maximised = False
+      fullscreen = False
+      size = 734, 451
+      title = pedro@main
+      last_active_term = 4a078fba-5789-41fb-84da-600d05965f4b
+      last_active_window = True
+    [[[terminal1]]]
+      type = Terminal
+      parent = child0
+      order = 0
+      profile = solarized-dark
+      uuid = 4a078fba-5789-41fb-84da-600d05965f4b
+  [[default]]
+    [[[child0]]]
+      type = Window
+      parent = ""
+      order = 0
+      position = 2139:149
+      maximised = False
+      fullscreen = False
+      size = 1450, 664
+      title = pedro@monitor
+      last_active_term = 4a078fba-5789-41fb-84da-600d05965f4b
+      last_active_window = True
+    [[[child1]]]
+      type = HPaned
+      parent = child0
+      order = 0
+      position = 834
+      ratio = 0.5751724137931035
+    [[[terminal2]]]
+      type = Terminal
+      parent = child1
+      order = 0
+      profile = solarized-dark
+      uuid = 4a078fba-5789-41fb-84da-600d05965f4b
+    [[[child3]]]
+      type = VPaned
+      parent = child1
+      order = 1
+      position = 332
+      ratio = 0.5
+    [[[terminal4]]]
+      type = Terminal
+      parent = child3
+      order = 0
+      profile = solarized-dark
+      uuid = b579b1ec-efb4-407b-8b07-d436a1160947
+    [[[terminal5]]]
+      type = Terminal
+      parent = child3
+      order = 1
+      command = htop;
+      profile = solarized-dark
+      uuid = ac587cb5-24e9-46fc-8b5b-90bc16eb9dac
+[plugins]

@@ -1,0 +1,197 @@
+set nocompatible              " be iMproved, required
+filetype off                  " required
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+
+" let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'
+
+" plugin from http://vim-scripts.org/vim/scripts.html
+"Plugin 'L9'
+
+" Git plugin not hosted on GitHub
+"Plugin 'git://git.wincent.com/command-t.git'
+
+" git repos on your local machine (i.e. when working on your own plugin)
+"Plugin 'file:///home/gmarik/path/to/plugin'
+
+" The sparkup vim script is in a subdirectory of this repo called vim.
+" Pass the path to set the runtimepath properly.
+"Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
+
+" All of your Plugins must be added before the following line
+
+" Template scheme for vim.
+Plugin 'altercation/vim-colors-solarized'
+
+" Ansible Plugin
+Plugin 'pearofducks/ansible-vim'
+
+"The NERD tree allows you to explore your filesystem and to open files and directories.
+Plugin 'scrooloose/nerdtree'
+
+"A plugin of NERDTree showing git status flags.
+Plugin 'Xuyuanp/nerdtree-git-plugin'
+"Git wrapper for vim
+Plugin 'tpope/vim-fugitive'
+
+"Syntastic is a syntax checking plugin for Vim that runs files through external syntax checkers and displays any resulting errors to the user
+Plugin 'scrooloose/syntastic'
+
+"provides mappings to easily delete, change and add such surroundings in pairs.
+Plugin 'tpope/vim-surround'
+
+"Repeat.vim remaps . in a way that plugins can tap into it."
+Plugin 'tpope/vim-repeat'
+
+"Lean & mean status/tabline for vim that's light as air.
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
+
+"EasyMotion provides a much simpler way to use some motions in vim.
+Plugin 'easymotion/vim-easymotion'
+
+"Full path fuzzy file, buffer, mru, tag, ... finder for Vim.
+Plugin 'ctrlpvim/ctrlp.vim'
+
+"Tagbar is a Vim plugin that provides an easy way to browse the tags of the current file and get an overview of its structure.
+Plugin 'majutsushi/tagbar'
+
+"Comment functions so powerful—no comment necessary.
+Plugin 'scrooloose/nerdcommenter'
+
+"A Vim plugin which shows a git diff in the 'gutter' (sign column).
+Plugin 'airblade/vim-gitgutter'
+
+"YouCompleteMe is a fast, as-you-type, fuzzy-search code completion engine for Vim.
+Plugin 'valloric/youcompleteme'
+
+Plugin 'vim-ruby/vim-ruby'
+Plugin 'tpope/vim-rails'
+
+call vundle#end()            " required
+filetype plugin indent on    " required
+" To ignore plugin indent changes, instead use:
+filetype plugin on
+set omnifunc=syntaxcomplete#Complete
+"
+" Brief help
+" :PluginList       - lists configured plugins
+" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+" :PluginSearch foo - searches for foo; append `!` to refresh local cache
+" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+"
+" see :h vundle for more details or wiki for FAQ
+" Put your non-Plugin stuff after this line
+
+
+syntax enable
+"let g:solarized_termcolors=256
+"set t_Co=256
+set background=dark
+if has("gui_running")
+    colorscheme solarized
+endif
+
+
+"open a NERDTree automatically when vim starts up
+autocmd vimenter * NERDTree
+"open a NERDTree automatically when vim starts up if no files were specified
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+"have my cursor start in the other window
+autocmd vimenter * wincmd p
+"open NERDTree with Ctrl+n
+map <C-n> :NERDTreeToggle<CR>
+"close vim if the only window left open is a NERDTree
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+
+"syntastic config
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+
+
+"airline
+"let g:airline_theme='dark'
+
+"ctrlp
+let g:ctrlp_map = '<c-p>'
+let g:ctrlp_cmd = 'CtrlP'
+let g:ctrlp_working_path_mode = 'ra'
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip     " Linux/MacOSX
+let g:ctrlp_custom_ignore = '\v[\/]\.(git|hg|svn)$'
+let g:ctrlp_custom_ignore = {
+	\ 'dir':  '\v[\/]\.(git|hg|svn)$',
+	\ 'file': '\v\.(exe|so|dll)$',
+	\ 'link': 'SOME_BAD_SYMBOLIC_LINKS',
+	\ }
+
+"Tagbar
+nmap <F8> :TagbarToggle<CR>
+
+
+set guifont=Menlo:h14
+set nocompatible
+set modelines=0
+set tabstop=2 shiftwidth=2 softtabstop=2 expandtab
+set encoding=utf-8
+set scrolloff=3
+set autoindent
+set showmode
+set showcmd
+set hidden
+set wildmenu
+set wildmode=list:longest
+set visualbell
+set ttyfast
+set ruler
+set backspace=indent,eol,start
+set laststatus=2
+set number
+set relativenumber
+set noundofile
+nnoremap / /\v
+vnoremap / /\v
+set ignorecase
+set smartcase
+set gdefault
+set incsearch
+set showmatch
+set hlsearch
+"nnoremap <leader><space> :noh<cr>
+"nnoremap <tab> %
+"vnoremap <tab> %
+set wrap
+set linebreak
+set nolist
+set formatoptions=qrn1
+"set spell spelllang=en_us
+set colorcolumn=80
+set updatetime=250
+
+" Basics
+
+inoremap jk <ESC>
+let mapleader = ","
+
+" Arrows are unvimlike 
+
+nnoremap <up> <nop>
+nnoremap <down> <nop>
+nnoremap <left> <nop>
+nnoremap <right> <nop>
+inoremap <up> <nop>
+inoremap <down> <nop>
+inoremap <left> <nop>
+inoremap <right> <nop>
+
+vnoremap . :norm.<CR>

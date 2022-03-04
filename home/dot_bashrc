@@ -1,0 +1,39 @@
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
+# for examples
+
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+  PATH="$HOME/bin:$PATH"
+fi
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/.local/bin" ] ; then
+  PATH="$HOME/.local/bin:$PATH"
+fi
+
+if [ -f "$HOME/.shell.d/bashrc.d/.bash_init" ] ; then
+  source "$HOME/.shell.d/bashrc.d/.bash_init"
+fi
+
+# load all files from .shell.d/rc.d directory
+if [ -d $HOME/.shell.d/rc.d ]; then
+  for file in $HOME/.shell.d/rc.d/*.sh; do
+    source $file
+  done
+fi
+
+# load all files from .shell.d/bashrc.d directory
+if [ -d $HOME/.shell.d/bashrc.d ]; then
+  for file in $HOME/.shell.d/bashrc.d/*.bash; do
+    source $file
+  done
+fi
+
+
