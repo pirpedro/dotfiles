@@ -1,0 +1,68 @@
+{{- $personalName := "Pedro Rodrigues" -}}
+{{- $personalEmail := "pir.pedro@gmail.com" -}}
+{{- $personalSigningKey := "426C5F3386CEEC28" -}}
+
+{{- $workSigningKey := "426C5F3386CEEC28" -}}
+{{- $workName := "Pedro Ivo Rodrigues" -}}
+{{- $workEmail := "pir.pedro@gmail.com" -}}
+
+{{- $isWork := contains "ukfed-msr" (lower .chezmoi.hostname) -}}
+{{- $isPersonal := not $isWork -}}
+
+{{- $isWsl := or (env "WSL_DISTRO_NAME") (env "IS_WSL") | not | not -}}
+{{- $isFedora := lookPath "gnome-shell" | not | not -}}
+
+{{ $editor := "vim" }}
+{{ $visual := "" }}
+
+{{ if lookPath "vim" }}
+  {{ $editor = "vim" }}
+{{ else if lookPath "nano" }}
+  {{ $editor = "nano" }}
+{{ end }}
+
+{{ if lookPath "code" }}
+  {{ $visual = "code --wait" }}
+{{ else }}
+  {{ $visual = $editor }}
+{{ end }}
+
+data:
+  personal:
+    name: {{ $personalName | quote }}
+    email: {{ $personalEmail | quote }}
+    signing_key: {{ $personalSigningKey | quote }}
+  work: 
+    name: {{ $workName | quote }}
+    email: {{ $workEmail | quote }}
+    signing_key: {{ $workSigningKey | quote }}
+  is:
+    personal: {{ $isPersonal }}
+    work: {{ $isWork }}
+    wsl: {{ $isWsl }}
+  github:
+  {{- if $isPersonal }}
+    name: {{ $personalName | quote }}
+    email: {{ $personalEmail | quote }}
+    signing_key: {{ $personalSigningKey | quote }}
+
+  {{- else }}
+    name: {{ $workName | quote }}
+    email: {{ $workEmail | quote }}
+    signing_key: {{ $workSigningKey | quote }}
+  {{- end }}
+
+  editor:
+    terminal: {{ $editor | quote }}
+    gui: {{ $visual | quote }}
+  locale: "en_US.UTF-8"
+  language: "en_US.UTF-8"
+
+diff:
+  exclude: ["scripts"]
+  
+git:
+  autoCommit: true
+
+template:
+  options: ["missingkey=zero"]

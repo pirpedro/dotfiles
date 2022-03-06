@@ -1,0 +1,1 @@
+bind 'set mark-symlinked-directories on' 2>/dev/null

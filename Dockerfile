@@ -10,8 +10,8 @@ RUN groupadd -g 1000 app \
   && useradd -u 1000 -g app -s /bin/bash -m app \
   && usermod -aG sudo app \
   && echo 'app    ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
-  && chown -R app:app /home/app \
-  && echo 'PATH="${PATH:+${PATH}:}~/.local/bin"' >> /home/app/.bashrc
+  && chown -R app:app /home/app
+# && echo 'PATH="${PATH:+${PATH}:}~/.local/bin"' >> /home/app/.bashrc
 
 USER app
 

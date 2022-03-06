@@ -4,22 +4,18 @@
 
 # If not running interactively, don't do anything
 case $- in
-    *i*) ;;
-      *) return;;
+*i*) ;;
+*) return ;;
 esac
 
 # set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
+if [ -d "$HOME/bin" ]; then
   PATH="$HOME/bin:$PATH"
 fi
 
 # set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/bin" ] ; then
+if [ -d "$HOME/.local/bin" ]; then
   PATH="$HOME/.local/bin:$PATH"
-fi
-
-if [ -f "$HOME/.shell.d/bashrc.d/.bash_init" ] ; then
-  source "$HOME/.shell.d/bashrc.d/.bash_init"
 fi
 
 # load all files from .shell.d/rc.d directory
@@ -35,5 +31,3 @@ if [ -d $HOME/.shell.d/bashrc.d ]; then
     source $file
   done
 fi
-
-

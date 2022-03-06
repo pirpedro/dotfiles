@@ -17,8 +17,8 @@
 # Editors
 #
 
-export EDITOR={{ .editor | quote }}
-export VISUAL={{ .editor | quote }}
+export EDITOR={{ .editor.terminal | quote }}
+export VISUAL={{ .editor.gui | quote }}
 export PAGER='less'
 
 #

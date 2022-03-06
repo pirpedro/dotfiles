@@ -1,3 +1,5 @@
+#Alias for not buit-in unix programs
+
 alias gist='gist -c'
 alias mconfig='my config'
 alias mcrypt='my crypt'

@@ -5,36 +5,37 @@
 #   Sorin Ionescu <sorin.ionescu@gmail.com>
 #
 
-export ZDOTDIR=~/.zsh.d
+#if zsh didn't find anything in a glob expansion it will not show errors.
+
+export ZDOTDIR=~/.shell.d/zshrc.d
 # Source Prezto.
 if [[ -s "$HOME/.local/share/zprezto/init.zsh" ]]; then
   source "$HOME/.local/share/zprezto/init.zsh"
 fi
 
-# load all files from .shell.d/zshrc.d directory
-if [ -d $HOME/.shell.d/zshrc.d ]; then
-  for file in $HOME/.shell.d/zshrc.d/*.zsh; do
-    source $file
-  done
-fi
-
 # load all files from .shell/rc.d directory
 if [ -d $HOME/.shell.d/rc.d ]; then
-  for file in $HOME/.shell.d/rc.d/*.sh; do
+  for file in $HOME/.shell.d/rc.d/*.sh(N); do
     source $file
   done
 fi
 
+# load all files from .shell.d/zshrc.d directory
+if [ -d $HOME/.shell.d/zshrc.d ]; then
+  for file in $HOME/.shell.d/zshrc.d/*.zsh(N); do
+    source $file
+  done
+fi
 
 # environment
 
-export CLICOLOR=1
-export TERM=xterm-256color
-export GPG_TTY=$(tty)
-export MY_CONFIG_PATH=~/dev/ws/my-config
+# export CLICOLOR=1
+# export TERM=xterm-256color
+# export GPG_TTY=$(tty)
+# export MY_CONFIG_PATH=~/dev/ws/my-config
 #export PYTHONPATH=/usr/local/lib/python2.7/site-packages:$PYTHONPATH
 
-if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+# if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 
 # completion
 
