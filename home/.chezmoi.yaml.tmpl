@@ -12,6 +12,9 @@
 {{- $isWsl := or (env "WSL_DISTRO_NAME") (env "IS_WSL") | not | not -}}
 {{- $isFedora := lookPath "gnome-shell" | not | not -}}
 
+{{- $codespaces:= env "CODESPACES" | not | not -}}
+{{- $docker:= lookPath "/.dockerenv" | not | not -}}
+
 {{ $editor := "vim" }}
 {{ $visual := "" }}
 
@@ -22,7 +25,7 @@
 {{ end }}
 
 {{ if lookPath "code" }}
-  {{ $visual = "code --wait" }}
+  {{ $visual = "code" }}
 {{ else }}
   {{ $visual = $editor }}
 {{ end }}
@@ -40,6 +43,8 @@ data:
     personal: {{ $isPersonal }}
     work: {{ $isWork }}
     wsl: {{ $isWsl }}
+    docker: {{ $docker }}
+    codespaces: {{ $codespaces }}
   github:
   {{- if $isPersonal }}
     name: {{ $personalName | quote }}
@@ -57,6 +62,8 @@ data:
     gui: {{ $visual | quote }}
   locale: "en_US.UTF-8"
   language: "en_US.UTF-8"
+
+  browser: "google-chrome"
 
 diff:
   exclude: ["scripts"]

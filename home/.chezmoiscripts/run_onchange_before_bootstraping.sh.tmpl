@@ -1,0 +1,31 @@
+#!/bin/bash
+
+{{ if eq .chezmoi.os "darwin" }}
+  xcode-select --install
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  brew install bash-completion@2
+  
+
+{{ else if eq .chezmoi.os "linux"}}
+
+  {{- if lookPath "apt" -}}
+    sudo apt -qq -y update
+    DEBIAN_FRONTEND=noninteractive sudo apt -qq -y install \
+    curl \
+    wget \
+    git \
+    git-core \
+    zsh
+
+    sudo chsh -s $(which zsh) $(whoami) 
+  {{- else if lookPath "apk" -}}
+    apk update
+    apk add \
+    sudo \
+    git \
+    zsh \
+    curl \
+    wget
+  {{- end -}}
+
+{{ end }}

@@ -1,0 +1,13 @@
+{
+  "files.associations": {
+    "*.ejs": "html",
+    "*.sh.tmpl": "shellscript",
+    "*.json.tmpl": "json",
+    "*.bash.tmpl": "shellscript",
+    "*.yaml.tmpl": "yaml"
+  },
+  "cSpell.words": [
+    "codespace",
+    "codespaces"
+  ]
+}

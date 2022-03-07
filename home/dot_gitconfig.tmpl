@@ -7,16 +7,16 @@
   pager = less -x4
   whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
 [user]
-  name = {{ .name }}
-  email = {{ .email }}
-  signingkey = {{ .signing_key }}
+  name = {{ .github.name }}
+  email = {{ .github.email }}
+  signingkey = {{ .github.signing_key }}
 [sendemail]
   smtpencryption = tls
   smtpserver = smtp.gmail.com
   smtpuser = pir.pedro@gmail.com
   smtpserverport = 587
 [web]
-  browser = google-chrome
+  browser = {{ .browser }}
 [instaweb]
   httpd = apache2 -f
 [rerere]

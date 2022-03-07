@@ -1,0 +1,13 @@
+#!/bin/bash
+{{if not .is.docker }}
+export DEBIAN_FRONTEND=noninteractive 
+
+PACKAGES=(
+  docker
+)
+for f in "${PACKAGES[@]}"; do
+  echo $f
+  # [ -x $f ] || chmod +x $f
+  # . $f
+done
+{{ end }}

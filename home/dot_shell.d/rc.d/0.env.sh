@@ -1,7 +1,14 @@
 if [ -d "$HOME/bin" ]; then
-  PATH="$HOME/bin:$PATH"
+  case ":$PATH:" in
+  *:$HOME/bin:*) ;;
+  *) export PATH="$HOME/bin:$PATH" ;;  
+  esac
+ 
 fi
 
 if [ -d "$HOME/.local/bin" ]; then
-  PATH="$HOME/.local/bin:$PATH"
+  case ":$PATH:" in
+  *:$HOME/.local/bin:*) ;;
+  *) export PATH="$HOME/.local/bin:$PATH" ;;  
+  esac
 fi
