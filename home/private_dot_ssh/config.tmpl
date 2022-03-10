@@ -1,0 +1,21 @@
+{{- if eq .chezmoi.os "darwin" }}
+Host *
+  AddKeysToAgent yes
+  UseKeychain yes
+{{- end }}
+
+Host github.com
+  Hostname github.com
+  User git
+  AddKeysToAgent yes
+  IdentityFile ~/.ssh/keys.d/id_ed25519_github
+
+#Host dashboard.getuff.com.br
+#  AddKeysToAgent yes
+#  Hostname dashboard.getuff.com.br
+#  User ubuntu
+#  IdentityFile ~/.ssh/keys.d/getuffsa-east-1.pem
+
+Host *
+  AddKeysToAgent yes
+  IdentityFile ~/.ssh/keys.d/id_rsa_master

@@ -1,3 +1,4 @@
+{{/* personal machine information */}}
 {{- $personalName := "Pedro Rodrigues" -}}
 {{- $personalEmail := "pir.pedro@gmail.com" -}}
 {{- $personalSigningKey := "426C5F3386CEEC28" -}}
@@ -6,15 +7,32 @@
 {{- $workName := "Pedro Ivo Rodrigues" -}}
 {{- $workEmail := "pir.pedro@gmail.com" -}}
 
-{{- $isWork := contains "ukfed-msr" (lower .chezmoi.hostname) -}}
+{{- $isWork := contains "-work" (lower .chezmoi.hostname) -}}
 {{- $isPersonal := not $isWork -}}
 
+{{- $osID := .chezmoi.os -}}
+{{- if hasKey .chezmoi.osRelease "id" -}}
+{{-   $osID = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
+{{- end -}}
+
+
+{{/* boolean feature tags */}}
 {{- $isWsl := or (env "WSL_DISTRO_NAME") (env "IS_WSL") | not | not -}}
 {{- $isFedora := lookPath "gnome-shell" | not | not -}}
+{{- $ephemeral := false -}}{{/* true if this machine is ephemeral, e.g. a cloud or VM instance */}}
+{{- $headless := false -}}{{/* true if this machine does not have a screen and keyboard */}}
 
-{{- $codespaces:= env "CODESPACES" | not | not -}}
-{{- $docker:= lookPath "/.dockerenv" | not | not -}}
+{{/* detect GitHub codespaces, VSCode remote containers, Docker containers, Multipass VMs, and Vagrant boxes */}}
+{{- if or (env "CODESPACES") (lookPath "/.dockerenv") (env "REMOTE_CONTAINERS_IPC") (eq .chezmoi.username "root" "ubuntu" "vagrant" "vscode") -}}
+{{-   $ephemeral = true -}}
+{{-   $headless = true -}}
+{{- end -}}
 
+{{- if eq .chezmoi.os "windows" -}}
+{{-   $ephemeral = true -}}
+{{- end -}}
+
+{{/* environmental tags */}}
 {{ $editor := "vim" }}
 {{ $visual := "" }}
 
@@ -30,6 +48,13 @@
   {{ $visual = $editor }}
 {{ end }}
 
+{{ $sudo := "sudo" -}}
+{{ if eq .chezmoi.username "root" }}
+{{ $sudo = "" -}}
+{{ end -}}
+
+sourceDir: {{ .chezmoi.sourceDir | quote }}
+
 data:
   personal:
     name: {{ $personalName | quote }}
@@ -43,8 +68,13 @@ data:
     personal: {{ $isPersonal }}
     work: {{ $isWork }}
     wsl: {{ $isWsl }}
-    docker: {{ $docker }}
-    codespaces: {{ $codespaces }}
+    ephemeral: {{ $ephemeral }}
+    headless: {{ $headless }}
+  path:
+    npm:
+      global: .local/share/npm
+  cmd:
+    sudo: {{ $sudo }}
   github:
   {{- if $isPersonal }}
     name: {{ $personalName | quote }}
@@ -64,12 +94,10 @@ data:
   language: "en_US.UTF-8"
 
   browser: "google-chrome"
+  osid: {{ $osID | quote }}
 
 diff:
   exclude: ["scripts"]
   
-git:
-  autoCommit: true
-
 template:
   options: ["missingkey=zero"]

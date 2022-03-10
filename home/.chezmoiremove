@@ -3,3 +3,6 @@
 .zpreztorc
 .zshrc
 .zprofile
+.gitconfig
+.gitcookies
+.gitignore

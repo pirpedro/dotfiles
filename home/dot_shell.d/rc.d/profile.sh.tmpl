@@ -34,7 +34,7 @@ export SHELL_IDE=$(which {{ .editor.gui }})
 export RUBY_IDE=$(which rubymine)
 export RAILS_IDE=$(which rubymine)
 
-#   Set Default PROGRAMS (change 'Vim' to the editor of your choice)
+#   Set Default PROGRAMS
 #   ------------------------------------------------------------
 export BROWSER={{ .browser }}
 
@@ -52,6 +52,11 @@ export TERM=xterm-256color
 #   TTY
 #   ------------------------------------------------------------
 export GPG_TTY=$(tty)
+
+#   XDG_FILES
+#   ------------------------------------------------------------
+export XDG_CONFIG_HOME=$HOME/.config
+export XDG_CACHE_HOME=$HOME/.cache
 
 #   Completion
 #   ------------------------------------------------------------

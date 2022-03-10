@@ -1,8 +1,5 @@
-#!/bin/bash
-
 {{ if lookPath "apt" }}
-sudo apt -y -qq install apache2
-sudo ufw allow in "Apache Full"
+{{ .cmd.sudo }} apt -qq -y install calibre
 {{ else }}
 echo "No installation descriptor for this distro."
-{{ end }}
+{{ end -}}

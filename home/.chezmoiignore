@@ -3,3 +3,5 @@
 {{ else if ne .chezmoi.os "linux" }}
 .config/terminator
 {{ end }}
+
+includes

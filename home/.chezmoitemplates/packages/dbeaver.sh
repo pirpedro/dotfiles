@@ -1,9 +1,7 @@
-#!/bin/bash
-
 {{ if lookPath "apt" }}
-sudo apt install -y gdebi
+{{ .cmd.sudo }} apt install -y gdebi
 wget http://dbeaver.jkiss.org/files/dbeaver-ce_latest_amd64.deb
-sudo gdebi dbeaver-ce_latest_amd64.deb
+{{ .cmd.sudo }} gdebi dbeaver-ce_latest_amd64.deb
 {{ else }}
 echo "No installation descriptor for this distro."
-{{ end }}
+{{ end -}}

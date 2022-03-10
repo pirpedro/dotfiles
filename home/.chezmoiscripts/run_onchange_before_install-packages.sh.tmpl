@@ -1,0 +1,76 @@
+{{ $scripts := list -}}
+
+{{ if not .is.ephemeral -}}
+  {{ if not (lookPath "node") -}}
+    {{ $scripts = mustAppend $scripts "node" -}}
+  {{ end -}}
+
+  {{ if .is.personal -}}
+     {{ $scripts = mustAppend $scripts "bw" -}}
+  {{ end -}}
+
+  {{ $scripts = concat $scripts (list
+    "docker"
+  ) -}}  
+{{ end -}}
+
+{{ if not .is.headless -}}
+   {{ $scripts = concat $scripts (list
+    "vscode"
+    "google-chrome"
+  ) -}}
+{{ end -}}
+
+{{ if eq .chezmoi.os "darwin" }}
+#!/bin/bash
+xcode-select --install
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install bash-completion@2
+{{ else if eq .chezmoi.os "linux" -}}
+
+{{ $packages := list
+     "curl"
+     "wget"
+     "vim"
+     "git"
+     "zsh" -}}
+
+ {{ if not .is.headless -}}
+   {{ $scripts = concat $scripts (list
+    "terminator"
+  ) -}}
+{{ end -}}    
+
+{{ if ne .chezmoi.username "root" -}}
+  {{ $packages = mustAppend $packages "sudo" -}}
+{{ end -}}
+
+{{ if lookPath "apt" -}}
+  {{  $packages = mustAppend $packages "git-core" -}}
+#!/bin/bash  
+export DEBIAN_FRONTEND=noninteractive
+
+set -eufo pipefail
+echo "Bootstrapping system..."
+{{ .cmd.sudo }} apt -qq -y update
+{{ .cmd.sudo }} apt -qq -y install {{ $packages | join " " }}
+sudo chsh -s $(which zsh) $(whoami)
+
+{{ else if lookPath "apk" -}}
+#!/bin/bash
+echo "Bootstrapping system..."
+{{ .cmd.sudo }} apk update
+{{ .cmd.sudo }} apk add {{ $packages | join " " }}
+{{ end -}}
+
+  {{ range $scripts -}}
+    {{ if not (lookPath .) -}}
+      echo "Installing {{ . }}...";
+      {{- /* Workaroud to handle the problem related to template function only accepting static string as arguments*/ -}}
+      {{- /* So invoking the chezmoi command allows to pass a dynamic location to be parsed */ -}}
+      {{ output "chezmoi" "execute-template" (include (printf ".chezmoitemplates/packages/%s.sh" . )) -}}
+      echo "{{ . }} installed.";
+    {{ end -}}
+  {{ end -}}
+{{ end -}}
+

@@ -1,7 +1,5 @@
-#!/bin/bash
-
 {{ if lookPath "apt" }}
-sudo apt -qq -y install terminator
+npm install -g @bitwarden/cli --prefix $HOME/{{ .path.npm.global }}
 {{ else }}
 echo "No installation descriptor for this distro."
-{{ end }}
+{{ end -}}
