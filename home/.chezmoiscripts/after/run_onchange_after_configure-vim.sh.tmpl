@@ -1,7 +1,7 @@
 {{ if (and (eq .chezmoi.os "darwin" "linux") (not .ephemeral)) -}}
 #!/bin/bash
 # .vimrc hash: {{ include "dot_vimrc" | sha256sum }}
-
 set -eufo pipefail
-
+{{ .cmd.sudo }} apt install -y exuberant-ctags
+vim +PluginInstall +qall
 {{ end -}}

@@ -16,7 +16,9 @@
 
 {{ if not .is.headless -}}
    {{ $scripts = concat $scripts (list
-    "vscode"
+    "fonts"
+    "sushi"
+    "code"
     "google-chrome"
   ) -}}
 {{ end -}}
@@ -37,6 +39,7 @@ brew install bash-completion@2
 
  {{ if not .is.headless -}}
    {{ $scripts = concat $scripts (list
+    "xclip"
     "terminator"
   ) -}}
 {{ end -}}    
