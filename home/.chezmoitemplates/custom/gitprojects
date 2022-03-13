@@ -1,0 +1,42 @@
+{{ define "clone_syntax" }}
+
+{{ end }}
+
+{{ $projects := fromYaml (output "chezmoi" "execute-template" (include ".chezmoigit.yaml" | trim ) ) -}}
+{{ $root := "" -}}
+
+{{ if $projects.clone -}}
+  {{ $clone := $projects.clone -}}
+  {{ if $clone.root -}}
+    {{ $root = $clone.root -}}
+  {{ end -}}
+  
+  {{ $organization := "" -}}
+  {{ $provider := "git@github.com" -}}
+
+  {{- range $clone.organizations -}}
+  
+    {{ $organization = .organization -}}
+    {{ $repo_name := "" -}}
+    {{ $repo_path := "" -}}
+
+    {{ if .provider -}}
+      {{ $provider = .provider -}}
+    {{ end -}}
+
+    {{- range .repos -}}
+      {{ $repo := split ":" .name -}}
+      {{ $repo_name = $repo._0 -}}
+
+      {{if $repo._1 -}}
+        {{ $repo_path = $repo._1 -}}
+      {{ else -}}  
+        {{ $repo_path = $repo_name -}}
+      {{ end -}}
+{{ list "[" (joinPath $root $repo_path | quote) "]" | join "" }}
+  type = "git-repo"
+  url = {{ list $provider ":" $organization "/" $repo_name | join "" | quote }}
+ 
+    {{ end -}}   
+  {{ end -}}
+{{ end -}}

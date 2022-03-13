@@ -1,0 +1,30 @@
+{{ if .is.personal -}}
+clone:
+  root: dev/ws
+  organizations:
+    - organization: pirpedro
+      repos:
+        - name: pirpedro.github.io:blog/personal
+        - name: CEMEAI-USP:MBA-CEMEAI/Disciplinas
+        - name: CEMEAI_TCC:MBA-CEMEAI/TCC
+        - name: dotfiles:chezmoi
+        - name: docker
+        - name: flix-catalog:fullcycle/catalog
+        - name: flix-encoder:fullcycle/encoder
+        - name: flix-auth:fullcycle/micro-auth
+        - name: flix-micro-catalog:fullcycle/micro-catalog
+        - name: flix-message-broker:fullcycle/rabbitmq
+        - name: git-gadgets
+        - name: my-config
+        - name: pgfa:UFF/pgfa
+        - name: bootstrapping:rule-them-all
+    - organization: nees-uff
+      repos:
+        - name: pef:UFF/pef
+    - organization: b2in-tech
+      repos:
+        - name: prepaf:UFF/prepaf
+    - organization: psrandom
+      repos:
+        - name: psrandom.github.io.git:blog/psrandom
+{{ end -}}
