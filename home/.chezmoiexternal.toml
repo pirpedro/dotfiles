@@ -8,29 +8,29 @@
     args = ["--recurse-submodules"]
 
 [".vim/autoload/plug.vim"]
-    type = "file"
-    url = "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
-    refreshPeriod = "168h"
+  type = "file"
+  url = "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+  refreshPeriod = "168h"
 
 [".vim/bundle/Vundle.vim"]
-    type = "git-repo"
-    url = "https://github.com/VundleVim/Vundle.vim.git"
+  type = "git-repo"
+  url = "https://github.com/VundleVim/Vundle.vim.git"
 {{- if and (eq .chezmoi.os "linux") .is.personal (not .is.ephemeral) }}
 {{- $ageVersion := "1.0.0" }}
 [".local/bin/age"]
-    type = "file"
-    url = "https://github.com/FiloSottile/age/releases/download/v{{ $ageVersion }}/age-v{{ $ageVersion }}-{{ .chezmoi.os }}-{{ .chezmoi.arch }}.tar.gz"
-    executable = true
-    [".local/bin/age".filter]
-        command = "tar"
-        args = ["--extract", "--file", "/dev/stdin", "--gzip", "--to-stdout", "age/age"]
+  type = "file"
+  url = "https://github.com/FiloSottile/age/releases/download/v{{ $ageVersion }}/age-v{{ $ageVersion }}-{{ .chezmoi.os }}-{{ .chezmoi.arch }}.tar.gz"
+  executable = true
+  [".local/bin/age".filter]
+      command = "tar"
+      args = ["--extract", "--file", "/dev/stdin", "--gzip", "--to-stdout", "age/age"]
 [".local/bin/age-keygen"]
-    type = "file"
-    url = "https://github.com/FiloSottile/age/releases/download/v{{ $ageVersion }}/age-v{{ $ageVersion }}-{{ .chezmoi.os }}-{{ .chezmoi.arch }}.tar.gz"
-    executable = true
-    [".local/bin/age-keygen".filter]
-        command = "tar"
-        args = ["--extract", "--file", "/dev/stdin", "--gzip", "--to-stdout", "age/age-keygen"]
+  type = "file"
+  url = "https://github.com/FiloSottile/age/releases/download/v{{ $ageVersion }}/age-v{{ $ageVersion }}-{{ .chezmoi.os }}-{{ .chezmoi.arch }}.tar.gz"
+  executable = true
+  [".local/bin/age-keygen".filter]
+      command = "tar"
+      args = ["--extract", "--file", "/dev/stdin", "--gzip", "--to-stdout", "age/age-keygen"]
 {{- end }}
 {{- if and (not .is.ephemeral) (not .is.headless) }}
 {{-   $fontDir := "" }}
@@ -40,19 +40,20 @@
 {{-     $fontDir = ".local/share/fonts" }}
 {{-   end }}
 ["{{ $fontDir }}/MesloLGS NF Regular.ttf"]
-    type = "file"
-    url = "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS NF Regular.ttf"
-    refreshPeriod = "168h"
+  type = "file"
+  url = "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS NF Regular.ttf"
+  refreshPeriod = "168h"
 ["{{ $fontDir }}/MesloLGS NF Bold.ttf"]
-    type = "file"
-    url = "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS NF Bold.ttf"
-    refreshPeriod = "168h"
+  type = "file"
+  url = "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS NF Bold.ttf"
+  refreshPeriod = "168h"
 ["{{ $fontDir }}/MesloLGS NF Italic.ttf"]
-    type = "file"
-    url = "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS NF Italic.ttf"
-    refreshPeriod = "168h"
+  type = "file"
+  url = "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS NF Italic.ttf"
+  refreshPeriod = "168h"
 ["{{ $fontDir }}/MesloLGS NF Bold Italic.ttf"]
-    type = "file"
-    url = "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS NF Bold Italic.ttf"
-    refreshPeriod = "168h"
+  type = "file"
+  url = "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS NF Bold Italic.ttf"
+  refreshPeriod = "168h"
 {{- end }}
+{{-  template "custom/gitprojects" . }}
