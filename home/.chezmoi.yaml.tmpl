@@ -81,6 +81,7 @@ data:
       global: .local/share/npm
   cmd:
     sudo: {{ $sudo }}
+    bat: {{ ternary "batcat" "bat" (eq .chezmoi.osRelease.idLike "debian" )}}
   env:
     de: {{ $desktop_environment }}
   github:

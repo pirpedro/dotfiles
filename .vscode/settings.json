@@ -4,7 +4,8 @@
     "*.sh.tmpl": "shellscript",
     "*.json.tmpl": "json",
     "*.bash.tmpl": "shellscript",
-    "*.yaml.tmpl": "yaml"
+    "*.yaml.tmpl": "yaml",
+    "*.conf": "plaintext"
   },
   "cSpell.words": [
     "codespace",
