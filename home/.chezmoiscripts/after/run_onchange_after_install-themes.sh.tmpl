@@ -1,0 +1,65 @@
+{{- if and .is.personal (not .is.ephemeral) (not .is.headless) }}
+{{-   if lookPath "apt" }}
+{{-     if eq .env.de "gnome" -}}
+#!/bin/bash
+#######################################
+# CONFIGURE THEME 
+#######################################
+{{- if ne (output "gsettings" "get" "org.gnome.desktop.interface" "gtk-theme" | trim ) "'WhiteSur-dark'"}}
+{{output "gsettings" "get" "org.gnome.desktop.interface" "gtk-theme" | trim | quote -}}
+cd $HOME/.local/share/themes/whiteSur
+chmod +x install.sh
+chmod +x tweaks.sh
+./install.sh -c dark #install theme
+./tweaks.sh -d -c dark #install dock
+sudo ./tweaks.sh -g -N # install gmp (login page)
+gsettings set org.gnome.desktop.interface gtk-theme "WhiteSur-dark"
+gsettings set org.gnome.desktop.wm.preferences theme "WhiteSur-dark"
+{{- end }}
+#######################################
+# CONFIGURE ICONS 
+#######################################
+{{- if ne (output "gsettings" "get" "org.gnome.desktop.interface" "icon-theme" | trim) "'la-capitaine'"}}
+cd $HOME/.icons/la-capitaine
+chmod +x configure
+printf 'y\ny\ny\n' | ./configure 
+gsettings set org.gnome.desktop.interface icon-theme 'la-capitaine'
+{{- end }}
+#######################################
+# CONFIGURE POINTERS 
+#######################################
+{{- if ne (output "gsettings" "get" "org.gnome.desktop.interface" "cursor-theme" | trim) "'capitaine-cursors'"}}
+cd $HOME/.local/share/themes/capitaine-cursors
+{{ .cmd.sudo }} apt install -y inkscape x11-apps libcanberra-gtk-module
+chmod +x build.sh
+./build.sh -t dark # build dark theme cursors
+mkdir -p $HOME/.icons/capitaine-cursors
+cp -r dist/dark/* $HOME/.icons/capitaine-cursors 
+gsettings set org.gnome.desktop.interface cursor-theme 'capitaine-cursors'
+{{- end}}
+#######################################
+# CONFIGURE FONTS 
+#######################################
+{{- if ne (output "gsettings" "get" "org.gnome.desktop.interface" "font-name" | trim ) "'Garuda Regular 10'"}}
+gsettings set org.gnome.desktop.interface font-name 'Garuda Regular 10'
+{{- end }}
+
+#######################################
+# CONFIGURE BACKGROUNDS 
+#######################################
+{{- $background_uri := printf "file://%s/.local/share/backgrounds/dracula" .chezmoi.homeDir }}
+{{- if eq .chezmoi.osRelease.id "ubuntu" }}
+{{-   $background_uri =joinPath $background_uri "ubuntu-2.png"}}
+{{- else }}
+{{-   $background_uri =joinPath $background_uri (list eq .chezmoi.osRelease.id ".png" | join "")}}
+{{- end }}
+{{- if ne (output "gsettings" "get" "org.gnome.desktop.background" "picture-uri" | trim ) "'{{background-uri}}'"}}
+gsettings set org.gnome.desktop.background picture-uri '{{ $background_uri }}'
+{{- end }}
+{{- if ne (output "gsettings" "get" "org.gnome.desktop.screensaver" "picture-uri" | trim ) "'{{background-uri}}'"}}
+gsettings set org.gnome.desktop.screensaver picture-uri '{{ $background_uri }}'
+{{- end }}
+
+{{-     end }}
+{{-   end }}
+{{- end}}

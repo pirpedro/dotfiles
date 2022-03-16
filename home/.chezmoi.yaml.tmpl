@@ -1,7 +1,7 @@
 {{/* personal machine information */}}
 {{- $personalName := "Pedro Rodrigues" -}}
 {{- $personalEmail := "pir.pedro@gmail.com" -}}
-{{- $personalSigningKey := "426C5F3386CEEC28" -}}
+{{- $personalSigningKey := "59451A325CE1E195" -}}
 
 {{- $workSigningKey := "426C5F3386CEEC28" -}}
 {{- $workName := "Pedro Ivo Rodrigues" -}}
@@ -35,6 +35,12 @@
 {{/* environmental tags */}}
 {{ $editor := "vim" }}
 {{ $visual := "" }}
+{{- $desktop_environment := env "XDG_CURRENT_DESKTOP" }}
+{{- if $desktop_environment }}
+{{-   $desktop_environment = (split ":" $desktop_environment)._1 | lower }}
+{{- else }}
+{{-   $headless = true }}
+{{- end }}
 
 {{ if lookPath "vim" }}
   {{ $editor = "vim" }}
@@ -75,6 +81,8 @@ data:
       global: .local/share/npm
   cmd:
     sudo: {{ $sudo }}
+  env:
+    de: {{ $desktop_environment }}
   github:
   {{- if $isPersonal }}
     name: {{ $personalName | quote }}

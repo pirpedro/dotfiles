@@ -27,7 +27,7 @@ fi >&2
 
 # load all files from .shell/login.d directory
 if [ -d $HOME/.shell.d/login.d ]; then
-  for file in $HOME/.shell.d/login.d/*.sh; do
+  for file in $HOME/.shell.d/login.d/*.sh(N); do
     source $file
   done
 fi

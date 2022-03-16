@@ -21,9 +21,11 @@
     "code"
     "google-chrome"
   ) -}}
+
+
 {{ end -}}
 
-{{ if eq .chezmoi.os "darwin" }}
+{{ if eq .chezmoi.os "darwin" -}}
 #!/bin/bash
 xcode-select --install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -35,9 +37,14 @@ brew install bash-completion@2
      "wget"
      "vim"
      "git"
-     "zsh" -}}
+     "zsh"
+     "progress" -}}
 
- {{ if not .is.headless -}}
+{{ if not .is.headless -}}
+   {{ if eq .env.de "gnome" -}}
+      {{ $packages = mustAppend $packages "gnome-tweaks" -}}
+   {{ end -}}
+
    {{ $scripts = concat $scripts (list
     "xclip"
     "terminator"
@@ -50,7 +57,7 @@ brew install bash-completion@2
 {{ end -}}
 
 {{ if lookPath "apt" -}}
-  {{  $packages = mustAppend $packages "git-core" -}}
+{{   $packages = mustAppend $packages "git-core" -}}
 #!/bin/bash  
 export DEBIAN_FRONTEND=noninteractive
 
@@ -60,21 +67,21 @@ echo "Bootstrapping system..."
 {{ .cmd.sudo }} apt -qq -y install {{ $packages | join " " }}
 sudo chsh -s $(which zsh) $(whoami)
 
-{{ else if lookPath "apk" -}}
+{{- else if lookPath "apk" }}
 #!/bin/bash
 echo "Bootstrapping system..."
 {{ .cmd.sudo }} apk update
 {{ .cmd.sudo }} apk add {{ $packages | join " " }}
-{{ end -}}
+{{- end }}
 
-  {{ range $scripts -}}
-    {{ if not (lookPath .) -}}
-      echo "Installing {{ . }}...";
-      {{- /* Workaroud to handle the problem related to template function only accepting static string as arguments*/ -}}
-      {{- /* So invoking the chezmoi command allows to pass a dynamic location to be parsed */ -}}
-      {{ output "chezmoi" "execute-template" (include (printf ".chezmoitemplates/packages/%s.sh" . )) -}}
-      echo "{{ . }} installed.";
-    {{ end -}}
-  {{ end -}}
+{{-   range $scripts }}
+{{-     if not (lookPath .) }}
+echo "Installing {{ . }}...";
+{{- /* Workaroud to handle the problem related to template function only accepting static string as arguments*/ -}}
+{{- /* So invoking the chezmoi command allows to pass a dynamic location to be parsed */ -}}
+{{ output "chezmoi" "execute-template" (include (printf ".chezmoitemplates/packages/%s.sh" . )) -}}
+echo "{{ . }} installed.";
+{{-     end }}
+{{-   end }}
 {{ end -}}
 
