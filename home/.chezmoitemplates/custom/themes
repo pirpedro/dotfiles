@@ -21,11 +21,14 @@
   type = "file"
   url = "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS NF Bold Italic.ttf"
   refreshPeriod = "168h"
+["{{ $fontDir }}/Script12 BT Roman.ttf"]
+  type = "file"
+  url = "https://www.freebestfonts.com/download?fn=1717"
 [".local/share/backgrounds/dracula"]
-type = "archive"
-url = "https://github.com/dracula/wallpaper/archive/master.zip"
-format = "zip"
-stripComponents=1
+  type = "archive"
+  url = "https://github.com/dracula/wallpaper/archive/master.zip"
+  format = "zip"
+  stripComponents=1
 {{- if eq .chezmoi.os "linux"}}  
 [".local/share/themes/whiteSur"]
   type = "git-repo"

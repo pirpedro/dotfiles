@@ -1,0 +1,8 @@
+/* Set italics and comments to the script font */
+.mtk4.mtki,
+.comment,
+.comment:not(.punctuation) {
+  font-family: 'Script12 BT';
+  font-style: italic;
+  font-size: 1.3em;
+}

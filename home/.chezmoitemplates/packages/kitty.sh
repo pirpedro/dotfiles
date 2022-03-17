@@ -1,8 +1,8 @@
-{{ if lookPath "apt" }}
 curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/
-ln -s ~/.local/kitty.app/bin/kitty ~/.local/bin/
-cp ~/.local/kitty.app/share/applications/kitty.desktop ~/.local/share/applications
+ln -s $HOME/.local/kitty.app/bin/kitty $HOME/.local/bin/
+cp $HOME/.local/kitty.app/share/applications/kitty.desktop $HOME/.local/share/
 sed -i "s|Icon=kitty|Icon=/home/$USER/.local/kitty.app/share/icons/hicolor/256x256/apps/kitty.png|g" ~/.local/share/applications/kitty.desktop
-{{ else }}
-echo "No installation descriptor for this distro."
+{{ if .env.de "gnome" }}
+gsettings set org.gnome.desktop.default-applications.terminal exec $HOME/.local/bin/kitty
+gsettings set org.gnome.desktop.default-applications.terminal exec-arg ""
 {{ end -}}
