@@ -6,3 +6,5 @@
 .gitconfig
 .gitcookies
 .gitignore
+.fzf.bash
+.fzf.zsh

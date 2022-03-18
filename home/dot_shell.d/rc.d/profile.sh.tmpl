@@ -64,32 +64,32 @@ export XDG_CACHE_HOME=$HOME/.cache
 #   -----------------------------
 #   2. MAKE TERMINAL BETTER
 #   -----------------------------
-unalias ls                                  # unalias ls in behalf of $HOME/.local/bin/ls command
-alias cp='cp -iv'                           # Preferred 'cp' implementation
-alias mv='mv -iv'                           # Preferred 'mv' implementation
-alias mkdir='mkdir -pv'                     # Preferred 'mkdir' implementation
-alias ll='ls -FGlAhp'                       # Preferred 'ls' implementation
-alias less='less -FSRXc'                    # Preferred 'less' implementation
-alias cd..='cd ../'                         # Go back 1 directory level (for fast typers)
-alias ..='cd ../'                           # Go back 1 directory level
-alias ...='cd ../../'                       # Go back 2 directory levels
-alias .3='cd ../../../'                     # Go back 3 directory levels
-alias .4='cd ../../../../'                  # Go back 4 directory levels
-alias .5='cd ../../../../../'               # Go back 5 directory levels
-alias .6='cd ../../../../../../'            # Go back 6 directory levels
-alias edit={{ .editor.gui | quote }}                         # edit:         Opens any file in vscode editor
-alias ~="cd ~"                             # ~:            Go Home
-alias c='clear'                            # c:            Clear terminal display
-alias path='echo -e ${PATH//:/\\n}'        # path:         Echo all executable Paths
-alias show_options='shopt'                 # Show_options: display bash options settings
-alias fix_stty='stty sane'                 # fix_stty:     Restore terminal settings when screwed up
-alias cic='set completion-ignore-case On'  # cic:          Make tab-completion case-insensitive
-mcd() { mkdir -p "$1" && cd "$1"; }        # mcd:          Makes new Dir and jumps inside
+unalias ls 2>/dev/null                    # unalias ls in behalf of $HOME/.local/bin/ls command
+alias cp='cp -iv'                         # Preferred 'cp' implementation
+alias mv='mv -iv'                         # Preferred 'mv' implementation
+alias mkdir='mkdir -pv'                   # Preferred 'mkdir' implementation
+alias ll='ls -FGlAhp'                     # Preferred 'ls' implementation
+alias less='less -FSRXc'                  # Preferred 'less' implementation
+alias cd..='cd ../'                       # Go back 1 directory level (for fast typers)
+alias ..='cd ../'                         # Go back 1 directory level
+alias ...='cd ../../'                     # Go back 2 directory levels
+alias .3='cd ../../../'                   # Go back 3 directory levels
+alias .4='cd ../../../../'                # Go back 4 directory levels
+alias .5='cd ../../../../../'             # Go back 5 directory levels
+alias .6='cd ../../../../../../'          # Go back 6 directory levels
+alias edit={{ .editor.gui | quote }}      # edit:         Opens any file in vscode editor
+alias ~="cd ~"                            # ~:            Go Home
+alias c='clear'                           # c:            Clear terminal display
+alias path='echo -e ${PATH//:/\\n}'       # path:         Echo all executable Paths
+alias show_options='shopt'                # Show_options: display bash options settings
+alias fix_stty='stty sane'                # fix_stty:     Restore terminal settings when screwed up
+alias cic='set completion-ignore-case On' # cic:          Make tab-completion case-insensitive
+mcd() { mkdir -p "$1" && cd "$1"; }       # mcd:          Makes new Dir and jumps inside
 {{ if eq .chezmoi.os "darwin" }}
-alias f='open -a Finder ./'                # f:            Opens current directory in MacOS Finder
-trash() { command mv "$@" ~/.Trash; }      # trash:        Moves a file to the MacOS trash
-ql() { qlmanage -p "$*" >&/dev/null; }     # ql:           Opens any file in MacOS Quicklook Preview
-alias DT='tee ~/Desktop/terminalOut.txt'   # DT:           Pipe content to file on MacOS Desktop
+alias f='open -a Finder ./'              # f:            Opens current directory in MacOS Finder
+trash() { command mv "$@" ~/.Trash; }    # trash:        Moves a file to the MacOS trash
+ql() { qlmanage -p "$*" >&/dev/null; }   # ql:           Opens any file in MacOS Quicklook Preview
+alias DT='tee ~/Desktop/terminalOut.txt' # DT:           Pipe content to file on MacOS Desktop
 {{ else if eq .chezmoi.os "linux" -}}
 alias f='xdg-open .'                       # f:            Opens current directory in default File Manager
 trash() { command gvfs-trash "$@"; }       # trash:        Moves a file to the trash
@@ -98,7 +98,11 @@ alias pbcopy='xclip -selection clipboard'  # pbcopy:       Emulate MacOS copy fu
 alias pbpaste='xclip -selection clipboard' # pbpaste:      Emulate MacOS paste function in linux
 {{ end -}}
 alias cat='{{ .cmd.bat }} --paging=never'
-tailf() { tail -f "$1" | {{ .cmd.bat }} --paging=never -l log }
+tailf() { tail -f "$1" | {{ .cmd.bat }} --paging=never -l; }
+{{ if not .is.headless -}}
+alias ssh='kitty +kitten ssh'
+{{ end -}}
+
 #   lr:  Full Recursive Directory Listing
 #   ------------------------------------------
 alias lr='ls -R | grep ":$" | sed -e '\''s/:$//'\'' -e '\''s/[^-][^\/]*\//--/g'\'' -e '\''s/^/   /'\'' -e '\''s/-/|/'\'' | less'
@@ -166,13 +170,13 @@ extract() {
 #   4. SEARCHING
 #   ---------------------------
 
-alias qfind="find . -name "                                             # qfind:    Quickly search for file
-ff() { /usr/bin/find . -name "$@" -exec {{ .cmd.bat }} {} +; }          # ff:       Find file under the current directory
-ffs() { /usr/bin/find . -name "$@"'*' -exec {{ .cmd.bat }} {} +; }      # ffs:      Find file whose name starts with a given string
-ffe() { /usr/bin/find . -name '*'"$@" -exec {{ .cmd.bat }} {} +; }      # ffe:      Find file whose name ends with a given 
+alias qfind="find . -name "                                        # qfind:    Quickly search for file
+ff() { /usr/bin/find . -name "$@" -exec {{ .cmd.bat }} {} +; }     # ff:       Find file under the current directory
+ffs() { /usr/bin/find . -name "$@"'*' -exec {{ .cmd.bat }} {} +; } # ffs:      Find file whose name starts with a given string
+ffe() { /usr/bin/find . -name '*'"$@" -exec {{ .cmd.bat }} {} +; } # ffe:      Find file whose name ends with a given
 batfind() { /usr/bin/find "$@" -exec {{ .cmd.bat }} {} +; }
 batfd() { fd "$@" -X {{ .cmd.bat }}; }
-batdiff() {  git diff --name-only --diff-filter=d | xargs bat --diff; }
+batdiff() { git diff --name-only --diff-filter=d | xargs bat --diff; }
 
 #   spotlight: Search for a file using MacOS Spotlight's metadata
 #   -----------------------------------------------------------
@@ -274,24 +278,24 @@ alias cleanupLS="/System/Library/Frameworks/CoreServices.framework/Frameworks/La
 #   -----------------------------------------------------------------------------------
 alias screensaverDesktop='/System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine -background'
 {{- if eq .chezmoi.os "darwin" "linux" }}
-{{-   $update_cmd := "" }}
-{{-   if eq .chezmoi.os "darwin" }}
-{{-     $update_cmd = "brew update && brew upgrade"}}
-{{-   else if eq .chezmoi.os "linux" }}
-{{-     if eq .chezmoi.osRelease.idLike "debian" }}
-{{-       $update_cmd = printf "%s apt update && %s apt upgrade -y" .cmd.sudo .cmd.sudo | trim }}
-{{-     else if eq .chezmoi.osRelease.idLike "suse" }}
-{{-       $update_cmd = printf "%s zypper update" .cmd.sudo | trim }}        
-{{-     else if eq .chezmoi.osRelease.idLike "gentoo" }}
-{{-       $update_cmd = printf "%s emerge -u world" .cmd.sudo | trim }}        
-{{-     else if eq .chezmoi.osRelease.idLike "fedora" }}
-{{-       $update_cmd = printf "%s dnf upgrade" .cmd.sudo | trim }}        
-{{-     else if eq .chezmoi.osRelease.idLike "centOS" }}
-{{-       $update_cmd = printf "%s yum update" .cmd.sudo | trim }}        
-{{-     end}}
+{{- $update_cmd := "" }}
+{{- if eq .chezmoi.os "darwin" }}
+{{- $update_cmd = "brew update && brew upgrade"}}
+{{- else if eq .chezmoi.os "linux" }}
+{{- if eq .chezmoi.osRelease.idLike "debian" }}
+{{- $update_cmd = printf "%s apt update && %s apt upgrade -y" .cmd.sudo .cmd.sudo | trim }}
+{{- else if eq .chezmoi.osRelease.idLike "suse" }}
+{{- $update_cmd = printf "%s zypper update" .cmd.sudo | trim }}
+{{- else if eq .chezmoi.osRelease.idLike "gentoo" }}
+{{- $update_cmd = printf "%s emerge -u world" .cmd.sudo | trim }}
+{{- else if eq .chezmoi.osRelease.idLike "fedora" }}
+{{- $update_cmd = printf "%s dnf upgrade" .cmd.sudo | trim }}
+{{- else if eq .chezmoi.osRelease.idLike "centOS" }}
+{{- $update_cmd = printf "%s yum update" .cmd.sudo | trim }}
+{{- end}}
 alias u='{{ $update_cmd }}'
 alias updt='{{ $update_cmd }}'
-{{-   end }}
+{{- end }}
 {{- end }}
 #   ---------------------------------------
 #   8. WEB DEVELOPMENT
