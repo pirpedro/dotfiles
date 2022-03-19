@@ -2,5 +2,7 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    build: 
+      context: .
+      target: base
     # entrypoint: ./.docker/entrypoint.sh

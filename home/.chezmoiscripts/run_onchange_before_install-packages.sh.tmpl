@@ -22,8 +22,6 @@
     "code"
     "google-chrome"
   ) -}}
-
-
 {{ end -}}
 
 {{ if eq .chezmoi.os "darwin" -}}
@@ -42,21 +40,21 @@ brew install bash-completion@2
      "progress"
      "bat" -}}
 
-{{ if not .is.headless -}}
-   {{ if eq .env.de "gnome" -}}
-      {{ $packages = mustAppend $packages "gnome-tweaks" -}}
-   {{ end -}}
+  {{ if not .is.headless -}}
+    {{ if eq .env.de "gnome" -}}
+        {{ $packages = mustAppend $packages "gnome-tweaks" -}}
+    {{ end -}}
 
-   {{ $scripts = concat $scripts (list
-    "xclip"
-    "kitty"
-    "etcher"
-  ) -}}
-{{ end -}}    
+    {{ $scripts = concat $scripts (list
+      "xclip"
+      "kitty"
+      "etcher"
+    ) -}}
+  {{ end -}}    
 
-{{ if ne .chezmoi.username "root" -}}
-  {{ $packages = mustAppend $packages "sudo" -}}
-{{ end -}}
+  {{ if ne .chezmoi.username "root" -}}
+    {{ $packages = mustAppend $packages "sudo" -}}
+  {{ end -}}
 
 {{ if lookPath "apt" -}}
 {{   $packages = mustAppend $packages "git-core" -}}

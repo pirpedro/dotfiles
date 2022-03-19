@@ -1,4 +1,4 @@
-{{ if (and (eq .chezmoi.os "darwin" "linux") (not .ephemeral)) -}}
+{{ if (and (lookPath "nvim") (eq .chezmoi.os "darwin" "linux") (not .ephemeral)) -}}
 #!/bin/bash
 # .config/nvm/init.vim hash: {{ include "private_dot_config/nvim/init.vim.tmpl" | sha256sum }}
 set -eufo pipefail

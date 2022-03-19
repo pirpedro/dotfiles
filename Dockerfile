@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:20.04 as base
 LABEL maintainer="Pedro Rodrigues <pir.pedro@gmail.com>"
 
 RUN apt update && \
@@ -15,6 +15,7 @@ RUN groupadd -g 1000 app \
 
 USER app
 
+FROM base as end
 RUN mkdir -p /home/app/.local/share \
   && cd /home/app/.local \
   && sh -c "$(curl -fsLS chezmoi.io/get)"
