@@ -6,7 +6,10 @@
   {{ end -}}
 
   {{ if .is.personal -}}
-     {{ $scripts = mustAppend $scripts "bw" -}}
+     {{ $scripts = concat $scripts (list 
+        "bw"
+        "delta"
+      ) -}}
   {{ end -}}
 
   {{ $scripts = concat $scripts (list

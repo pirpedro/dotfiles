@@ -1,43 +1,60 @@
 [init]
   defaultBranch = master
+  templateDir = ~/.git/init_template
+
 [core]
   editor = vim
   excludesfile = ~/.git/gitignore
   ignorecase = false
-  pager = less -x4
+  pager = delta --features default
   whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+
 [user]
   name = {{ .github.name }}
   email = {{ .github.email }}
   signingkey = {{ .github.signing_key }}
+
 [sendemail]
   smtpencryption = tls
   smtpserver = smtp.gmail.com
-  smtpuser = pir.pedro@gmail.com
+  smtpuser = {{ .github.email }}
   smtpserverport = 587
+
 [web]
   browser = {{ .browser }}
+
 [instaweb]
   httpd = apache2 -f
+
 [rerere]
   enabled = 1
   autoupdate = 1
+
 [commit]
   template = ~/.git/commit_message.txt
   gpgsign = true
+
 [tag]
   gpgsign = true
+
 [push]
-  default = simple
+  default = current
+
+[pretty]
+  better-oneline = "format:%C(auto)%h%d %s %Cblue[%cn]"
+  summary = "format:%C(yellow)%H%C(red)%d%n%C(blue)%cd %an%n%C(reset)%s%n"
+
 [color]
   ui = true
   branch = auto
   diff = auto
   status = auto
+
 [color "branch"]
   current = yellow bold
   local = green bold
   remote = cyan bold
+
 [color "diff"]
   meta = yellow bold
   frag = magenta bold
@@ -45,32 +62,75 @@
   new = green bold
   plain = white
   whitespace = red reverse
+
+[color "diff-highlight"]
+  oldNormal = red bold
+  oldHighlight = reverse bold red
+  newNormal = green bold
+  newHighlight = reverse bold green
+
 [color "status"]
   added = green bold
   changed = yellow bold
   untracked = red bold
+
 [filter "tabspace"]
   smudge = unexpand --tabs=2 --first-only
   clean = expand --tabs=2 --initial
+
 [merge]
-  keepBackup = false;
+  keepBackup = false
   tool = p4merge
+
 [mergetool]
   prompt = false
+
 [mergetool "p4merge"]
   cmd = p4merge "$BASE" "$LOCAL" "$REMOTE" "$MERGED"
   keepTemporaries = false
   trustExitCode = false
   keepBackup = false
+
 [diff]
-  tool = p4merge
-[difftool]
-  prompt = false
+  renameLimit = 5000
+  tool = fugitive
+  compactionHeuristic = 1
+  colorMoved = default
+
+[difftool "fugitive"]
+  cmd = vim -c \"execute 'Gstatus' | wincmd p | Gvdiff ~1\" $MERGED
+
 [difftool "p4merge"]
   cmd = p4merge "$LOCAL" "$REMOTE"
   keepTemporaries = false
   trustExitCode = false
   keepBackup = false
+
+  [bash]
+  showDirtyState = true
+
+[interactive]
+  diffFilter = delta --features default --color-only
+
+[delta "default"]
+  navigate = true
+  side-by-side = true
+  features = nord-theme
+
+[delta "nord-theme"]
+  line-numbers-zero-style = blue
+  line-numbers-minus-style = white red
+  line-numbers-plus-style = black green
+  minus-style = white red
+  minus-emph-style = red white 
+  plus-style = black green
+  plus-emph-style = black white
+  syntax-theme = Nord
+
+[delta "fzf"]
+  line-numbers = true
+  features = nord-theme
+
 [alias]
   a = add
   aa = add --all

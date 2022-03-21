@@ -18,6 +18,11 @@
 [".vim/bundle/Vundle.vim"]
   type = "git-repo"
   url = "https://github.com/VundleVim/Vundle.vim.git"
+[".config/nano"]
+  type = "archive"
+  url = "https://github.com/scopatz/nanorc/archive/master.tar.gz"
+  stripComponents=1
+  include=["*.nanorc"]
 {{- if and (eq .chezmoi.os "linux") .is.personal (not .is.ephemeral) }}
 {{- $ageVersion := "1.0.0" }}
 [".local/bin/age"]

@@ -4,5 +4,5 @@ services:
   app:
     build: 
       context: .
-      target: base
+      # target: base
     # entrypoint: ./.docker/entrypoint.sh

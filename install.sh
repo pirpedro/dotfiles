@@ -2,6 +2,8 @@
 
 set -e # -e: exit on error
 
+GITHUB_REPO=pirpedro
+
 if [ ! "$(command -v chezmoi)" ]; then
   bin_dir="$HOME/.local/bin"
   chezmoi="$bin_dir/chezmoi"
@@ -19,5 +21,13 @@ fi
 
 # POSIX way to get script's dir: https://stackoverflow.com/a/29834779/12156188
 script_dir="$(cd -P -- "$(dirname -- "$(command -v -- "$0")")" && pwd -P)"
+# check if the script is running from stdin or from a file.
+# if stdin is usage, try to downlaad source files form my pirpedro/dotfiles repository
+if [ $script_dir != "$(dirname $(which sh))" ]; then
+  source_flag="--source=$script_dir"
+else
+  repo=$GITHUB_REPO
+fi
+
 # exec: replace current process with chezmoi init
-exec "$chezmoi" init --apply "--source=$script_dir"
+exec "$chezmoi" init $repo -a "$@" "$source_flag"
