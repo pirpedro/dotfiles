@@ -24,10 +24,14 @@ script_dir="$(cd -P -- "$(dirname -- "$(command -v -- "$0")")" && pwd -P)"
 # check if the script is running from stdin or from a file.
 # if stdin is usage, try to downlaad source files form my pirpedro/dotfiles repository
 if [ $script_dir != "$(dirname $(which sh))" ]; then
-  source_flag="--source=$script_dir"
+  cmd_options="-a --source ${script_dir}"
 else
-  repo=$GITHUB_REPO
+  cmd_options="$GITHUB_REPO -a"
+fi
+
+if [ -n "$*" ]; then
+  cmd_options="$cmd_options $*"
 fi
 
 # exec: replace current process with chezmoi init
-exec "$chezmoi" init $repo -a "$@" "$source_flag"
+exec "${chezmoi}" init ${cmd_options}

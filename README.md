@@ -12,8 +12,9 @@
 </div>
 
 ## 1. Goals ⚽
+
 - keep your configuration, hotkeys and shortcuts synced throught differents OS.
-- Nice way to customize your dotfiles. 
+- Nice way to customize your dotfiles.
 - Easy access to common paths.
 - Make a prettier development environment.
 
@@ -39,7 +40,7 @@ It is possible to pass any kind of `chezmoi init` flags to the installation proc
 Like, if you want to purge any trace of the installation files
 
 ```bash
-curl -sfL https://raw.githubusercontent.com/pirpedro/dotfiles/main/install.sh | sh -s -- '-p -P'
+curl -sfL https://raw.githubusercontent.com/pirpedro/dotfiles/main/install.sh | sh -s -- -p -P
 ```
 
 ### 2.2. Manual
@@ -67,30 +68,53 @@ chezmoi init -a
 ## 3. Supported Tools 🧰
 
 ### 3.1. Shells 🐚
+
 - [Bash](https://www.gnu.org/software/bash/) <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>: [`~/.bashrc`](./dot_bashrc)
 - [Z shell](http://zsh.sourceforge.net/) <sub><sup><b title="Linux">🐧</b></sup></sub><b title="macOS">🍎</b>: [`~/.zshenv`](./dot_zshenv) _<sup>enhanced with [**prezto**](https://github.com/sorin-ionescu/prezto), [**Powerlevel10K**](https://github.com/romkatv/powerlevel10k), and others!</sup>_
 
 ### 3.2. Terminals 💻
--   [kitty](https://sw.kovidgoyal.net/kitty/) <sub><sup><b title="Linux">🐧</b><b title="macOS">🍎</b></sup></sub>: [`~/.config/kitty/kitty.conf`](./private_dot_config/kitty/kitty.conf)
--   [terminator](https://terminator-gtk3.readthedocs.io/en/latest/) <sub><sup><b title="Linux">🐧</b></sup></sub>: [`~/.config/terminator/config`](./private_dot_config/terminator/config)
-  
-### 3.3. Package managers 📦
--   [apt](https://wiki.debian.org/Apt) <sub><sup><b title="Linux">🐧</b></sup></sub>
--   [Homebrew](https://brew.sh/) <sub><sup><b title="macOS">🍎</b></sup></sub>: [`~/.Brewfile`](./dot_Brewfile)
--   [Scoop](https://scoop.sh/) <sub><sup><b title="windows">🪟</b></sup></sub>
 
-### 3.4.  Universal apps 💾 <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>
--   [chezmoi](https://www.chezmoi.io/) dotfiles manager: [`~/.chezmoi.yaml`](./.chezmoi.yaml.tmpl)
--   [cURL](https://curl.haxx.se/) data transfer tool: [`~/.curlrc`](./dot_curlrc)
--   [Git :octocat:](https://git-scm.com/) version-control system: [`~/.config/git/config`](./private_dot_config/git/config.tmpl)
--   [GNU Nano 4.x+](https://www.nano-editor.org/) text editor: [`~/.nanorc`](./dot_nanorc) _<sup>enhanced with [**Improved Nano Syntax Highlighting Files**](https://github.com/scopatz/nanorc)!</sup>_
--   [GNU Wget](https://www.gnu.org/software/wget/) HTTP/FTP file downloader: [`~/.wgetrc`](./dot_wgetrc)
--   [OpenSSH](https://www.openssh.com/) secure networking utilities: [`~/.ssh/config`](./private_dot_ssh/config.tmpl)
--   [Ripgrep](https://github.com/BurntSushi/ripgrep) fast-search tool: [`~/.ripgreprc`](./dot_ripgreprc)
--   [Vim](https://www.vim.org/) text editor: [`~/.vimrc`](./dot_vimrc) 
+- [kitty](https://sw.kovidgoyal.net/kitty/) <sub><sup><b title="Linux">🐧</b><b title="macOS">🍎</b></sup></sub>: [`~/.config/kitty/kitty.conf`](./private_dot_config/kitty/kitty.conf)
+- [terminator](https://terminator-gtk3.readthedocs.io/en/latest/) <sub><sup><b title="Linux">🐧</b></sup></sub>: [`~/.config/terminator/config`](./private_dot_config/terminator/config)
+
+### 3.3. Package managers 📦
+
+- [apt](https://wiki.debian.org/Apt) <sub><sup><b title="Linux">🐧</b></sup></sub>
+- [Homebrew](https://brew.sh/) <sub><sup><b title="macOS">🍎</b></sup></sub>: [`~/.Brewfile`](./dot_Brewfile)
+- [Scoop](https://scoop.sh/) <sub><sup><b title="windows">🪟</b></sup></sub>
+
+### 3.4. Universal apps 💾 <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>
+
+- [chezmoi](https://www.chezmoi.io/) dotfiles manager: [`~/.chezmoi.yaml`](./.chezmoi.yaml.tmpl)
+- [cURL](https://curl.haxx.se/) data transfer tool: [`~/.curlrc`](./dot_curlrc)
+- [Git :octocat:](https://git-scm.com/) version-control system: [`~/.config/git/config`](./private_dot_config/git/config.tmpl)
+- [GNU Nano 4.x+](https://www.nano-editor.org/) text editor: [`~/.nanorc`](./dot_nanorc) _<sup>enhanced with [**Improved Nano Syntax Highlighting Files**](https://github.com/scopatz/nanorc)!</sup>_
+- [GNU Wget](https://www.gnu.org/software/wget/) HTTP/FTP file downloader: [`~/.wgetrc`](./dot_wgetrc)
+- [OpenSSH](https://www.openssh.com/) secure networking utilities: [`~/.ssh/config`](./private_dot_ssh/config.tmpl)
+- [psql](https://www.postgresql.org/docs/13/app-psql.html) terminal-based front-end to PostgreSQL: [`~/.psqlrc`](./dot_psqlrc)
+- [Ripgrep](https://github.com/BurntSushi/ripgrep) fast-search tool: [`~/.ripgreprc`](./dot_ripgreprc)
+- [Vim](https://www.vim.org/) text editor: [`~/.vimrc`](./dot_vimrc)
 
 <p align="right"><a href="#top" title="Back to top">🔝</a></p>
 
+### 3.5. Gui apps 🖼️ <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>
+
+- [Ansible](https://www.ansible.com/) IT automation.
+- [Apache](https://httpd.apache.org/) web server.
+- [Balena Etcher](https://www.balena.io/etcher/) utility to write image files onto storage medias.
+- [Bitwarden](https://bitwarden.com/) password management service.
+- [Calibre](https://calibre-ebook.com/) e-book manager.
+- [DBeaver](https://dbeaver.io/) SQL client.
+- [Delta](https://github.com/dandavison/delta) Syntax highlighting pager for git and diff.
+- [Docker](https://www.docker.com/) Container provider.
+- [Google Chrome](https://www.google.com/chrome/) web browser.
+- [NeoVim](https://neovim.io/) vim alternative: [`~/.config/nvim/init.vim`](./private_dot_config/nvim/init.vim.tmpl)
+- [sushi:GNOME](https://gitlab.gnome.org/GNOME/sushi) file previewer.
+- [Ulauncher](https://ulauncher.io/) launcher fro linux.
+- [VS Code](https://code.visualstudio.com/) code editor.
+
+
+<p align="right"><a href="#top" title="Back to top">🔝</a></p>
 
 README inspired by [`renemarc/dotfiles`](https://github.com/renemarc/dotfiles).
 
