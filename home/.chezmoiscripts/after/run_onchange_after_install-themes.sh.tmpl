@@ -3,10 +3,18 @@
 {{-     if eq .env.de "gnome" -}}
 #!/bin/bash
 #######################################
+# CONFIGURE GNOME PLUGINS 
+#######################################
+gnome_install=$HOME/.local/bin/gnome-shell-extension-installer
+$gnome_install --yes 19 # User themes
+$gnome_install --yes 307 # Dash to Dock
+$gnome_install --yes 1465 # desktop icons
+$gnome_install --yes 3193 #blur my shell
+
+#######################################
 # CONFIGURE THEME 
 #######################################
 {{- if ne (output "gsettings" "get" "org.gnome.desktop.interface" "gtk-theme" | trim ) "'WhiteSur-dark'"}}
-{{output "gsettings" "get" "org.gnome.desktop.interface" "gtk-theme" | trim | quote -}}
 cd $HOME/.local/share/themes/whiteSur
 chmod +x install.sh
 chmod +x tweaks.sh

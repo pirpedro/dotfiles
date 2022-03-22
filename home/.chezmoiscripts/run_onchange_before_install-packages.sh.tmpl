@@ -48,6 +48,7 @@ brew install bash-completion@2
   {{ if not .is.headless -}}
     {{ if eq .env.de "gnome" -}}
         {{ $packages = mustAppend $packages "gnome-tweaks" -}}
+        {{ $scripts = mustAppend $scripts "gnome-shell-extension-installer" -}}
     {{ end -}}
 
     {{ $scripts = concat $scripts (list
