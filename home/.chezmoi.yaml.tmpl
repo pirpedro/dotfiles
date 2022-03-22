@@ -11,10 +11,17 @@
 {{- $isPersonal := not $isWork -}}
 
 {{- $osID := .chezmoi.os -}}
+{{- $osIDLike := ""}}
+
 {{- if hasKey .chezmoi.osRelease "id" -}}
 {{-   $osID = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
+{{-   $osIDLike = .chezmoi.osRelease.id }}
 {{- end -}}
 
+{{- if hasKey .chezmoi.osRelease "idLike" }}
+{{-   $osIDLike = .chezmoi.osRelease.idLike }}
+
+{{- end -}}
 
 {{/* boolean feature tags */}}
 {{- $isWsl := or (env "WSL_DISTRO_NAME") (env "IS_WSL") | not | not -}}
@@ -81,7 +88,7 @@ data:
       global: .local/share/npm
   cmd:
     sudo: {{ $sudo }}
-    bat: {{ ternary "batcat" "bat" (eq .chezmoi.osRelease.idLike "debian" )}}
+    bat: {{ ternary "batcat" "bat" (eq $osIDLike "debian" )}}
   env:
     de: {{ $desktop_environment }}
   github:
@@ -104,6 +111,7 @@ data:
 
   browser: "google-chrome"
   osid: {{ $osID | quote }}
+  osidlike: {{ $osIDLike | quote }}
 
 diff:
   exclude: ["scripts"]

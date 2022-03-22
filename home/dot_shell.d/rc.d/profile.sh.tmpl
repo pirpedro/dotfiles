@@ -282,15 +282,15 @@ alias screensaverDesktop='/System/Library/Frameworks/ScreenSaver.framework/Resou
 {{- if eq .chezmoi.os "darwin" }}
 {{- $update_cmd = "brew update && brew upgrade"}}
 {{- else if eq .chezmoi.os "linux" }}
-{{- if eq .chezmoi.osRelease.idLike "debian" }}
+{{- if eq .osidlike "debian" }}
 {{- $update_cmd = printf "%s apt update && %s apt upgrade -y" .cmd.sudo .cmd.sudo | trim }}
-{{- else if eq .chezmoi.osRelease.idLike "suse" }}
+{{- else if eq .osidlike "suse" }}
 {{- $update_cmd = printf "%s zypper update" .cmd.sudo | trim }}
-{{- else if eq .chezmoi.osRelease.idLike "gentoo" }}
+{{- else if eq .osidlike "gentoo" }}
 {{- $update_cmd = printf "%s emerge -u world" .cmd.sudo | trim }}
-{{- else if eq .chezmoi.osRelease.idLike "fedora" }}
+{{- else if eq .osidlike "fedora" }}
 {{- $update_cmd = printf "%s dnf upgrade" .cmd.sudo | trim }}
-{{- else if eq .chezmoi.osRelease.idLike "centOS" }}
+{{- else if eq .osidlike "centOS" }}
 {{- $update_cmd = printf "%s yum update" .cmd.sudo | trim }}
 {{- end}}
 alias u='{{ $update_cmd }}'

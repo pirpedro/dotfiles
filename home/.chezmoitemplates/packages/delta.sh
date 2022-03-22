@@ -1,6 +1,6 @@
 {{ if eq .chezmoi.os "darwin" -}}
 brew install git-delta
-{{ else if eq .chezmoi.osRelease.idLike "debian" -}}
+{{ else if eq .osidlike "debian" -}}
 version="0.12.1"
 dir=${TMPDIR:=$(mktemp -dt)}
 trap "rm -rf ${dir}" EXIT
