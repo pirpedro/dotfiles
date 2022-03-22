@@ -11,6 +11,17 @@
     <p><strong>Be sure to <a href="#" title="star">⭐️</a> or <a href="#" title="fork">🔱</a> this repo if you find it useful! 😃</strong></p>
 </div>
 
+- [1. Goals ⚽](#1-goals-)
+- [2. Installation Guide ⚙️](#2-installation-guide-️)
+  - [2.1. One line](#21-one-line)
+  - [2.2. Manual](#22-manual)
+- [3. Supported Tools 🧰](#3-supported-tools-)
+  - [3.1. Shells 🐚](#31-shells-)
+  - [3.2. Terminals 💻](#32-terminals-)
+  - [3.3. Package managers 📦](#33-package-managers-)
+  - [3.4. Universal apps 💾 <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>](#34-universal-apps--supsubb-titlelinuxbb-titlemacosbsubsup)
+  - [3.5. Gui apps 🖼️ <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>](#35-gui-apps-️-supsubb-titlelinuxbb-titlemacosbsubsup)
+
 ## 1. Goals ⚽
 
 - keep your configuration, hotkeys and shortcuts synced throught differents OS.

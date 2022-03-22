@@ -38,6 +38,9 @@
   url = "https://github.com/keeferrourke/la-capitaine-icon-theme.git"
 [".local/share/themes/capitaine-cursors"]
   type = "git-repo"
-  url = "https://github.com/keeferrourke/capitaine-cursors.git"  
+  url = "https://github.com/keeferrourke/capitaine-cursors.git"
+[".config/ulauncher/user-themes/dracula"]
+  type = "git-repo"
+  url = "https://github.com/dracula/ulauncher.git" 
 {{- end }}
 {{- end }}
