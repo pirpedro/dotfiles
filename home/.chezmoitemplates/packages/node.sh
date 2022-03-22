@@ -1,4 +1,4 @@
-{{ if .osidlike "debian" }}
+{{ if eq .osidlike "debian" }}
 mkdir -p $HOME/"{{ .path.npm.global }}"
 curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 {{ .cmd.sudo }} apt install -y nodejs

@@ -1,4 +1,4 @@
-{{ if .osidlike "debian" }}
+{{ if eq .osidlike "debian" }}
 curl -1sLf \
   'https://dl.cloudsmith.io/public/balena/etcher/setup.deb.sh' |
   {{ .cmd.sudo }} -E distro={{.chezmoi.osRelease.id}} version={{.chezmoi.osRelease.versionID}} codename={{.chezmoi.osRelease.versionCodename}} arch={{.chezmoi.arch}} bash

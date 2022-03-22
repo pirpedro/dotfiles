@@ -1,4 +1,4 @@
-{{ if .osidlike "debian" }}
+{{ if eq .osidlike "debian" }}
 {{ .cmd.sudo }} apt -qq -y install software-properties-common
 {{ .cmd.sudo }} apt-add-repository ppa:ansible/ansible -y
 {{ .cmd.sudo }} apt update -y

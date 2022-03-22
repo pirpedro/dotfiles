@@ -1,4 +1,4 @@
-{{ if .osidlike "debian" }}
+{{ if eq .osidlike "debian" }}
 {{ .cmd.sudo }} apt -y -qq install apache2
 {{ .cmd.sudo }} ufw allow in "Apache Full"
 {{ else }}

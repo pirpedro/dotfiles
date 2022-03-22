@@ -1,4 +1,4 @@
-{{ if .osidlike "debian" }}
+{{ if eq .osidlike "debian" }}
 {{ .cmd.sudo }} add-apt-repository ppa:agornostal/ulauncher -y
 {{ .cmd.sudo }} apt update -y
 {{ .cmd.sudo }} apt -qq -y install ulauncher python3-pip

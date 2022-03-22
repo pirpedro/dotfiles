@@ -1,4 +1,4 @@
-{{ if .osidlike "debian" }}
+{{ if eq .osidlike "debian" }}
 git clone "https://github.com/RinCat/RTL88x2BU-Linux-Driver.git" ~/.local/src/rtl88x2bu-git
 sed -i 's/PACKAGE_VERSION="@PKGVER@"/PACKAGE_VERSION="git"/g' ~/.local/src/rtl88x2bu-git/dkms.conf
 cd ~/.local/src/rtl88x2bu-git
