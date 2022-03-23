@@ -91,12 +91,12 @@
 {{-   else if eq $osIDLike "suse" }}
 {{-   $update_cmd ="zypper refresh" }}
 {{-   $upgrade_cmd =printf "%s zypper update" $sudo | trim }}
-{{-   $install_cmd ="zypper install" }}
+{{-   $install_cmd ="zypper in" }}
 
 {{-   else if eq $osIDLike "gentoo" }}
 {{-   $update_cmd ="emerge -u world" }}
 {{-   $upgrade_cmd =printf "%s emerge -u world" $sudo | trim }}
-{{-   $install_cmd ="brew install" }}
+{{-   $install_cmd ="emerge -av" }}
 
 {{-   else if eq $osIDLike "fedora" }}
 {{-   $update_cmd ="dnf check-update" }}

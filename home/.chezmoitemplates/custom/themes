@@ -41,6 +41,9 @@
   url = "https://github.com/keeferrourke/capitaine-cursors.git"
 [".config/ulauncher/user-themes/dracula"]
   type = "git-repo"
-  url = "https://github.com/dracula/ulauncher.git" 
+  url = "https://github.com/dracula/ulauncher.git"
+[".config/ulauncher/user-themes/ReMatch-Dark-Blue-Ulauncher"]
+  type = "git-repo"
+  url = "git@github.com:S-ci/ReMatch-Dark-Blue-Ulauncher.git" 
 {{- end }}
 {{- end }}

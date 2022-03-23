@@ -22,7 +22,9 @@
   - [Shell Configuration 🐚](#shell-configuration-)
   - [File Navigation and Search](#file-navigation-and-search)
   - [Text Manipulation](#text-manipulation)
-- [- jq command-line json processor.](#--jq-command-line-json-processor)
+- [- lnav log file navigator.](#--lnav-log-file-navigator)
+  - [Multimedia](#multimedia)
+  - [Networking](#networking)
   - [Terminals 💻](#terminals-)
   - [Package managers 📦](#package-managers-)
   - [Universal apps 💾 <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>](#universal-apps--supsubb-titlelinuxbb-titlemacosbsubsup)
@@ -115,7 +117,19 @@ In the course of need multiple Operational Systems have been supported.
 - [vim](https://www.vim.org/) text editor: [`~/.vimrc`](./dot_vimrc) _<sup>enhanced with [**vim-plug**](https://github.com/junegunn/vim-plug)!</sup>_
 - [bat](https://github.com/sharkdp/bat) cat clone with wings.
 - [jq](https://github.com/stedolan/jq) command-line json processor.
+- [pandoc](https://github.com/jgm/pandoc) universal markup converter.
+- [lnav](http://lnav.org/) log file navigator.
 ---
+
+### Multimedia
+- [asciicinema](https://asciinema.org/) record and share your terminal sessions, the right way
+- [imagemagick](https://imagemagick.org/index.php) create, edit, compose or convert digital images.
+- [youtube-dl](https://github.com/rg3/youtube-dl) download videos from YouTube.com and other video sites
+  
+---
+
+### Networking
+- nmap
 
 ### Terminals 💻
 

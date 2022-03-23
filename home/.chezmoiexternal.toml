@@ -42,9 +42,6 @@
   [".local/bin/age-keygen".filter]
       command = "tar"
       args = ["--extract", "--file", "/dev/stdin", "--gzip", "--to-stdout", "age/age-keygen"]
-[".config/ulauncher/user-themes/ReMatch-Dark-Blue-Ulauncher"]
-  type = "git-repo"
-  url = "git@github.com:S-ci/ReMatch-Dark-Blue-Ulauncher.git"
 {{- end }}
 {{ template "custom/themes" . }}
 

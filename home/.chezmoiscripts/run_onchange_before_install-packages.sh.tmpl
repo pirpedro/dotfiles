@@ -1,6 +1,7 @@
 {{ $install := list
      "curl"
      "wget"
+     "libarchive-tools:bsdtar"
      "vim"
      "git"
      "zsh"
@@ -12,25 +13,31 @@
      "ripgrep:rg"
      "jq"
      "yq"
+     "lnav"
+     "imagemagick:convert"
+     "mitmproxy" 
      "neofetch" -}}
 
 {{ if not .is.ephemeral -}}
   {{ $install = concat $install (list
     "node"
     "docker"
+    "nmap"
+    "pandoc"
+    "asciinema"
   ) -}}
   
   {{ if .is.personal -}}
      {{ $install = concat $install (list 
         "bitwarden:bw"
         "delta"
+        "youtube-dl"
       ) -}}
   {{ end -}}
 {{ end -}}
 
 {{ if not .is.headless -}}
    {{ $install = concat $install (list
-    "fonts"
     "sushi"
     "neovim:nvim"
     "vscode:code"

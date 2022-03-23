@@ -1,0 +1,11 @@
+{{ if and (not .is.ephemeral) (not .is.headless) -}}
+{{   $fontDir := "" -}}
+{{   if eq .chezmoi.os "darwin" -}}
+{{     $fontDir = "Library/Fonts" -}}
+{{   else if eq .chezmoi.os "linux" -}}
+{{     $fontDir = ".local/share/fonts" -}}
+{{   end -}}
+#!/bin/bash
+curl -L "https://github.com/tonsky/FiraCode/releases/download/6.2/Fira_Code_v6.2.zip" | bsdtar \
+    -xv --strip-components 1 -f - --include "*/*.ttf" --exclude "*-VF.ttf" -C $HOME/{{ $fontDir }}
+{{ end -}}
