@@ -1,8 +1,8 @@
 {{ if eq .osidlike "debian" }}
-{{ .cmd.sudo }} apt -qq -y install software-properties-common
+{{ .cmd.install }} software-properties-common
 {{ .cmd.sudo }} apt-add-repository ppa:ansible/ansible -y
-{{ .cmd.sudo }} apt update -y
-{{ .cmd.sudo }} apt -qq -y install ansible -y
+{{ .cmd.update }}
+{{ .cmd.install }} ansible
 {{ else }}
 echo "No installation descriptor for this distro."
 {{ end -}}

@@ -11,18 +11,26 @@
     <p><strong>Be sure to <a href="#" title="star">⭐️</a> or <a href="#" title="fork">🔱</a> this repo if you find it useful! 😃</strong></p>
 </div>
 
-- [1. Goals ⚽](#1-goals-)
-- [2. Installation Guide ⚙️](#2-installation-guide-️)
-  - [2.1. One line](#21-one-line)
-  - [2.2. Manual](#22-manual)
-- [3. Supported Tools 🧰](#3-supported-tools-)
-  - [3.1. Shells 🐚](#31-shells-)
-  - [3.2. Terminals 💻](#32-terminals-)
-  - [3.3. Package managers 📦](#33-package-managers-)
-  - [3.4. Universal apps 💾 <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>](#34-universal-apps--supsubb-titlelinuxbb-titlemacosbsubsup)
-  - [3.5. Gui apps 🖼️ <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>](#35-gui-apps-️-supsubb-titlelinuxbb-titlemacosbsubsup)
+---
 
-## 1. Goals ⚽
+- [Design Goals ⚽](#design-goals-)
+- [Installation Guide ⚙️](#installation-guide-️)
+  - [One line](#one-line)
+  - [Manual](#manual)
+- [Supported Systems](#supported-systems)
+- [Supported Terminal Applications](#supported-terminal-applications)
+  - [Shell Configuration 🐚](#shell-configuration-)
+  - [File Navigation and Search](#file-navigation-and-search)
+  - [Text Manipulation](#text-manipulation)
+- [- jq command-line json processor.](#--jq-command-line-json-processor)
+  - [Terminals 💻](#terminals-)
+  - [Package managers 📦](#package-managers-)
+  - [Universal apps 💾 <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>](#universal-apps--supsubb-titlelinuxbb-titlemacosbsubsup)
+- [Gui apps](#gui-apps)
+
+
+
+## Design Goals ⚽
 
 - keep your configuration, hotkeys and shortcuts synced throught differents OS.
 - Nice way to customize your dotfiles.
@@ -31,9 +39,9 @@
 
 <p align="right"><a href="#top" title="Back to top">🔝</a></p>
 
-## 2. Installation Guide ⚙️
+## Installation Guide ⚙️
 
-### 2.1. One line
+### One line
 
 If you don't have, please install `curl` or `wget`.
 
@@ -53,8 +61,9 @@ Like, if you want to purge any trace of the installation files
 ```bash
 curl -sfL https://raw.githubusercontent.com/pirpedro/dotfiles/main/install.sh | sh -s -- -p -P
 ```
+---
 
-### 2.2. Manual
+### Manual
 
 Install chezmoi
 
@@ -76,25 +85,50 @@ chezmoi init -a
 
 <p align="right"><a href="#top" title="Back to top">🔝</a></p>
 
-## 3. Supported Tools 🧰
+## Supported Systems
+In the course of need multiple Operational Systems have been supported.
+- Linux <sup><sub><b title="Linux">🐧</b></sub></sup>
+  - Debian-Like (Debian, Ubuntu, Mint, Pop OS)
+  - Fedora
+- OSx <sup><sub><b title="macOS">🍎</b></sub></sup>
+  - The support is not as completed as I want because I'm not using macbook anymore.
+- Windows <sup><sub><b title="Windows">🪟</b></sub></sup>
+  - It's possible to use chezmoi with Windows, but, come on, if you really are trying to keep track of your dotfiles go to a Unix environment or use WSL2.
 
-### 3.1. Shells 🐚
+## Supported Terminal Applications
+### Shell Configuration 🐚
 
-- [Bash](https://www.gnu.org/software/bash/) <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>: [`~/.bashrc`](./dot_bashrc)
-- [Z shell](http://zsh.sourceforge.net/) <sub><sup><b title="Linux">🐧</b></sup></sub><b title="macOS">🍎</b>: [`~/.zshenv`](./dot_zshenv) _<sup>enhanced with [**prezto**](https://github.com/sorin-ionescu/prezto), [**Powerlevel10K**](https://github.com/romkatv/powerlevel10k), and others!</sup>_
+- [Bash](https://www.gnu.org/software/bash/): [`~/.bashrc`](./dot_bashrc)
+- [Z shell](http://zsh.sourceforge.net/): [`~/.zshenv`](./dot_zshenv) _<sup>enhanced with [**prezto**](https://github.com/sorin-ionescu/prezto), [**Powerlevel10K**](https://github.com/romkatv/powerlevel10k), and others!</sup>_
 
-### 3.2. Terminals 💻
+---
+
+### File Navigation and Search
+- [fzf-marks](https://github.com/urbainvaes/fzf-marks) Plugin to manage bookmarks in zsh and bash. <sup><sub>mark \<mark> and ctrl-g shortcut </sub></sup>
+- [fzf](https://github.com/junegunn/fzf) A command line fuzzy finder.
+- [ranger](https://github.com/ranger/ranger) A VIM-inspired filemanager for the console: [`~/.config/ranger`](./home/private_dot_config/ranger)
+- [ripgrep](https://github.com/BurntSushi/ripgrep) fast-search tool: [`~/.ripgreprc`](./dot_ripgreprc)
+
+---
+
+### Text Manipulation
+- [vim](https://www.vim.org/) text editor: [`~/.vimrc`](./dot_vimrc) _<sup>enhanced with [**vim-plug**](https://github.com/junegunn/vim-plug)!</sup>_
+- [bat](https://github.com/sharkdp/bat) cat clone with wings.
+- [jq](https://github.com/stedolan/jq) command-line json processor.
+---
+
+### Terminals 💻
 
 - [kitty](https://sw.kovidgoyal.net/kitty/) <sub><sup><b title="Linux">🐧</b><b title="macOS">🍎</b></sup></sub>: [`~/.config/kitty/kitty.conf`](./private_dot_config/kitty/kitty.conf)
 - [terminator](https://terminator-gtk3.readthedocs.io/en/latest/) <sub><sup><b title="Linux">🐧</b></sup></sub>: [`~/.config/terminator/config`](./private_dot_config/terminator/config)
 
-### 3.3. Package managers 📦
+### Package managers 📦
 
 - [apt](https://wiki.debian.org/Apt) <sub><sup><b title="Linux">🐧</b></sup></sub>
 - [Homebrew](https://brew.sh/) <sub><sup><b title="macOS">🍎</b></sup></sub>: [`~/.Brewfile`](./dot_Brewfile)
 - [Scoop](https://scoop.sh/) <sub><sup><b title="windows">🪟</b></sup></sub>
 
-### 3.4. Universal apps 💾 <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>
+### Universal apps 💾 <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>
 
 - [chezmoi](https://www.chezmoi.io/) dotfiles manager: [`~/.chezmoi.yaml`](./.chezmoi.yaml.tmpl)
 - [cURL](https://curl.haxx.se/) data transfer tool: [`~/.curlrc`](./dot_curlrc)
@@ -103,12 +137,11 @@ chezmoi init -a
 - [GNU Wget](https://www.gnu.org/software/wget/) HTTP/FTP file downloader: [`~/.wgetrc`](./dot_wgetrc)
 - [OpenSSH](https://www.openssh.com/) secure networking utilities: [`~/.ssh/config`](./private_dot_ssh/config.tmpl)
 - [psql](https://www.postgresql.org/docs/13/app-psql.html) terminal-based front-end to PostgreSQL: [`~/.psqlrc`](./dot_psqlrc)
-- [Ripgrep](https://github.com/BurntSushi/ripgrep) fast-search tool: [`~/.ripgreprc`](./dot_ripgreprc)
-- [Vim](https://www.vim.org/) text editor: [`~/.vimrc`](./dot_vimrc)
+
 
 <p align="right"><a href="#top" title="Back to top">🔝</a></p>
 
-### 3.5. Gui apps 🖼️ <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>
+## Gui apps
 
 - [Ansible](https://www.ansible.com/) IT automation.
 - [Apache](https://httpd.apache.org/) web server.
@@ -127,7 +160,9 @@ chezmoi init -a
 
 <p align="right"><a href="#top" title="Back to top">🔝</a></p>
 
-README inspired by [`renemarc/dotfiles`](https://github.com/renemarc/dotfiles).
+> README inspired by [`renemarc/dotfiles`](https://github.com/renemarc/dotfiles).
+
+---
 
 <p align="center"><strong>Don't forget to <a href="#" title="star">⭐️</a> or <a href="#" title="fork">🔱</a> this repo! 😃<br/><sub>Assembled with <b title="love">❤️</b> in Rio de Janeiro.</sub></strong></p>
 

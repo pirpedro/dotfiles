@@ -36,6 +36,7 @@ zstyle ':prezto:load' pmodule \
   'history' \
   'directory' \
   'docker' \
+  'fzf-marks' \
   'spectrum' \
   'utility' \
   'ssh' \

@@ -1,3 +1,3 @@
 {{ if eq .osidlike "debian" }}
-{{ .cmd.sudo }} apt install fonts-firacode
+{{ .cmd.install }} fonts-firacode
 {{ end -}}

@@ -1,94 +1,104 @@
-{{ $scripts := list -}}
-
-{{ if not .is.ephemeral -}}
-  {{ if not (lookPath "node") -}}
-    {{ $scripts = mustAppend $scripts "node" -}}
-  {{ end -}}
-
-  {{ if .is.personal -}}
-     {{ $scripts = concat $scripts (list 
-        "bw"
-        "delta"
-      ) -}}
-  {{ end -}}
-
-  {{ $scripts = concat $scripts (list
-    "docker"
-  ) -}}  
-{{ end -}}
-
-{{ if not .is.headless -}}
-   {{ $scripts = concat $scripts (list
-    "fonts"
-    "sushi"
-    "nvim"
-    "code"
-    "google-chrome"
-  ) -}}
-{{ end -}}
-
-{{ if eq .chezmoi.os "darwin" -}}
-#!/bin/bash
-xcode-select --install
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install bash-completion@2
-{{ else if eq .chezmoi.os "linux" -}}
-
-{{ $packages := list
+{{ $install := list
      "curl"
      "wget"
      "vim"
      "git"
      "zsh"
      "progress"
-     "bat"
+     (printf "bat:%s" .cmd.bat)
      "htop"
+     "fzf"
+     "ranger"
+     "ripgrep:rg"
+     "jq"
+     "yq"
      "neofetch" -}}
 
-  {{ if not .is.headless -}}
-    {{ if eq .env.de "gnome" -}}
-        {{ $packages = mustAppend $packages "gnome-tweaks" -}}
-        {{ $scripts = mustAppend $scripts "gnome-shell-extension-installer" -}}
-    {{ end -}}
-
-    {{ $scripts = concat $scripts (list
-      "xclip"
-      "kitty"
-      "etcher"
-      "ulauncher"
-    ) -}}
-  {{ end -}}    
-
-  {{ if ne .chezmoi.username "root" -}}
-    {{ $packages = mustAppend $packages "sudo" -}}
+{{ if not .is.ephemeral -}}
+  {{ $install = concat $install (list
+    "node"
+    "docker"
+  ) -}}
+  
+  {{ if .is.personal -}}
+     {{ $install = concat $install (list 
+        "bitwarden:bw"
+        "delta"
+      ) -}}
   {{ end -}}
+{{ end -}}
 
-{{ if lookPath "apt" -}}
-{{   $packages = mustAppend $packages "git-core" -}}
-#!/bin/bash  
+{{ if not .is.headless -}}
+   {{ $install = concat $install (list
+    "fonts"
+    "sushi"
+    "neovim:nvim"
+    "vscode:code"
+    "google-chrome"
+    "xclip"
+    "kitty"
+    "etcher"
+    "ulauncher"
+  ) -}}
+
+  {{ if eq .env.de "gnome" -}}
+        {{ $install = concat $install (list
+            "gnome-tweaks"
+            "gnome-shell-extension-installer"
+          ) -}} 
+    {{ end -}}
+{{ end -}}
+
+{{ if and (ne .chezmoi.username "root") (not .is.ephemeral) -}}
+    {{ $install = mustAppend $install "sudo" -}}
+{{ end -}}
+
+{{ $packages := list -}}
+{{ $scripts := list -}}
+{{ $name := "" -}}
+{{ $cmd := "" -}}
+{{ range $install -}}
+{{   $i := split ":" . -}}
+{{   $name = $i._0 -}}
+{{   $cmd = $i._0 -}}
+{{   if $i._1 -}}
+{{     $cmd = $i._1 -}}
+{{   end -}}
+{{   if not (lookPath $cmd) -}}
+{{     if stat (printf "%s/.chezmoitemplates/packages/%s.sh" $.chezmoi.sourceDir $name) -}}
+{{       $scripts = mustAppend $scripts $name -}}
+{{     else -}}
+{{       $packages = mustAppend $packages $name -}}          
+{{     end -}}
+{{   end -}}
+{{ end -}}
+
+
+{{ if eq .chezmoi.os "darwin" "linux" -}}
+#!/bin/bash
+{{   if eq .chezmoi.os "darwin" -}}
+xcode-select --install
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+{{ .cmd.install }} bash-completion@2
+{{    end -}}
+
+{{   if eq .osidlike "debian" -}}
 export DEBIAN_FRONTEND=noninteractive
-
+{{   end -}}
 set -eufo pipefail
 echo "Bootstrapping system..."
-{{ .cmd.sudo }} apt -qq -y update
-{{ .cmd.sudo }} apt -qq -y install {{ $packages | join " " }}
-sudo chsh -s $(which zsh) $(whoami)
-
-{{- else if lookPath "apk" }}
-#!/bin/bash
-echo "Bootstrapping system..."
-{{ .cmd.sudo }} apk update
-{{ .cmd.sudo }} apk add {{ $packages | join " " }}
-{{- end }}
+{{ .cmd.update }}
+{{   if $packages -}} 
+{{ .cmd.install }} {{ $packages | join " " }}
+{{   end -}}
+{{ .cmd.sudo }} chsh -s $(which zsh) $(whoami)
 
 {{-   range $scripts }}
-{{-     if not (lookPath .) }}
 echo "Installing {{ . }}...";
 {{- /* Workaroud to handle the problem related to template function only accepting static string as arguments*/ -}}
 {{- /* So invoking the chezmoi command allows to pass a dynamic location to be parsed */ -}}
 {{ output "chezmoi" "execute-template" (include (printf ".chezmoitemplates/packages/%s.sh" . )) -}}
 echo "{{ . }} installed.";
-{{-     end }}
 {{-   end }}
 {{ end -}}
 

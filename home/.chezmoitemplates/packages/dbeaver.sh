@@ -1,5 +1,5 @@
 {{ if eq .osidlike "debian" }}
-{{ .cmd.sudo }} apt install -y gdebi
+{{ .cmd.install }} gdebi
 wget http://dbeaver.jkiss.org/files/dbeaver-ce_latest_amd64.deb
 {{ .cmd.sudo }} gdebi dbeaver-ce_latest_amd64.deb
 {{ else }}

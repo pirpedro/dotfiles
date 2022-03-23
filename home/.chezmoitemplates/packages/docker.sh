@@ -1,11 +1,11 @@
-{{ if .osidlike "debian" }}
-{{ .cmd.sudo }} apt install -y ca-certificates curl gnupg lsb-release
+{{ if eq .osidlike "debian" }}
+{{ .cmd.install }} ca-certificates curl gnupg lsb-release
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | {{ .cmd.sudo }} gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | {{ .cmd.sudo }} tee /etc/apt/sources.list.d/docker.list >/dev/null
-{{ .cmd.sudo }} apt update
-{{ .cmd.sudo }} apt install -y docker-ce docker-ce-cli containerd.io
+{{ .cmd.update }}
+{{ .cmd.install }} docker-ce docker-ce-cli containerd.io
 {{ .cmd.sudo }} groupadd docker
 {{ .cmd.sudo }} usermod -aG docker $USER
 newgrp docker

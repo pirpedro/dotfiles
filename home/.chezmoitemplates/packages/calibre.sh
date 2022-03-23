@@ -1,5 +1,1 @@
-{{ if eq .osidlike "debian" }}
-{{ .cmd.sudo }} apt -qq -y install calibre
-{{ else }}
-echo "No installation descriptor for this distro."
-{{ end -}}
+sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin

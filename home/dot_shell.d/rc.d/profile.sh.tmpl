@@ -277,26 +277,8 @@ alias cleanupLS="/System/Library/Frameworks/CoreServices.framework/Frameworks/La
 #    screensaverDesktop: Run a screensaver on the Desktop
 #   -----------------------------------------------------------------------------------
 alias screensaverDesktop='/System/Library/Frameworks/ScreenSaver.framework/Resources/ScreenSaverEngine.app/Contents/MacOS/ScreenSaverEngine -background'
-{{- if eq .chezmoi.os "darwin" "linux" }}
-{{- $update_cmd := "" }}
-{{- if eq .chezmoi.os "darwin" }}
-{{- $update_cmd = "brew update && brew upgrade"}}
-{{- else if eq .chezmoi.os "linux" }}
-{{- if eq .osidlike "debian" }}
-{{- $update_cmd = printf "%s apt update && %s apt upgrade -y" .cmd.sudo .cmd.sudo | trim }}
-{{- else if eq .osidlike "suse" }}
-{{- $update_cmd = printf "%s zypper update" .cmd.sudo | trim }}
-{{- else if eq .osidlike "gentoo" }}
-{{- $update_cmd = printf "%s emerge -u world" .cmd.sudo | trim }}
-{{- else if eq .osidlike "fedora" }}
-{{- $update_cmd = printf "%s dnf upgrade" .cmd.sudo | trim }}
-{{- else if eq .osidlike "centOS" }}
-{{- $update_cmd = printf "%s yum update" .cmd.sudo | trim }}
-{{- end}}
-alias u='{{ $update_cmd }}'
-alias updt='{{ $update_cmd }}'
-{{- end }}
-{{- end }}
+alias u='{{ .cmd.upgrade }}'
+alias updt='{{ .cmd.upgrade }}'
 #   ---------------------------------------
 #   8. WEB DEVELOPMENT
 #   ---------------------------------------

@@ -3,7 +3,7 @@
 {{ if output "cat" "/boot/grub/grub.conf" | contains "Windows Boot Manager" -}}
 #!/bin/bash
 {{ if and (lookPath "apt") (not (lookPath "timedatectl")) -}}
-{{ .cmd.sudo }} apt install -y systemd  
+{{ .cmd.install }} systemd  
 {{ end -}}
 timedatectl set-local-rtc 1 --adjust-system-clock
 {{ end -}}
