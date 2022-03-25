@@ -45,6 +45,6 @@
 {{- end }}
 {{ template "custom/themes" . }}
 
-{{ template "custom/zshplugins" . -}}
+{{ template "custom/zshplugins" . }}
 
-{{ template "custom/gitprojects" . -}}
+{{ template "custom/gitprojects" . }}

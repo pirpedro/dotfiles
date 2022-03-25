@@ -19,14 +19,17 @@
   - [Manual](#manual)
 - [Supported Systems](#supported-systems)
 - [Supported Terminal Applications](#supported-terminal-applications)
-  - [Shell Configuration 🐚](#shell-configuration-)
+  - [Shell Configuration](#shell-configuration)
   - [File Navigation and Search](#file-navigation-and-search)
   - [Text Manipulation](#text-manipulation)
-- [- lnav log file navigator.](#--lnav-log-file-navigator)
   - [Multimedia](#multimedia)
   - [Networking](#networking)
-  - [Terminals 💻](#terminals-)
-  - [Package managers 📦](#package-managers-)
+  - [Http Tools](#http-tools)
+  - [Package managers](#package-managers)
+  - [Version Control](#version-control)
+- [- git-extras GIT utilities, repo summary, repl, changelog population, author commit percentages and more](#--git-extras-git-utilities-repo-summary-repl-changelog-population-author-commit-percentages-and-more)
+- [Supported Graphical Applications](#supported-graphical-applications)
+  - [Terminals](#terminals)
   - [Universal apps 💾 <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>](#universal-apps--supsubb-titlelinuxbb-titlemacosbsubsup)
 - [Gui apps](#gui-apps)
 
@@ -98,7 +101,7 @@ In the course of need multiple Operational Systems have been supported.
   - It's possible to use chezmoi with Windows, but, come on, if you really are trying to keep track of your dotfiles go to a Unix environment or use WSL2.
 
 ## Supported Terminal Applications
-### Shell Configuration 🐚
+### Shell Configuration
 
 - [Bash](https://www.gnu.org/software/bash/): [`~/.bashrc`](./dot_bashrc)
 - [Z shell](http://zsh.sourceforge.net/): [`~/.zshenv`](./dot_zshenv) _<sup>enhanced with [**prezto**](https://github.com/sorin-ionescu/prezto), [**Powerlevel10K**](https://github.com/romkatv/powerlevel10k), and others!</sup>_
@@ -119,6 +122,7 @@ In the course of need multiple Operational Systems have been supported.
 - [jq](https://github.com/stedolan/jq) command-line json processor.
 - [pandoc](https://github.com/jgm/pandoc) universal markup converter.
 - [lnav](http://lnav.org/) log file navigator.
+
 ---
 
 ### Multimedia
@@ -130,17 +134,35 @@ In the course of need multiple Operational Systems have been supported.
 
 ### Networking
 - nmap
+- [mitmproxy](https://github.com/mitmproxy/mitmproxy) An interactive TLS-capable intercepting HTTP proxy for penetration testers and software developers.
 
-### Terminals 💻
+---
+
+### Http Tools
+- [httpie](https://github.com/jakubroztocil/httpie) Modern command line HTTP client – user-friendly curl alternative with intuitive UI, JSON support, syntax highlighting, wget-like downloads, extensions, etc.
+
+---
+
+### Package managers
+- [apt](https://wiki.debian.org/Apt) <sub><sup><b title="Linux">🐧</b></sup></sub>
+- [Homebrew](https://brew.sh/) <sub><sup><b title="macOS">🍎</b></sup></sub>: [`~/.Brewfile`](./dot_Brewfile)
+- [Scoop](https://scoop.sh/) <sub><sup><b title="windows">🪟</b></sup></sub>
+
+___
+
+### Version Control
+- [gh](https://github.com/cli/cli) Github's official command line tool.
+- [git-extras](https://github.com/tj/git-extras) GIT utilities, repo summary, repl, changelog population, author commit percentages and more
+---
+
+## Supported Graphical Applications
+
+### Terminals
 
 - [kitty](https://sw.kovidgoyal.net/kitty/) <sub><sup><b title="Linux">🐧</b><b title="macOS">🍎</b></sup></sub>: [`~/.config/kitty/kitty.conf`](./private_dot_config/kitty/kitty.conf)
 - [terminator](https://terminator-gtk3.readthedocs.io/en/latest/) <sub><sup><b title="Linux">🐧</b></sup></sub>: [`~/.config/terminator/config`](./private_dot_config/terminator/config)
 
-### Package managers 📦
 
-- [apt](https://wiki.debian.org/Apt) <sub><sup><b title="Linux">🐧</b></sup></sub>
-- [Homebrew](https://brew.sh/) <sub><sup><b title="macOS">🍎</b></sup></sub>: [`~/.Brewfile`](./dot_Brewfile)
-- [Scoop](https://scoop.sh/) <sub><sup><b title="windows">🪟</b></sup></sub>
 
 ### Universal apps 💾 <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>
 

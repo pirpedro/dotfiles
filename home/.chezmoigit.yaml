@@ -1,29 +1,30 @@
 {{ if .is.personal -}}
-clone:
-  root: dev/ws
-  organizations:
-    - organization: pirpedro
-      repos:
-        - name: pirpedro.github.io:blog/personal
-        - name: CEMEAI-USP:MBA-CEMEAI/Disciplinas
-        - name: CEMEAI_TCC:MBA-CEMEAI/TCC
-        - name: docker
-        - name: flix-catalog:fullcycle/catalog
-        - name: flix-encoder:fullcycle/encoder
-        - name: flix-auth:fullcycle/micro-auth
-        - name: flix-micro-catalog:fullcycle/micro-catalog
-        - name: flix-message-broker:fullcycle/rabbitmq
-        - name: git-gadgets
-        - name: my-config
-        - name: pgfa:UFF/pgfa
-        - name: bootstrapping:rule-them-all
-    - organization: nees-uff
-      repos:
-        - name: pef:UFF/pef
-    - organization: b2in-tech
-      repos:
-        - name: prepaf:UFF/prepaf
-    - organization: psrandom
-      repos:
-        - name: psrandom.github.io.git:blog/psrandom
+workspaces:
+  - name: all
+    root: dev/ws
+  - name: personal
+    root: dev/ws/my
+    repos:
+      - name: pirpedro/pirpedro.github.io:blog/personal
+      - name: psrandom/psrandom.github.io.git:blog/psrandom
+      - name: pirpedro/CEMEAI-USP:MBA-CEMEAI/Disciplinas
+      - name: pirpedro/CEMEAI_TCC:MBA-CEMEAI/TCC
+      - name: pirpedro/docker
+      - name: pirpedro/git-gadgets
+      - name: pirpedro/my-config
+      - name: pirpedro/bootstrapping:rule-them-all
+  - name: fullcycle
+    root: dev/ws/fullcycle
+    repos:
+      - name: pirpedro/flix-catalog:catalog
+      - name: pirpedro/flix-encoder:encoder
+      - name: pirpedro/flix-auth:micro-auth
+      - name: pirpedro/flix-micro-catalog:micro-catalog
+      - name: pirpedro/flix-message-broker:rabbitmq 
+  - name: UFF
+    root: dev/ws/UFF          
+    repos:
+      - name: pirpedro/pgfa
+      - name: nees-uff/pef
+      - name: b2in-tech/prepaf
 {{ end -}}

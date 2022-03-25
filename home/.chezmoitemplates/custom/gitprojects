@@ -1,39 +1,19 @@
-{{- if and .is.personal (not .is.ephemeral) (not .is.headless) }}
-{{ $projects := fromYaml (output "chezmoi" "execute-template" (include ".chezmoigit.yaml" | trim ) ) -}}
-{{ $root := "" -}}
+{{ if and .is.personal (not .is.ephemeral) (not .is.headless) -}}
+{{ $yaml := fromYaml (output "chezmoi" "execute-template" (include ".chezmoigit.yaml" | trim ) ) -}}
+{{ $workspaces := $yaml.workspaces -}}
 
-{{- if $projects.clone }}
-{{-   $clone := $projects.clone }}
-{{-   if $clone.root }}
-{{-     $root = $clone.root }}
-{{- end }}
-  
-{{-   $organization := "" }}
-{{-   $provider := "git@github.com" }}
-
-{{-   range $clone.organizations }}
-{{-     $organization = .organization }}
-{{-     $repo_name := "" }}
-{{-     $repo_path := "" }}
-
-{{-     if .provider }}
-{{-       $provider = .provider }}
-{{-     end }}
-
-{{-     range .repos }}
-{{-       $repo := split ":" .name }}
-{{-       $repo_name = $repo._0 }}
-
-{{-       if $repo._1 }}
-{{-         $repo_path = $repo._1 }}
-{{-       else }}  
-{{-         $repo_path = $repo_name }}
-{{-       end }}
+{{  range $yaml.workspaces -}}
+{{    $root:=ternary .root "" (ne .root nil) -}}
+{{    range .repos -}}
+{{      $provider:=ternary .provider "git@github.com" (ne .provider nil) -}}
+{{      $repo := split ":" .name -}}
+{{      $repo_name := $repo._0 -}}
+{{      $repo_path := ternary $repo._1 (split "/" $repo_name)._1 (ne $repo._1 "") -}}
 {{ list "[" (joinPath $root $repo_path | quote) "]" | join "" }}
   type = "git-repo"
-  url = {{ list $provider ":" $organization "/" $repo_name | join "" | quote }}
- 
-{{-     end }}   
-{{-   end }}
-{{- end }}
-{{- end }}
+  url = {{ list $provider ":" $repo_name | join "" | quote }}
+{{    end -}}
+{{  end -}}
+
+
+{{ end -}}

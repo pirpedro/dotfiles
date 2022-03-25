@@ -4,6 +4,7 @@
      "libarchive-tools:bsdtar"
      "vim"
      "git"
+     "git-extras:git-bulk"
      "zsh"
      "progress"
      (printf "bat:%s" .cmd.bat)
@@ -15,7 +16,8 @@
      "yq"
      "lnav"
      "imagemagick:convert"
-     "mitmproxy" 
+     "mitmproxy"
+     "httpie:http" 
      "neofetch" -}}
 
 {{ if not .is.ephemeral -}}
@@ -31,6 +33,7 @@
      {{ $install = concat $install (list 
         "bitwarden:bw"
         "delta"
+        "github:gh"
         "youtube-dl"
       ) -}}
   {{ end -}}

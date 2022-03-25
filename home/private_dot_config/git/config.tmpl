@@ -314,3 +314,15 @@
   curbranch = stats --long-current-branch
   #remove tag
   deletetag = "f() { git tag -d $1; git push origin :refs/tags/$1; }; f"
+
+{{ if and .is.personal (not .is.ephemeral) (not .is.headless) -}}
+{{   $yaml := fromYaml (output "chezmoi" "execute-template" (include ".chezmoigit.yaml" | trim ) ) -}}
+{{   $workspaces := $yaml.workspaces -}}
+[bulkworkspaces]
+{{   range $yaml.workspaces -}}
+{{    $root:=ternary .root "" (ne .root nil) -}}
+{{   if .name -}}
+{{ printf "  %s = %s/%s" .name $.chezmoi.homeDir $root}} 
+{{    end -}}
+{{  end -}}
+{{ end -}}
