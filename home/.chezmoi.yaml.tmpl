@@ -46,6 +46,7 @@
 {{- if $desktop_environment }}
 {{-   $desktop_environment = (split ":" $desktop_environment)._1 | lower }}
 {{- else }}
+{{-   $desktop_environment = "" | quote }}
 {{-   $headless = true }}
 {{- end }}
 

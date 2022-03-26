@@ -1,63 +1,34 @@
-{{ $install := list
-     "curl"
-     "wget"
-     "libarchive-tools:bsdtar"
-     "vim"
-     "git"
-     "git-extras:git-bulk"
-     "zsh"
-     "progress"
-     (printf "bat:%s" .cmd.bat)
-     "htop"
-     "fzf"
-     "ranger"
-     "ripgrep:rg"
-     "jq"
-     "yq"
-     "lnav"
-     "imagemagick:convert"
-     "mitmproxy"
-     "httpie:http" 
-     "neofetch" -}}
-
-{{ if not .is.ephemeral -}}
-  {{ $install = concat $install (list
-    "node"
-    "docker"
-    "nmap"
-    "pandoc"
-    "asciinema"
-  ) -}}
-  
-  {{ if .is.personal -}}
-     {{ $install = concat $install (list 
-        "bitwarden:bw"
-        "delta"
-        "github:gh"
-        "youtube-dl"
-      ) -}}
-  {{ end -}}
+{{ $yaml := fromYaml (output "chezmoi" "execute-template" (include ".chezmoipackages.yaml" | trim ) ) -}}
+{{- /* Create an list with the crrent machine state: ephemeral, headless, personal etc... */ -}}
+{{ $state:=list -}}
+{{ range keys .is -}}
+{{   if dig . false $.is -}}
+{{     $state = mustAppend $state . -}}
+{{   end -}}
 {{ end -}}
 
-{{ if not .is.headless -}}
-   {{ $install = concat $install (list
-    "sushi"
-    "neovim:nvim"
-    "vscode:code"
-    "google-chrome"
-    "xclip"
-    "kitty"
-    "etcher"
-    "ulauncher"
-  ) -}}
-
-  {{ if eq .env.de "gnome" -}}
-        {{ $install = concat $install (list
-            "gnome-tweaks"
-            "gnome-shell-extension-installer"
-          ) -}} 
-    {{ end -}}
-{{ end -}}
+{{ $install := list -}}
+{{  range $yaml.packages -}}
+{{    $pkg_name:="" -}}
+{{    $pkg_alias:="" -}}
+{{    $pkg_not:= list -}}
+{{    $pkg_de:= list $.env.de -}}{{- /* Force package defaut desktop enviroment to be the system one */ -}}
+{{    if eq (printf "%T" .) "string" -}}
+{{      $pkg_name = . -}}
+{{      $pkg_alias = . -}}
+{{    else -}}
+{{      $pkg_name = index (keys .) 0 -}}
+{{      $pkg_alias = dig $pkg_name "alias" $pkg_name . -}}
+{{      $pkg_not = splitList ":" (dig $pkg_name "not" "" .) -}}
+{{      $pkg_de = splitList ":" (dig $pkg_name "de" $.env.de .) -}}
+{{    end -}}
+{{    if has $.env.de $pkg_de -}}
+{{- /* dumb away to check intersectino between two lists */ -}}
+{{      if eq (addf (len $pkg_not) (len $state) | int) (concat $pkg_not $state | uniq | len ) -}}
+{{        $install = mustAppend $install (printf "%s:%s" $pkg_name $pkg_alias ) -}}
+{{      end -}}
+{{    end -}}
+{{  end -}}
 
 {{ if and (ne .chezmoi.username "root") (not .is.ephemeral) -}}
     {{ $install = mustAppend $install "sudo" -}}
@@ -70,10 +41,7 @@
 {{ range $install -}}
 {{   $i := split ":" . -}}
 {{   $name = $i._0 -}}
-{{   $cmd = $i._0 -}}
-{{   if $i._1 -}}
-{{     $cmd = $i._1 -}}
-{{   end -}}
+{{   $cmd = $i._1 -}}
 {{   if not (lookPath $cmd) -}}
 {{     if stat (printf "%s/.chezmoitemplates/packages/%s.sh" $.chezmoi.sourceDir $name) -}}
 {{       $scripts = mustAppend $scripts $name -}}
@@ -86,6 +54,7 @@
 
 {{ if eq .chezmoi.os "darwin" "linux" -}}
 #!/bin/bash
+# .chezmoipackages.yaml hash {{ include ".chezmoipackages.yaml" | sha256sum }}
 {{   if eq .chezmoi.os "darwin" -}}
 xcode-select --install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -107,7 +76,7 @@ echo "Bootstrapping system..."
 echo "Installing {{ . }}...";
 {{- /* Workaroud to handle the problem related to template function only accepting static string as arguments*/ -}}
 {{- /* So invoking the chezmoi command allows to pass a dynamic location to be parsed */ -}}
-{{ output "chezmoi" "execute-template" (include (printf ".chezmoitemplates/packages/%s.sh" . )) -}}
+{{ output "chezmoi" "execute-template" (include (printf ".chezmoitemplates/packages/%s.sh" . )) }}
 echo "{{ . }} installed.";
 {{-   end }}
 {{ end -}}

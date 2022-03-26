@@ -17,6 +17,7 @@
 - [Installation Guide ⚙️](#installation-guide-️)
   - [One line](#one-line)
   - [Manual](#manual)
+- [Chezmoi Extras](#chezmoi-extras)
 - [Supported Systems](#supported-systems)
 - [Supported Terminal Applications](#supported-terminal-applications)
   - [Shell Configuration](#shell-configuration)
@@ -87,6 +88,13 @@ And execute `chezmoi` with `-a` flag to auto apply the changes to your home dir.
 ```bash
 chezmoi init -a
 ```
+
+<p align="right"><a href="#top" title="Back to top">🔝</a></p>
+
+## Chezmoi Extras
+
+This repo include some new chezmoi configuration files to clarify and control changes more concisely.
+Check [here](docs/chezmoi_extras.md) those new features.
 
 <p align="right"><a href="#top" title="Back to top">🔝</a></p>
 

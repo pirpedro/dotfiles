@@ -1,0 +1,42 @@
+packages:
+  - curl
+  - wget
+  - libarchive-tools: {alias: bsdtar}
+  - vim
+  - git
+  - zsh
+  - progress
+  - bat: {alias: {{.cmd.bat}}}
+  - htop
+  - fzf
+  - ranger
+  - ripgrep: {alias: rg}
+  - jq
+  - yq
+  - lnav
+  - imagemagick: {alias: convert}
+  - mitmproxy
+  - httpie: {alias: http}
+  - neofetch
+  - make: {not: ephemeral}
+  - {{ ternary "bsdmainutils" "util-linux" (eq .osidlike "debian" )}}: {alias: column, not: ephemeral}
+  - git-extras: {alias: git-bulk, not: ephemeral}
+  - node: {not: ephemeral}
+  - docker: {not: ephemeral}
+  - nmap: {not: ephemeral}
+  - pandoc: {not: ephemeral}
+  - asciinema: {not: ephemeral}
+  - bitwarden: {alias: bw, not: ephemeral:work}
+  - delta: {not: ephemeral, work}
+  - github: {alias: gh, not: ephemeral:work}
+  - youtube-dl: {not: ephemeral:work}
+  - sushi: {not: headless, de: gnome}
+  - neovim: {alias: nvim, not: headless}
+  - vscode: {alias: code, not: headless}
+  - google-chrome: {not: headless}
+  - xclip: {not: headless}
+  - kitty: {not: headless}
+  - etcher: {not: headless}
+  - ulauncher: {not: headless}
+  - gnome-tweaks: {not: headless, de: gnome}
+  - gnome-shell-extension-installer: {not: headless, de: gnome}

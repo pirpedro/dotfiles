@@ -1,8 +1,8 @@
 {{ if .is.personal -}}
 workspaces:
-  - name: all
+  all:
     root: dev/ws
-  - name: personal
+  personal:
     root: dev/ws/my
     repos:
       - name: pirpedro/pirpedro.github.io:blog/personal
@@ -13,7 +13,7 @@ workspaces:
       - name: pirpedro/git-gadgets
       - name: pirpedro/my-config
       - name: pirpedro/bootstrapping:rule-them-all
-  - name: fullcycle
+  fullcycle:
     root: dev/ws/fullcycle
     repos:
       - name: pirpedro/flix-catalog:catalog
@@ -21,7 +21,7 @@ workspaces:
       - name: pirpedro/flix-auth:micro-auth
       - name: pirpedro/flix-micro-catalog:micro-catalog
       - name: pirpedro/flix-message-broker:rabbitmq 
-  - name: UFF
+  UFF:
     root: dev/ws/UFF          
     repos:
       - name: pirpedro/pgfa

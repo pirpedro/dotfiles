@@ -317,12 +317,10 @@
 
 {{ if and .is.personal (not .is.ephemeral) (not .is.headless) -}}
 {{   $yaml := fromYaml (output "chezmoi" "execute-template" (include ".chezmoigit.yaml" | trim ) ) -}}
-{{   $workspaces := $yaml.workspaces -}}
 [bulkworkspaces]
-{{   range $yaml.workspaces -}}
-{{    $root:=ternary .root "" (ne .root nil) -}}
-{{   if .name -}}
-{{ printf "  %s = %s/%s" .name $.chezmoi.homeDir $root}} 
-{{    end -}}
+{{  range (keys $yaml.workspaces | sortAlpha) -}}
+{{    $ws:= get $yaml.workspaces . -}}
+{{    $root:=ternary $ws.root "" (ne $ws.root nil) -}}
+{{ printf "  %s = %s/%s" . $.chezmoi.homeDir $root}} 
 {{  end -}}
 {{ end -}}
