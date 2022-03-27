@@ -22,11 +22,13 @@ packages:
   - {{ ternary "bsdmainutils" "util-linux" (eq .osidlike "debian" )}}: {alias: column, not: ephemeral}
   - git-extras: {alias: git-bulk, not: ephemeral}
   - node: {not: ephemeral}
+  - python3-pip: {alias: pip3, not: ephemeral}
   - docker: {not: ephemeral}
+  - goreleaser: {not: ephemeral:headless}
   - nmap: {not: ephemeral}
   - pandoc: {not: ephemeral}
   - asciinema: {not: ephemeral}
-  - bitwarden: {alias: bw, not: ephemeral:work}
+  - "@bitwarden/cli": {alias: bw, not: ephemeral:work, installer: node}
   - delta: {not: ephemeral, work}
   - github: {alias: gh, not: ephemeral:work}
   - youtube-dl: {not: ephemeral:work}
@@ -40,3 +42,4 @@ packages:
   - ulauncher: {not: headless}
   - gnome-tweaks: {not: headless, de: gnome}
   - gnome-shell-extension-installer: {not: headless, de: gnome}
+  - cookiecutter: {not: ephemeral, installer: python}

@@ -1,4 +1,4 @@
 {{/* create this file only in non-ephemeral machines */}}
 {{ if not .is.ephemeral }}
-prefix=~/.local/share/npm
+prefix={{ .path.node.global }} 
 {{ end }}

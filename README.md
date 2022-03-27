@@ -1,12 +1,14 @@
 <h1 align="center">
     <a name="top" title="dotfiles">~/.&nbsp;📂</a><br/>Pedro Rodrigues cross-platform, cross-shell dotfiles<br/> <sup><sub>powered by  <a href="https://www.chezmoi.io/">chezmoi</a> 🏠</sub></sup>
 </h1>
+<div align=center>
 
 [![CodeFactor][badge-codefactor]][link-codefactor]
 [![License][badge-license]][link-license]
 [![Repo analytics][badge-analytics]][link-analytics]
 [![Tweet][badge-twitter]][link-twitter]
 
+</div>
 <div align="center">
     <p><strong>Be sure to <a href="#" title="star">⭐️</a> or <a href="#" title="fork">🔱</a> this repo if you find it useful! 😃</strong></p>
 </div>
@@ -28,7 +30,8 @@
   - [Http Tools](#http-tools)
   - [Package managers](#package-managers)
   - [Version Control](#version-control)
-- [- git-extras GIT utilities, repo summary, repl, changelog population, author commit percentages and more](#--git-extras-git-utilities-repo-summary-repl-changelog-population-author-commit-percentages-and-more)
+- [- cookiecutter A command-line utility that creates projects from project templates.](#--cookiecutter-a-command-line-utility-that-creates-projects-from-project-templates)
+  - [Container Tools](#container-tools)
 - [Supported Graphical Applications](#supported-graphical-applications)
   - [Terminals](#terminals)
   - [Universal apps 💾 <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>](#universal-apps--supsubb-titlelinuxbb-titlemacosbsubsup)
@@ -161,7 +164,13 @@ ___
 ### Version Control
 - [gh](https://github.com/cli/cli) Github's official command line tool.
 - [git-extras](https://github.com/tj/git-extras) GIT utilities, repo summary, repl, changelog population, author commit percentages and more
+- [goreleaser](https://github.com/goreleaser/goreleaser) Deliver Go binaries as fast and easily as possible.
+- [cookiecutter](https://github.com/cookiecutter/cookiecutter) A command-line utility that creates projects from project templates.
 ---
+
+### Container Tools
+- [ttl.sh](https://ttl.sh/) Anonymous & ephemeral Docker image registry.
+
 
 ## Supported Graphical Applications
 

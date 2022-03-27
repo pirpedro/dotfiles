@@ -37,7 +37,7 @@ gsettings set org.gnome.desktop.interface icon-theme 'la-capitaine'
 #######################################
 {{- if ne (output "gsettings" "get" "org.gnome.desktop.interface" "cursor-theme" | trim) "'capitaine-cursors'"}}
 cd $HOME/.local/share/themes/capitaine-cursors
-{{ .cmd.install }} inkscape x11-apps libcanberra-gtk-module
+{{ .cmd.os.install }} inkscape x11-apps libcanberra-gtk-module
 chmod +x build.sh
 ./build.sh -t dark # build dark theme cursors
 mkdir -p $HOME/.icons/capitaine-cursors

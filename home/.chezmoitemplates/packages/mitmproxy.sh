@@ -1,5 +1,5 @@
 {{ if eq .chezmoi.os "darwin" -}}
-{{ .cmd.install }} mitmproxy
+{{ .cmd.os.install }} mitmproxy
 {{ else -}}
 {{ end -}}
 

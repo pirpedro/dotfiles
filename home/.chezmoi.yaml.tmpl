@@ -137,14 +137,19 @@ data:
     ephemeral: {{ $ephemeral }}
     headless: {{ $headless }}
   path:
-    npm:
-      global: .local/share/npm
+    node:
+      global: {{ .chezmoi.homeDir }}/.local/share/npm
   cmd:
     sudo: {{ $sudo }}
-    update: {{ $update_cmd }}
-    upgrade: {{ $upgrade_cmd }}
-    install: {{ $install_cmd }}
+    os:
+      update: {{ $update_cmd }}
+      upgrade: {{ $upgrade_cmd }}
+      install: {{ $install_cmd }}
     bat: {{ ternary "batcat" "bat" (eq $osIDLike "debian" )}}
+    node:
+      install: npm install -g --prefix {{ .chezmoi.homeDir }}/.local/share/npm
+    python:
+      install: pip3 install --user
   env:
     de: {{ $desktop_environment }}
   github:

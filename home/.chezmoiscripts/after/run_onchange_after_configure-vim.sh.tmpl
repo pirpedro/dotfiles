@@ -2,6 +2,6 @@
 #!/bin/bash
 # .vimrc hash: {{ include "dot_vimrc.tmpl" | sha256sum }}
 set -eufo pipefail
-{{ .cmd.install }} exuberant-ctags
+{{ .cmd.os.install }} exuberant-ctags
 vim +PlugInstall +qall
 {{ end -}}

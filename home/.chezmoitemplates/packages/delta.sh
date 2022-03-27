@@ -7,5 +7,5 @@ trap "rm -rf ${dir}" EXIT
 curl -L https://github.com/dandavison/delta/releases/download/${version}/git-delta_${version}_{{ .chezmoi.arch }}.deb -o "$dir/git-delta.deb"
 {{ .cmd.sudo }} dpkg -i "$dir/git-delta.deb"
 {{ else -}}
-{{ .cmd.install }} git-delta
+{{ .cmd.os.install }} git-delta
 {{ end -}}

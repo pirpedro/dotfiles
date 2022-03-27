@@ -6,11 +6,11 @@
 {{     $state = mustAppend $state . -}}
 {{   end -}}
 {{ end -}}
-
 {{ $install := list -}}
 {{  range $yaml.packages -}}
 {{    $pkg_name:="" -}}
 {{    $pkg_alias:="" -}}
+{{    $pkg_installer:="os" -}}
 {{    $pkg_not:= list -}}
 {{    $pkg_de:= list $.env.de -}}{{- /* Force package defaut desktop enviroment to be the system one */ -}}
 {{    if eq (printf "%T" .) "string" -}}
@@ -21,32 +21,36 @@
 {{      $pkg_alias = dig $pkg_name "alias" $pkg_name . -}}
 {{      $pkg_not = splitList ":" (dig $pkg_name "not" "" .) -}}
 {{      $pkg_de = splitList ":" (dig $pkg_name "de" $.env.de .) -}}
+{{      $pkg_installer = dig $pkg_name "installer" $pkg_installer . -}}
 {{    end -}}
 {{    if has $.env.de $pkg_de -}}
 {{- /* dumb away to check intersectino between two lists */ -}}
 {{      if eq (addf (len $pkg_not) (len $state) | int) (concat $pkg_not $state | uniq | len ) -}}
-{{        $install = mustAppend $install (printf "%s:%s" $pkg_name $pkg_alias ) -}}
+{{        $install = mustAppend $install (printf "%s:%s:%s" $pkg_name $pkg_alias $pkg_installer ) -}}
 {{      end -}}
 {{    end -}}
 {{  end -}}
 
 {{ if and (ne .chezmoi.username "root") (not .is.ephemeral) -}}
-    {{ $install = mustAppend $install "sudo" -}}
+    {{ $install = mustAppend $install "sudo:sudo:os" -}}
 {{ end -}}
 
-{{ $packages := list -}}
-{{ $scripts := list -}}
-{{ $name := "" -}}
-{{ $cmd := "" -}}
+{{ $packages := dict -}}{{ $scripts := list -}}
+{{ $name := "" -}}{{ $cmd := "" -}}{{ $installer := "" -}}
 {{ range $install -}}
 {{   $i := split ":" . -}}
 {{   $name = $i._0 -}}
 {{   $cmd = $i._1 -}}
+{{   $installer = $i._2 -}}
 {{   if not (lookPath $cmd) -}}
 {{     if stat (printf "%s/.chezmoitemplates/packages/%s.sh" $.chezmoi.sourceDir $name) -}}
 {{       $scripts = mustAppend $scripts $name -}}
 {{     else -}}
-{{       $packages = mustAppend $packages $name -}}          
+{{       if not (hasKey $packages $installer) -}}
+{{          $_:= set $packages $installer list -}}
+{{       end -}}
+{{       $list := get $packages $installer -}}
+{{       $_:= set $packages $installer (mustAppend $list $name) -}}       
 {{     end -}}
 {{   end -}}
 {{ end -}}
@@ -58,7 +62,7 @@
 {{   if eq .chezmoi.os "darwin" -}}
 xcode-select --install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-{{ .cmd.install }} bash-completion@2
+{{ .cmd.os.install }} bash-completion@2
 {{    end -}}
 
 {{   if eq .osidlike "debian" -}}
@@ -66,9 +70,10 @@ export DEBIAN_FRONTEND=noninteractive
 {{   end -}}
 set -eufo pipefail
 echo "Bootstrapping system..."
-{{ .cmd.update }}
-{{   if $packages -}} 
-{{ .cmd.install }} {{ $packages | join " " }}
+{{ .cmd.os.update }}
+{{   if $packages.os -}} 
+{{ .cmd.os.install }} {{ $packages.os | join " " }}
+{{   $_ := unset $packages "os" -}}
 {{   end -}}
 {{ .cmd.sudo }} chsh -s $(which zsh) $(whoami)
 
@@ -80,4 +85,8 @@ echo "Installing {{ . }}...";
 echo "{{ . }} installed.";
 {{-   end }}
 {{ end -}}
+
+{{  range $k, $v := $packages -}} 
+{{ dig  $k "install" "" $.cmd }} {{ $v | join " " }}
+{{   end -}}
 

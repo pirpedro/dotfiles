@@ -1,1 +1,1 @@
-{{ .cmd.install}} -o Dpkg::Options::="--force-overwrite" ripgrep
+{{ .cmd.os.install}} -o Dpkg::Options::="--force-overwrite" ripgrep

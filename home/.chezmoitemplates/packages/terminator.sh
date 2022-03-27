@@ -1,2 +1,1 @@
-{{ .cmd.install }} terminator
-
+{{ .cmd.os.install }} terminator

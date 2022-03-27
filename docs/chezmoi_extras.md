@@ -26,9 +26,9 @@ Some useful configuration file improvements powered by [`chezmoi.io`](https://ww
 Commands that work on diferents distros. Like `OsX`, `Debian-Like` (debian, ubuntu, min, popOS...), `Fedora`, `Open Suse` and `Alpine`.
 
 - `.cmd.sudo` - will return super user privileges if you need.
-- `.cmd.update` - update command for current distro.
-- `.cmd.upgrade` - upgrade command for current distro.
-- `.cmd.install` - install command for current distro.
+- `.cmd.os.update` - update command for current distro.
+- `.cmd.os.upgrade` - upgrade command for current distro.
+- `.cmd.os.install` - install command for current distro.
 - 
 <p align="right"><a href="#top" title="Back to top">🔝</a></p>
 
@@ -45,10 +45,12 @@ packages:
   - fzf
   - github: {alias: gh, not: ephemeral:work}
   - sushi: {not: headless, de: gnome}
+  - "@bitwarden/cli": {installer: node}
 ```
 This file (treated as a chezmoi `template`) contains all packages to be installed following those rules:
 - Try to find a `template` in `<source-dir>/.chezmoitemplates/packages` with the name `<package-name>.sh` to be sourced.
   - If it doesn't exist, try to install the `<package-name>` from the current distro package manager.
+  - If the `installer` tag is provided, try to install with the language package manager (like `npm` for `node` or `pip3` for `python`)
 - Try to find in `$PATH` a command with the `<package-name>` or an `alias` if provided, so this package installation could be skipped.
 - Check some desktop environment restrictions as a `de` tag has been provided, e.g, if you said that `sushi` can be installed only in `gnome`, skip installation if your system uses `kde`.
 - Restrict installation to some [machine states](#machine-state) if `not` tag exists, e.g, don't install `github cli` if your system is `ephemeral` or `work` (you can pass multiple states separated by colon)
