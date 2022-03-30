@@ -31,7 +31,15 @@
   - [Package managers](#package-managers)
   - [Version Control](#version-control)
 - [- cookiecutter A command-line utility that creates projects from project templates.](#--cookiecutter-a-command-line-utility-that-creates-projects-from-project-templates)
+  - [Project Scaffolding](#project-scaffolding)
+- [Soon...](#soon)
+  - [Snippets and Cheat sheets](#snippets-and-cheat-sheets)
+  - [Cloud Clients](#cloud-clients)
   - [Container Tools](#container-tools)
+  - [Infrastructure as Code](#infrastructure-as-code)
+  - [Security](#security)
+  - [System Utils](#system-utils)
+  - [Other](#other)
 - [Supported Graphical Applications](#supported-graphical-applications)
   - [Terminals](#terminals)
   - [Universal apps 💾 <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>](#universal-apps--supsubb-titlelinuxbb-titlemacosbsubsup)
@@ -162,14 +170,55 @@ In the course of need multiple Operational Systems have been supported.
 ___
 
 ### Version Control
+- [Git :octocat:](https://git-scm.com/) version-control system: [`~/.config/git/config`](./private_dot_config/git/config.tmpl)
 - [gh](https://github.com/cli/cli) Github's official command line tool.
 - [git-extras](https://github.com/tj/git-extras) GIT utilities, repo summary, repl, changelog population, author commit percentages and more
 - [goreleaser](https://github.com/goreleaser/goreleaser) Deliver Go binaries as fast and easily as possible.
 - [cookiecutter](https://github.com/cookiecutter/cookiecutter) A command-line utility that creates projects from project templates.
 ---
 
+### Project Scaffolding
+Soon...
+---
+
+### Snippets and Cheat sheets
+- [tldr](https://github.com/tldr-pages/tldr) Simplified and community-driven man pages.
+
+---
+
+### Cloud Clients
+- [doctl](https://github.com/digitalocean/doctl) Digital Ocean cli to configure services.
+- [gcloud](https://cloud.google.com/sdk/gcloud/) Google Cloud SDK.
+- [firebase](https://firebase.google.com/docs/cli) Fire base Command Line Tools.
+
 ### Container Tools
 - [ttl.sh](https://ttl.sh/) Anonymous & ephemeral Docker image registry.
+- [ctop](https://github.com/bcicen/ctop) Prompt interface for container metrics.
+- [dive](https://github.com/wagoodman/dive) Explore each layer in a docker image.
+- [lazydocker](https://github.com/jesseduffield/lazydocker) Docker manager.
+
+### Infrastructure as Code
+- [Ansible](https://www.ansible.com/) IT automation.
+- [Terraform](https://www.terraform.io/) Write, Plan, and Create Infrastructure as Code.
+
+### Security
+- [bw](https://github.com/bitwarden/cli) Bitwarden command line vault.
+
+### System Utils
+- [chezmoi](https://www.chezmoi.io/) dotfiles manager: [`~/.chezmoi.yaml`](./.chezmoi.yaml.tmpl)
+- [cURL](https://curl.haxx.se/) Data transfer tool: [`~/.curlrc`](./dot_curlrc)
+- [direnv](https://direnv.net/) It augments existing shells with a new feature that can load and unload environment variables depending on the current directory.
+- [fkill](https://github.com/sindresorhus/fkill-cli) Kill processes. Cross-plataform.
+- [glances](https://github.com/nicolargo/glances) Glances an Eye on your system. A top/htop alternative for GNU/Linux, BSD, Mac OS and Windows operating systems.
+- [GNU Wget](https://www.gnu.org/software/wget/) HTTP/FTP file downloader: [`~/.wgetrc`](./dot_wgetrc)
+- [htop](https://github.com/hishamhm/htop) An interactive text-mode process viewer for Unix systems.
+- [OpenSSH](https://www.openssh.com/) secure networking utilities: [`~/.ssh/config`](./private_dot_ssh/config.tmpl)
+- [ncdu](https://linux.die.net/man/1/ncdu) Disk usage visualization from terminal.
+
+### Other
+- [localtunnel](https://github.com/localtunnel/localtunnel) Expose your machine to the world.
+- [mkcert](https://github.com/FiloSottile/mkcert) A simple zero-config tool to make locally trusted development certificates with any names you'd like.
+
 
 
 ## Supported Graphical Applications
@@ -183,12 +232,9 @@ ___
 
 ### Universal apps 💾 <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>
 
-- [chezmoi](https://www.chezmoi.io/) dotfiles manager: [`~/.chezmoi.yaml`](./.chezmoi.yaml.tmpl)
-- [cURL](https://curl.haxx.se/) data transfer tool: [`~/.curlrc`](./dot_curlrc)
-- [Git :octocat:](https://git-scm.com/) version-control system: [`~/.config/git/config`](./private_dot_config/git/config.tmpl)
+
+
 - [GNU Nano 4.x+](https://www.nano-editor.org/) text editor: [`~/.nanorc`](./dot_nanorc) _<sup>enhanced with [**Improved Nano Syntax Highlighting Files**](https://github.com/scopatz/nanorc)!</sup>_
-- [GNU Wget](https://www.gnu.org/software/wget/) HTTP/FTP file downloader: [`~/.wgetrc`](./dot_wgetrc)
-- [OpenSSH](https://www.openssh.com/) secure networking utilities: [`~/.ssh/config`](./private_dot_ssh/config.tmpl)
 - [psql](https://www.postgresql.org/docs/13/app-psql.html) terminal-based front-end to PostgreSQL: [`~/.psqlrc`](./dot_psqlrc)
 
 
@@ -196,7 +242,6 @@ ___
 
 ## Gui apps
 
-- [Ansible](https://www.ansible.com/) IT automation.
 - [Apache](https://httpd.apache.org/) web server.
 - [Balena Etcher](https://www.balena.io/etcher/) utility to write image files onto storage medias.
 - [Bitwarden](https://bitwarden.com/) password management service.

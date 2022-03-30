@@ -1,5 +1,5 @@
 {{ if (and (eq .chezmoi.os "darwin" "linux") (not .ephemeral)) -}}
-#!/bin/bash
+#!/usr/bin/env bash
 # .vimrc hash: {{ include "dot_vimrc.tmpl" | sha256sum }}
 set -eufo pipefail
 {{ .cmd.os.install }} exuberant-ctags

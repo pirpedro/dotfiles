@@ -57,7 +57,7 @@
 
 
 {{ if eq .chezmoi.os "darwin" "linux" -}}
-#!/bin/bash
+#!/usr/bin/env bash
 # .chezmoipackages.yaml hash {{ include ".chezmoipackages.yaml" | sha256sum }}
 {{   if eq .chezmoi.os "darwin" -}}
 xcode-select --install
