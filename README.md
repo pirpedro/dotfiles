@@ -30,7 +30,6 @@
   - [Http Tools](#http-tools)
   - [Package managers](#package-managers)
   - [Version Control](#version-control)
-- [- cookiecutter A command-line utility that creates projects from project templates.](#--cookiecutter-a-command-line-utility-that-creates-projects-from-project-templates)
   - [Project Scaffolding](#project-scaffolding)
 - [Soon...](#soon)
   - [Snippets and Cheat sheets](#snippets-and-cheat-sheets)
@@ -41,9 +40,18 @@
   - [System Utils](#system-utils)
   - [Other](#other)
 - [Supported Graphical Applications](#supported-graphical-applications)
-  - [Terminals](#terminals)
-  - [Universal apps 💾 <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>](#universal-apps--supsubb-titlelinuxbb-titlemacosbsubsup)
-- [Gui apps](#gui-apps)
+  - [Productivity](#productivity)
+  - [Internet](#internet)
+- [- Slack Official slack application.](#--slack-official-slack-application)
+  - [Graphics & Design](#graphics--design)
+- [- inkscape Design tool.](#--inkscape-design-tool)
+  - [Sound & Video](#sound--video)
+- [- VLC A free and open source cross-platform multimedia player and framework that plays most multimedia files as well as DVDs, Audio CDs, VCDs, and various streaming protocols.](#--vlc-a-free-and-open-source-cross-platform-multimedia-player-and-framework-that-plays-most-multimedia-files-as-well-as-dvds-audio-cds-vcds-and-various-streaming-protocols)
+  - [Development Tools](#development-tools)
+  - [Utilities](#utilities)
+  - [Games](#games)
+  - [Themes](#themes)
+  - [Fonts](#fonts)
 
 
 
@@ -141,6 +149,7 @@ In the course of need multiple Operational Systems have been supported.
 - [jq](https://github.com/stedolan/jq) command-line json processor.
 - [pandoc](https://github.com/jgm/pandoc) universal markup converter.
 - [lnav](http://lnav.org/) log file navigator.
+- [nano](https://www.nano-editor.org/) text editor: [`~/.nanorc`](./dot_nanorc) _<sup>enhanced with [**Improved Nano Syntax Highlighting Files**](https://github.com/scopatz/nanorc)!</sup>_
 
 ---
 
@@ -175,6 +184,8 @@ ___
 - [git-extras](https://github.com/tj/git-extras) GIT utilities, repo summary, repl, changelog population, author commit percentages and more
 - [goreleaser](https://github.com/goreleaser/goreleaser) Deliver Go binaries as fast and easily as possible.
 - [cookiecutter](https://github.com/cookiecutter/cookiecutter) A command-line utility that creates projects from project templates.
+- [Delta](https://github.com/dandavison/delta) Syntax highlighting pager for git and diff.
+
 ---
 
 ### Project Scaffolding
@@ -191,18 +202,27 @@ Soon...
 - [gcloud](https://cloud.google.com/sdk/gcloud/) Google Cloud SDK.
 - [firebase](https://firebase.google.com/docs/cli) Fire base Command Line Tools.
 
+---
+
 ### Container Tools
+- [Docker](https://www.docker.com/) Container provider.
 - [ttl.sh](https://ttl.sh/) Anonymous & ephemeral Docker image registry.
 - [ctop](https://github.com/bcicen/ctop) Prompt interface for container metrics.
 - [dive](https://github.com/wagoodman/dive) Explore each layer in a docker image.
 - [lazydocker](https://github.com/jesseduffield/lazydocker) Docker manager.
 
+---
+
 ### Infrastructure as Code
 - [Ansible](https://www.ansible.com/) IT automation.
 - [Terraform](https://www.terraform.io/) Write, Plan, and Create Infrastructure as Code.
 
+---
+
 ### Security
 - [bw](https://github.com/bitwarden/cli) Bitwarden command line vault.
+
+---
 
 ### System Utils
 - [chezmoi](https://www.chezmoi.io/) dotfiles manager: [`~/.chezmoi.yaml`](./.chezmoi.yaml.tmpl)
@@ -210,50 +230,69 @@ Soon...
 - [direnv](https://direnv.net/) It augments existing shells with a new feature that can load and unload environment variables depending on the current directory.
 - [fkill](https://github.com/sindresorhus/fkill-cli) Kill processes. Cross-plataform.
 - [glances](https://github.com/nicolargo/glances) Glances an Eye on your system. A top/htop alternative for GNU/Linux, BSD, Mac OS and Windows operating systems.
-- [GNU Wget](https://www.gnu.org/software/wget/) HTTP/FTP file downloader: [`~/.wgetrc`](./dot_wgetrc)
+- [wget](https://www.gnu.org/software/wget/) HTTP/FTP file downloader: [`~/.wgetrc`](./dot_wgetrc)
 - [htop](https://github.com/hishamhm/htop) An interactive text-mode process viewer for Unix systems.
 - [OpenSSH](https://www.openssh.com/) secure networking utilities: [`~/.ssh/config`](./private_dot_ssh/config.tmpl)
 - [ncdu](https://linux.die.net/man/1/ncdu) Disk usage visualization from terminal.
 
+--- 
+
 ### Other
 - [localtunnel](https://github.com/localtunnel/localtunnel) Expose your machine to the world.
 - [mkcert](https://github.com/FiloSottile/mkcert) A simple zero-config tool to make locally trusted development certificates with any names you'd like.
-
-
-
-## Supported Graphical Applications
-
-### Terminals
-
-- [kitty](https://sw.kovidgoyal.net/kitty/) <sub><sup><b title="Linux">🐧</b><b title="macOS">🍎</b></sup></sub>: [`~/.config/kitty/kitty.conf`](./private_dot_config/kitty/kitty.conf)
-- [terminator](https://terminator-gtk3.readthedocs.io/en/latest/) <sub><sup><b title="Linux">🐧</b></sup></sub>: [`~/.config/terminator/config`](./private_dot_config/terminator/config)
-
-
-
-### Universal apps 💾 <sup><sub><b title="Linux">🐧</b><b title="macOS">🍎</b></sub></sup>
-
-
-
-- [GNU Nano 4.x+](https://www.nano-editor.org/) text editor: [`~/.nanorc`](./dot_nanorc) _<sup>enhanced with [**Improved Nano Syntax Highlighting Files**](https://github.com/scopatz/nanorc)!</sup>_
 - [psql](https://www.postgresql.org/docs/13/app-psql.html) terminal-based front-end to PostgreSQL: [`~/.psqlrc`](./dot_psqlrc)
-
+- [apache](https://httpd.apache.org/) web server.
 
 <p align="right"><a href="#top" title="Back to top">🔝</a></p>
 
-## Gui apps
+## Supported Graphical Applications
 
-- [Apache](https://httpd.apache.org/) web server.
-- [Balena Etcher](https://www.balena.io/etcher/) utility to write image files onto storage medias.
-- [Bitwarden](https://bitwarden.com/) password management service.
+### Productivity
+- [libreoffice](https://libreoffice.org/) Office suite.
 - [Calibre](https://calibre-ebook.com/) e-book manager.
-- [DBeaver](https://dbeaver.io/) SQL client.
-- [Delta](https://github.com/dandavison/delta) Syntax highlighting pager for git and diff.
-- [Docker](https://www.docker.com/) Container provider.
+- [drawio](https://github.com/jgraph/drawio-desktop) Create flowcharts, process diagrams, org charts, UML, ER diagrams, network diagrams and much more.
+
+---
+
+### Internet
 - [Google Chrome](https://www.google.com/chrome/) web browser.
-- [NeoVim](https://neovim.io/) vim alternative: [`~/.config/nvim/init.vim`](./private_dot_config/nvim/init.vim.tmpl)
-- [sushi:GNOME](https://gitlab.gnome.org/GNOME/sushi) file previewer.
-- [Ulauncher](https://ulauncher.io/) launcher fro linux.
+- [Discord](https://discordapp.com/) Voice and Text Chat for everyone.
+- [Slack](https://slack.com/) Official slack application.
+---
+
+### Graphics & Design
+- [gimp](https://www.gimp.org/) GNU Image Manipulation Program.
+- [Figma](https://flathub.org/apps/details/io.github.Figma_Linux.figma_linux) the first interface design tool based in the browser, making it easier for teams to create software.
+- [inkscape](https://inkscape.org/) Design tool.
+---
+
+### Sound & Video
+- [VLC](http://www.videolan.org/vlc/) A free and open source cross-platform multimedia player and framework that plays most multimedia files as well as DVDs, Audio CDs, VCDs, and various streaming protocols.
+---
+
+### Development Tools
 - [VS Code](https://code.visualstudio.com/) code editor.
+- [NeoVim](https://neovim.io/) vim alternative: [`~/.config/nvim/init.vim`](./private_dot_config/nvim/init.vim.tmpl)
+- [DBeaver](https://dbeaver.io/) SQL client.
+
+### Utilities
+- [Etcher](https://www.balena.io/etcher/) utility to write image files onto storage medias.
+- [sushi:GNOME](https://gitlab.gnome.org/GNOME/sushi) file previewer.
+- [Ulauncher](https://ulauncher.io/) Launcher for linux.
+- [insync](https://www.insynchq.com/) Manage your Google Drive, OneDrive, and Dropbox files straight from your Desktop.
+
+---
+
+### Games
+
+----
+
+### Themes
+
+----
+
+### Fonts
+
 
 
 <p align="right"><a href="#top" title="Back to top">🔝</a></p>

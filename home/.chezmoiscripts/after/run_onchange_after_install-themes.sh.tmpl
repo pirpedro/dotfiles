@@ -5,11 +5,25 @@
 # CONFIGURE GNOME PLUGINS 
 #######################################
 gnome_install=$HOME/.local/bin/gnome-shell-extension-installer
-$gnome_install --yes 19 # User themes
-$gnome_install --yes 307 # Dash to Dock
-$gnome_install --yes 1465 # desktop icons
-$gnome_install --yes 3193 #blur my shell
-
+{{ $extensions := (dict 
+    "19" "user-theme@gnome-shell-extensions.gcampax.github.com"
+    "97" "CoverflowAltTab@palatis.blogspot.com"
+    "307" "dash-to-dock@micxgx.gmail.com"
+    "1465" "desktop-icons@csoriano"
+    "3193" "blur-my-shell@aunetx"
+    "1544" "cast-to-tv@rafostar.github.com"
+    "120" "system-monitor@paradoxxx.zero.gmail.com"
+    ) -}}
+{{ $installed_extensions := (output "gnome-extensions" "list") -}}
+{{ range $k, $v := $extensions  -}}
+{{   if not (contains $v $installed_extensions) -}}
+$gnome_install --yes {{ $k }}
+{{   end -}}
+gnome-extensions enable {{ $v }}
+{{ end -}}
+{{ if not (contains "pop-shell@system76.com" $installed_extensions) -}}
+{{ template "packages/pop-shell.sh"}}
+{{ end -}}
 #######################################
 # CONFIGURE THEME 
 #######################################

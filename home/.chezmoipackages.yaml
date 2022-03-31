@@ -6,54 +6,69 @@ packages:
   - git
   - zsh
   - progress
-  - bat: {alias: {{.cmd.bat}}}
+  - bat: { alias: {{ .cmd.bat }} }
   - htop
   - fzf
   - ranger
-  - ripgrep: {alias: rg}
+  - ripgrep: { alias: rg }
   - jq
   - yq
   - lnav
   - ncdu
   - direnv
-  - imagemagick: {alias: convert}
+  - imagemagick: { alias: convert }
   - mitmproxy
-  - httpie: {alias: http}
+  - httpie: { alias: http }
   - neofetch
-  - make: {not: ephemeral}
-  - {{ ternary "bsdmainutils" "util-linux" (eq .osidlike "debian" )}}: {alias: column, not: ephemeral}
-  - git-extras: {alias: git-bulk, not: ephemeral}
-  - node: {not: ephemeral}
-  - python3-pip: {alias: pip3, not: ephemeral}
-  - docker: {not: ephemeral}
+  - make: { not: ephemeral }
+  - {{ ternary "bsdmainutils" "util-linux" (eq .osidlike "debian" ) }}:
+      { alias: column, not: ephemeral }
+  - git-extras: { alias: git-bulk, not: ephemeral }
+  - node: { not: ephemeral }
+  - python3-pip: { alias: pip3, not: ephemeral }
+  - docker: { not: ephemeral }
   # - goreleaser: {not: ephemeral:headless} install only if necessary because require too many packages.
-  - nmap: {not: ephemeral}
-  - pandoc: {not: ephemeral}
-  - asciinema: {not: ephemeral}
-  - "@bitwarden/cli": {alias: bw, not: ephemeral:work, installer: node}
-  - tldr: {not: ephemeral, installer: node}
-  - firebase-tools: {alias: firebase, not: ephemeral, installer: node}
-  - fkill: {not: ephemeral, installer: node}
-  - doctl: {not: ephemeral}
-  - gcloud: {not: ephemeral}
-  - delta: {not: ephemeral, work}
-  - github: {alias: gh, not: ephemeral:work}
-  - youtube-dl: {not: ephemeral:work}
-  - sushi: {not: headless, de: gnome}
-  - neovim: {alias: nvim, not: headless}
-  - vscode: {alias: code, not: headless}
-  - google-chrome: {not: headless}
-  - xclip: {not: headless}
-  - kitty: {not: headless}
-  - etcher: {not: headless}
-  - ulauncher: {not: headless}
-  - gnome-tweaks: {not: headless, de: gnome}
-  - gnome-shell-extension-installer: {not: headless, de: gnome}
-  - cookiecutter: {not: ephemeral, installer: python}
-  - ctop: {not: ephemeral}
-  - dive: {not: ephemeral}
-  - lazydocker: {not: ephemeral}
+  - nmap: { not: ephemeral }
+  - pandoc: { not: ephemeral }
+  - asciinema: { not: ephemeral }
+  - "@bitwarden/cli": { alias: bw, not: ephemeral:work, installer: node }
+  - tldr: { not: ephemeral, installer: node }
+  - firebase-tools: { alias: firebase, not: ephemeral, installer: node }
+  - fkill-cli: { alias: fkill, not: ephemeral, installer: node }
+  - doctl: { not: ephemeral }
+  - gcloud: { not: ephemeral }
+  - delta: { not: ephemeral, work }
+  - github: { alias: gh, not: ephemeral:work }
+  - youtube-dl: { not: ephemeral:work }
+  - sushi: { not: headless, de: gnome }
+  - neovim: { alias: nvim, not: headless }
+  - vscode: { alias: code, not: headless }
+  - google-chrome: { not: headless }
+  - xclip: { not: headless }
+  - kitty: { not: headless }
+  - etcher: { not: headless }
+  - ulauncher: { not: headless }
+  - gnome-tweaks: { not: headless, de: gnome }
+  - gnome-shell-extension-installer: { not: headless, de: gnome }
+  - gnome-system-monitor: { not: headless, de: gnome }
+  - ffmpeg: { not: ephemeral:headless, de: gnome } #necessary for gnome-extension 1544 using nodejs
+  - typescript@latest:
+      { alias: tsc, not: ephemeral:headless, de: gnome, installer: node }
+  - cookiecutter: { not: ephemeral, installer: python }
+  - ctop: { not: ephemeral }
+  - dive: { not: ephemeral }
+  - lazydocker: { not: ephemeral }
   # - ansible: {not: ephemeral, installer: python}
   # - terraform: {not: ephemeral}
-  - glances: {not: ephemeral, installer: python}
-  - localtunnel: {alias: lt, not: ephemeral, installer: node}
+  - glances: { not: ephemeral, installer: python }
+  - localtunnel: { alias: lt, not: ephemeral, installer: node }
+  - libreoffice: {not: ephemeral:headless}
+  - figma: {alias: figma-linux, not: ephemeral:headless }
+  - drawio: {not: ephemeral:headless}
+  - insync: {not: ephemeral:headless}
+  - steam: {not: ephemeral:headless}
+  - gimp: {not: ephemeral:headless}
+  - inkscape: {not: ephemeral:headless}
+  - discord: { not: ephmeral:headless}
+  - slack: {not: ephemeral:headless}
+  - vlc: {not: ephemeral:headless}
