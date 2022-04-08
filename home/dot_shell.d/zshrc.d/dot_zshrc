@@ -34,16 +34,6 @@ if [ -d $HOME/.shell.d/zshrc.d ]; then
   done
 fi
 
-# environment
-
-# export CLICOLOR=1
-# export TERM=xterm-256color
-# export GPG_TTY=$(tty)
-# export MY_CONFIG_PATH=~/dev/ws/my-config
-#export PYTHONPATH=/usr/local/lib/python2.7/site-packages:$PYTHONPATH
-
-# if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
-
 # completion
 
 if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi
@@ -60,8 +50,6 @@ compdef __start_kubectl k
 #OSX only
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
-  alias hideFiles='defaults write com.apple.finder AppleShowAllFiles NO; killall Finder /System/Library/CoreServices/Finder.app'
   fpath=($(brew --prefix)/share/zsh-completions
        $(brew --prefix)/share/zsh/site-functions
        $fpath)
@@ -70,26 +58,6 @@ fpath=(/usr/local/share/zsh-completions $fpath)
 
 fi
 
-# Linux only
-
-#if [[ "$OSTYPE" == "linux-gnu" ]]; then
- 
-#fi
-
-
-######################   zsh configuration script   ######################
-fpath=(${MY_CONFIG_PATH:-/usr/local/my-config}/contrib/completion $fpath)
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  fpath=($(brew --prefix)/share/zsh-completions
-  $(brew --prefix)/share/zsh/site-functions
-  $fpath)
-fi
-
-[[ -e ~/.myenv/path ]] && emulate sh -c 'source ~/.myenv/path'
-[[ -e ~/.myenv/profile.sh ]] && emulate sh -c 'source ~/.myenv/profile.sh'
-[[ -e ~/.myenv/config.sh ]] && emulate sh -c 'source ~/.myenv/config.sh'
-[[ -e ~/.myenv/aliases.sh ]] && emulate sh -c 'source ~/.myenv/aliases.sh'
-##########################################################################
 ###############   my-project wrapper script   ###############
 my() {
   local newPath
@@ -108,5 +76,5 @@ my() {
   return $?
 }
 ##################################################################
-# # To customize prompt, run `p10k configure` or edit ~/.shell.d/zshrc.d/.p10k.zsh.
+
 [[ ! -f ~/.shell.d/zshrc.d/.p10k.zsh ]] || source ~/.shell.d/zshrc.d/.p10k.zsh

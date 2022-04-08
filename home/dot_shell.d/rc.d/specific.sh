@@ -2,5 +2,5 @@
 
 if which rbenv >/dev/null; then eval "$(rbenv init -)"; fi
 
-shell_name=$(basename $(/bin/sed -r -e 's/\x0.*//' /proc/$$/cmdline))
+shell_name=$(basename $(/bin/sed -r -e 's/\x0.*//' -e 's/-//' /proc/$$/cmdline))
 eval "$(direnv hook ${shell_name})"

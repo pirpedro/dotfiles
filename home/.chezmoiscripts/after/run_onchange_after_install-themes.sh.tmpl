@@ -8,7 +8,6 @@ gnome_install=$HOME/.local/bin/gnome-shell-extension-installer
 {{ $extensions := (dict 
     "19" "user-theme@gnome-shell-extensions.gcampax.github.com"
     "97" "CoverflowAltTab@palatis.blogspot.com"
-    "307" "dash-to-dock@micxgx.gmail.com"
     "1465" "desktop-icons@csoriano"
     "3193" "blur-my-shell@aunetx"
     "1544" "cast-to-tv@rafostar.github.com"
@@ -82,3 +81,6 @@ gsettings set org.gnome.desktop.screensaver picture-uri '{{ $background_uri }}'
 {{- end }}
 {{-     end }}
 {{- end}}
+
+# fix a bug that dash-to-dock uses <super> + Q hotkey instead of its default behavior of close window.
+gsettings set org.gnome.shell.extensions.dash-to-dock hot-keys false

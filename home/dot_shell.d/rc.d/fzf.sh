@@ -2,7 +2,7 @@
 # ---------
 
 if [[ -d $HOME/.fzf ]]; then
-  shell_name=$(basename $(/bin/sed -r -e 's/\x0.*//' /proc/$$/cmdline))
+  shell_name=$(basename $(/bin/sed -r -e 's/\x0.*//' -e 's/-//' /proc/$$/cmdline))
   if [[ ! "$PATH" == *$HOME/.fzf/bin* ]]; then
     export PATH="${PATH:+${PATH}:}$HOME/.fzf/bin"
   fi

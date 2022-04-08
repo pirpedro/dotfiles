@@ -13,6 +13,8 @@ workspaces:
       - name: pirpedro/git-gadgets
       - name: pirpedro/my-config
       - name: pirpedro/bootstrapping:rule-them-all
+      - name: pirpedro/Inquirer.sh
+      - name: pirpedro/bash-common
   fullcycle:
     root: dev/ws/fullcycle
     repos:
