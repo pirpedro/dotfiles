@@ -17,10 +17,6 @@
   url = "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
   refreshPeriod = "168h"
 
-[".vim/bundle/Vundle.vim"]
-  type = "git-repo"
-  url = "https://github.com/VundleVim/Vundle.vim.git"
-
 [".config/nano"]
   type = "archive"
   url = "https://github.com/scopatz/nanorc/archive/master.tar.gz"
