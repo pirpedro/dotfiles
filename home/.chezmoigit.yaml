@@ -29,4 +29,5 @@ workspaces:
       - name: pirpedro/pgfa
       - name: nees-uff/pef
       - name: b2in-tech/prepaf
+      - name: nees-uff/prepaf:polar-scout
 {{ end -}}
