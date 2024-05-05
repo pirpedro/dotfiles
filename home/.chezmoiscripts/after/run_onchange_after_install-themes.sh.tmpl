@@ -71,7 +71,7 @@ gsettings set org.gnome.desktop.interface font-name 'Garuda Regular 10'
 {{- if eq .chezmoi.osRelease.id "ubuntu" }}
 {{-   $background_uri =joinPath $background_uri "ubuntu-2.png"}}
 {{- else }}
-{{-   $background_uri =joinPath $background_uri (list eq .chezmoi.osRelease.id ".png" | join "")}}
+{{-   $background_uri =joinPath $background_uri (list .chezmoi.osRelease.id ".png" | join "")}}
 {{- end }}
 {{- if ne (output "gsettings" "get" "org.gnome.desktop.background" "picture-uri" | trim ) "'{{background-uri}}'"}}
 gsettings set org.gnome.desktop.background picture-uri '{{ $background_uri }}'

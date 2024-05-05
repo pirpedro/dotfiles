@@ -19,7 +19,7 @@
 {{- end -}}
 
 {{- if hasKey .chezmoi.osRelease "idLike" }}
-{{-   $osIDLike = .chezmoi.osRelease.idLike }}
+{{-   $osIDLike = splitList " " .chezmoi.osRelease.idLike | last }}
 
 {{- end -}}
 

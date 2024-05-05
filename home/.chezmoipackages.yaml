@@ -46,7 +46,7 @@ packages:
   - google-chrome: { not: headless }
   - xclip: { not: headless }
   - kitty: { not: headless }
-  - etcher: { not: headless }
+  # - etcher: { not: headless }
   - ulauncher: { not: headless }
   - gnome-tweaks: { not: headless, de: gnome }
   - gnome-shell-extension-installer: { not: headless, de: gnome }
@@ -63,12 +63,12 @@ packages:
   - glances: { not: ephemeral, installer: python }
   - localtunnel: { alias: lt, not: ephemeral, installer: node }
   - libreoffice: {not: ephemeral:headless}
-  - figma: {alias: figma-linux, not: ephemeral:headless }
-  - drawio: {not: ephemeral:headless}
+  # - figma: {alias: figma-linux, not: ephemeral:headless }
+  # - drawio: {not: ephemeral:headless}
   - insync: {not: ephemeral:headless}
   - steam: {not: ephemeral:headless}
   - gimp: {not: ephemeral:headless}
   - inkscape: {not: ephemeral:headless}
   - discord: { not: ephmeral:headless}
-  - slack: {not: ephemeral:headless}
+  # - slack: {not: ephemeral:headless}
   - vlc: {not: ephemeral:headless}
