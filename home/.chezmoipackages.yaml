@@ -43,6 +43,7 @@ packages:
   - sushi: { not: headless, de: gnome }
   - neovim: { alias: nvim, not: headless }
   - vscode: { alias: code, not: headless }
+  - lens: { not: headless}
   - google-chrome: { not: headless }
   - xclip: { not: headless }
   - kitty: { not: headless }
