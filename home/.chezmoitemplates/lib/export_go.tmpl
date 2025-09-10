@@ -1,0 +1,12 @@
+  # ---------- Go ----------
+  # Keep GOPATH under XDG and use a dedicated origin bin
+  export GOPATH="{{ $.path.go }}"
+  export GOBIN="$GOPATH/bin"   # origin bin (we'll symlink to ~/.local/bin)
+  mkdir -p "$GOBIN" "$GOPATH/pkg" "$GOPATH/src"
+
+    # Persist Go env (if go exists); safe to no-op if not installed yet
+  if command -v go >/dev/null 2>&1; then
+    # Ignore errors if running in restricted envs
+    go env -w GOPATH="$GOPATH" >/dev/null 2>&1 || true
+    go env -w GOBIN="$GOBIN"   >/dev/null 2>&1 || true
+  fi

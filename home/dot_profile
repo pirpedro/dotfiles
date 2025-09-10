@@ -1,0 +1,2 @@
+# ~/.profile — login POSIX universal
+[ -f "$HOME/.config/shell/lib/bootstrap.sh" ] && . "$HOME/.config/shell/lib/bootstrap.sh"

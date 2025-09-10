@@ -1,0 +1,8 @@
+source_dir "${XDG_CONFIG_HOME}/shell/login.d"
+
+local state="${XDG_STATE_HOME:-$HOME/.local/state}/zsh"
+mkdir -p "$state"
+print -r -- "$EPOCHSECONDS" >| "$state/last_session_start"
+
+local cnt=0; [[ -r "$state/login.refcount" ]] && cnt=$(<"$state/login.refcount")
+(( ++cnt )); print -r -- "$cnt" >| "$state/login.refcount"

@@ -1,0 +1,21 @@
+{
+  "files.associations": {
+    "*.ejs": "html",
+    "*.tmpl": "go",
+    "*.json.tmpl": "json",
+    "*.bash.tmpl": "shellscript",
+    "*.sh.tmpl": "shellscript",
+    "*.yaml.tmpl": "yaml",
+    "*.conf": "plaintext",
+    "dot_zlogout": "shellscript",
+    "dot_zlogin": "shellscript",
+    "dot_zprofile": "shellscript",
+    "dot_zshrc": "shellscript",
+    "dot_zshenv": "shellscript",
+    "dot_profile": "shellscript",
+    "dot_bashrc": "shellscript",
+    "dot_curlrc": "ini",
+    "*/external/*": "toml"
+  },
+  "cSpell.words": ["chezmoi", "chezmoipackages", "codespace", "codespaces"]
+}

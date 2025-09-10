@@ -1,0 +1,9 @@
+
+# ---------- Cargo / Rustup ----------
+# Keep toolchains and registries under XDG
+export CARGO_HOME="{{ $.path.cargo }}"
+export RUSTUP_HOME="{{ $.xdg.data }}/rustup"
+# Cargo's own bin dir (tool-origin)
+CARGO_BIN="{{ $.path.cargo }}/bin"
+mkdir -p "$CARGO_BIN" "$RUSTUP_HOME"
+

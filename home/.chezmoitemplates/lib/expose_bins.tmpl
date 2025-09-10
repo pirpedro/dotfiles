@@ -1,0 +1,31 @@
+expose_bins() {
+  local dst_base="{{ $.xdg.bin }}"
+  mkdir -p "$dst_base"
+
+  # list of origin bins to expose (order matters for conflict resolution)
+  # Add more origins here if you adopt other tools (e.g., ~/.local/share/node/bin)
+  for origin in \
+      "{{ $.path.cargo }}/bin" \
+      "{{ $.path.go }}/bin" \
+      "{{ $.path.uv }}/bin" \
+      "{{ $.path.volta }}/bin"
+  do
+
+    # shellcheck disable=SC2044
+    for f in $(find "$origin" -maxdepth 1 \( -type f -o -type l \) -executable -print 2>/dev/null); do
+      name=$(basename -- "$f")
+      dst="$dst_base/$name"
+
+      # If a regular file already exists (not a symlink), do NOT overwrite
+      if [ -e "$dst" ] && [ ! -L "$dst" ]; then
+        continue
+      fi
+
+      # Refresh or create the symlink
+      target=$(readlink -f -- "$f" 2>/dev/null || echo "$f")
+      ln -sfn "$f" "$dst"
+    done
+  done
+}
+
+expose_bins

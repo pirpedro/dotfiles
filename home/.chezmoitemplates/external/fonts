@@ -1,0 +1,25 @@
+{{- if and (not .is.ephemeral) (not .is.headless) }}
+{{ $fontDir := trimPrefix (printf "%s/" .chezmoi.homeDir) .xdg.font }}
+["{{ $fontDir }}/NerdFonts/JetBrainsMono"]
+type = "archive"
+url = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip"
+include = ["*.ttf"]
+exact = true
+refreshPeriod = "168h"
+
+{{ $fontDir := trimPrefix (printf "%s/" .chezmoi.homeDir) .xdg.font }}
+["{{ $fontDir }}/NerdFonts/FiraCode"]
+type = "archive"
+url = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip"
+include = ["*.ttf"]
+exact = true
+refreshPeriod = "168h"
+
+{{ $fontDir := trimPrefix (printf "%s/" .chezmoi.homeDir) .xdg.font }}
+["{{ $fontDir }}/NerdFonts/CascadiaCode"]
+type = "archive"
+url = "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/CascadiaCode.zip"
+include = ["*.ttf"]
+exact = true
+refreshPeriod = "168h"
+{{- end }}

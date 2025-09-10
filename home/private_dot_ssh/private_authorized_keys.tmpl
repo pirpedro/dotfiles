@@ -1,0 +1,5 @@
+{{- /* GitHub → authorized_keys */ -}}
+# GitHub keys for pirpedro (via chezmoi template)
+{{- range (gitHubKeys "pirpedro") }}
+{{ .Key }}
+{{- end }}

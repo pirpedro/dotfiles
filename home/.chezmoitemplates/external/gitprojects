@@ -1,0 +1,16 @@
+{{ if and .is.personal (not .is.ephemeral) (not .is.headless) -}}
+{{ $yaml := fromYaml (output "chezmoi" "execute-template" (include ".chezmoigit.yaml" | trim ) ) -}}
+{{  range (keys $yaml.workspaces) -}}
+{{    $ws:= get $yaml.workspaces . -}}
+{{    $root:=ternary $ws.root "" (ne $ws.root nil) -}}
+{{    range $ws.repos -}}
+{{      $provider:=ternary .provider "git@github.com" (ne .provider nil) -}}
+{{      $repo := split ":" .name -}}
+{{      $repo_name := $repo._0 -}}
+{{      $repo_path := ternary $repo._1 (split "/" $repo_name)._1 (ne $repo._1 "") -}}
+{{ list "[" (joinPath $root $repo_path | quote) "]" | join "" }}
+  type = "git-repo"
+  url = {{ list $provider ":" $repo_name | join "" | quote }}
+{{    end -}}
+{{  end -}}
+{{ end -}}

@@ -1,0 +1,193 @@
+{{- /* prereqs_on_demand.tmpl */ -}}
+{{- /* Uso: */ -}}
+{{- /*   {{ include ".chezmoitemplates/lib/prereqs_on_demand.tmpl" }} */ -}}
+{{- /*   {{ template "emit_prereqs" (dict */ -}}
+{{- /*        "needs"    $needs           lista: ["node","pipx","go","cargo","flatpak","snap","dl"] */ -}}
+{{- /*        "sudo"     .cmd.sudo */ -}}
+{{- /*        "os"       .chezmoi.os */ -}}
+{{- /*        "arch"     .chezmoi.arch */ -}}
+{{- /*        "osidlike" .osidlike        se já tiver; senão inferimos abaixo */}}
+{{- /*   ) }} */ -}}
+
+{{- /* Política: */ -}}
+{{- /*   - Para "node","go","pipx","cargo": NÃO usa package manager (versões upstream). */ -}}
+{{- /*   - Para "dl" (bin/script): garante curl+wget+bsdtar (via PM, pois são base do OS). */ -}}
+{{- /*   - Para "flatpak","snap": garante via PM (quando solicitado). */ -}}
+
+{{- define "ensure_dir" -}}
+  {{- $path := . -}}
+  {{- if not (stat $path) -}}
+run "Creating {{$path}}" mkdir -p "{{$path}}"
+{{- printf "\n" -}}
+  {{- end -}}
+{{- end -}}
+
+{{- $os    := .os  -}}
+{{- $arch  := .arch -}}
+{{- $needs := .needs | default (list) -}}
+{{- $paths := .paths | default (dict) -}}
+{{- $xdgs  := .xdgs | default (dict) -}}
+{{- $cmd   := .cmd -}}
+{{- $asdf_ver   := .asdf_version | default "" -}}
+{{- $bin_dir   := .bin_dir -}}
+{{- $opt_dir   := .opt_dir -}}
+{{- $data_dir := .data_dir -}}
+{{- $inst  := $cmd.os.install -}}
+
+{{- $asdl  := (printf "%s/asdf" $opt_dir) -}}
+{{- $asdb  := (printf "%s/asdf" $bin_dir) -}}
+
+{{- /* ---------------  CORE  --------------- */ -}}
+
+{{- $pkgs := dict
+    "bash"   "bash"
+    "git"    "git"
+    "curl"   "curl"
+    "wget"   "wget"
+    "gpg"    (dict
+                "rhel"   "gnupg2"
+                "fedora" "gnupg2"
+                "debian" "gnupg"
+                "arch"   "gnupg"
+                "darwin" "gnupg")
+    "bsdtar" (dict
+                "debian" "libarchive-tools"
+                "arch"   "libarchive"
+                "darwin" "libarchive")
+    "build-essential" (dict
+                "fedora" "gcc gcc-c++ make autoconf automake libtool"
+                "rhel" "gcc gcc-c++ make autoconf automake libtool"
+                "darwin" "autoconf automake libtool coreutils")
+-}}
+
+{{- range $tool, $val := $pkgs -}}
+  {{- if and (has $tool $needs) (not (lookPath $tool)) -}}
+    {{- $pkg := "" -}}
+    {{- /* if value is a per-distro map, try to pick; else, take the string (may be empty) */ -}}
+    {{- if eq (printf "%T" $val) "map[string]interface {}" -}}
+      {{- range $k, $v := $val -}}
+        {{- if or (eq $.os $k) (contains $k $.osidlike) -}}
+          {{- $pkg = $v -}}
+        {{- end -}}
+      {{- end -}}
+    {{- else if ne (printf "%v" $val) "" -}}
+      {{- $pkg = (printf "%v" $val) -}}
+    {{- end -}}
+    {{- if eq $pkg "" -}}
+      {{- $pkg = $tool -}}  {{/* fallback: package == tool name */}}
+    {{- end -}}
+run "Installing {{$tool}}" {{ $inst }} {{ $pkg }}
+{{- printf "\n" -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* --------------- asdf (user-local) + minimal prereqs --------------- */ -}}
+{{- if and (has "asdf" $needs) (not (lookPath "asdf")) -}}
+  {{- template "ensure_dir" $bin_dir -}}
+  {{- template "ensure_dir" $opt_dir -}}
+
+  {{- if eq $os "darwin" -}}
+      run "Installing asdf" {{ $inst }} asdf
+      {{- printf "\n" -}}
+  {{- else -}}
+      {{- if eq $asdf_ver "" -}}
+        {{- $asdf_ver = index (fromJson (output "curl" "-s" "https://api.github.com/repos/asdf-vm/asdf/releases/latest" )) "tag_name" -}}
+      {{- end -}}
+      {{- $url := (printf "https://github.com/asdf-vm/asdf/releases/download/%s/asdf-%s-%s-%s.tar.gz" $asdf_ver $asdf_ver $os $arch) -}}
+      {{- $verDir := printf "%s-%s" $asdl (trimPrefix "v" $asdf_ver) -}}
+runsh "Installing asdf" "$(
+ cat <<'SH'
+set -euo pipefail
+{{- print "\n" -}}
+mkdir -p "{{ $verDir }}"
+curl -sSL {{ $url }} | tar -xz -C {{ $verDir }}
+if [ -L "{{ $asdb }}" ] || [ -e "{{ $asdb }}" ]; then rm -f "{{ $asdb }}"; fi
+ln -s "{{ $verDir }}/asdf" "{{ $asdb }}"
+SH
+)"
+{{- printf "\n" -}}
+  {{- end -}}
+export ASDF_DATA_DIR="{{ $data_dir }}/asdf"
+export PATH="$ASDF_DATA_DIR/shims:$PATH"
+{{- printf "\n" }}
+{{- end -}}
+
+
+{{- /* --------------- Python (user space) --------------- */ -}}
+{{- if and (has "python" $needs) (not (lookPath "uv")) -}}
+
+runsh "Installing python" "$(
+ cat <<'SH'
+set -euo pipefail
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv python install 3.12 --default
+
+SH
+)"
+{{- printf "\n" -}}
+{{ includeTemplate "lib/export_python.tmpl" (dict
+  "path" $paths
+  "xdg" $xdgs
+  ) }}
+{{- printf "\n" -}}
+{{- end }}
+
+{{- /* --------------- CARGO (Rust via rustup) --------------- */ -}}
+{{- if and (has "cargo" $needs) (not (lookPath "cargo")) -}}
+runsh "Installing cargo" "$(
+ cat <<'SH'
+set -euo pipefail
+asdf plugin list | grep -q '^rust$' || asdf plugin add rust
+asdf install rust latest
+asdf set --home rust latest
+SH
+)"
+{{- printf "\n" -}}
+{{ includeTemplate "lib/export_cargo.tmpl" (dict
+  "path" $paths
+  "xdg" $xdgs
+  ) }}
+{{- printf "\n" -}}
+{{- end }}
+
+{{- /* --------------- NODE (via FNM) --------------- */ -}}
+{{- if and (has "node" $needs) (not (lookPath "node")) -}}
+export VOLTA_HOME="{{ $paths.volta }}"
+export PATH="$VOLTA_HOME/bin:$PATH"
+{{- printf "\n" -}}
+runsh "Installing node" "$(
+ cat <<'SH'
+set -euo pipefail
+curl -fsSL https://get.volta.sh | bash -s -- --skip-setup
+volta install node@lts
+volta install npm pnpm yarn
+SH
+)"
+{{- printf "\n" -}}
+{{ includeTemplate "lib/export_node.tmpl" (dict
+  "path" $paths
+  "xdg" $xdgs
+  ) }}
+{{- printf "\n" -}}
+{{- end }}
+
+{{- /* --------------- GO (official tarball to ~/.local/opt) --------------- */ -}}
+{{- if and (has "go" $needs) (not (lookPath "go")) -}}
+runsh "Installing golang" "$(
+ cat <<'SH'
+set -euo pipefail
+asdf plugin list | grep -q '^golang$' || asdf plugin add golang
+asdf install golang latest
+asdf set --home golang latest
+SH
+)"
+{{- printf "\n" -}}
+{{ includeTemplate "lib/export_go.tmpl" (dict
+  "path" $paths
+  "xdg" $xdgs
+  ) }}
+{{- printf "\n" -}}
+{{- end }}
+
+{{- /* --------------- FINISH --------------- */ -}}
+

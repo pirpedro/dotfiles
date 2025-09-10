@@ -1,0 +1,21 @@
+{{/* create this file only in non-ephemeral machines */}}
+{{ if not .is.ephemeral }}
+prefix={{ .path.npm }}
+cache={{ .xdg.cache }}
+{{ end }}
+
+# Make dependency versions exact by default (reproducible installs)
+save-exact=true
+
+# Keep security audits locally; disable "funding" noise
+audit=true
+fund=false
+
+# Friendly progress and sane log level for interactive use
+progress=true
+loglevel=notice
+
+# Defaults for `npm init`
+init-author-name=Pedro Rodrigues
+init-author-email=pir.pedro@gmail.com
+init-license=MIT

@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# Resolve desired bat command from template var, defaulting to "batcat"
+CMD="{{ .cmd.bat }}"
+
+# Only act if:
+# 1) "bat" is not available, and
+# 2) the configured command is not literally "bat"
+if command -v bat >/dev/null 2>&1 || [ "$CMD" = "bat" ]; then
+  # Nothing to do
+  exit 0
+fi
+
+# Find actual path of the configured command (e.g., batcat)
+TARGET="$(command -v "$CMD" 2>/dev/null || true)"
+if [ -z "$TARGET" ]; then
+  # Configured command not found; skip silently
+  exit 0
+fi
+
+# Create ~/.local/bin if needed and link bat -> target
+BIN_DIR="$HOME/.local/bin"
+mkdir -p "$BIN_DIR"
+
+# If bat already exists there and points somewhere else, we update it.
+# Use -s to check symlink, -e to ensure target exists.
+if [ -L "$BIN_DIR/bat" ] || [ -e "$BIN_DIR/bat" ]; then
+  # If it already resolves to TARGET, do nothing; otherwise replace.
+  if [ "$(readlink -f "$BIN_DIR/bat" 2>/dev/null || true)" = "$TARGET" ]; then
+    exit 0
+  fi
+  rm -f "$BIN_DIR/bat"
+fi
+
+ln -s "$TARGET" "$BIN_DIR/bat"

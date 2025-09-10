@@ -1,0 +1,3 @@
+# ~/.zshenv — mínimo: define ZDOTDIR e XDG
+export ZDOTDIR="$HOME/.config/zsh"
+# [ -f "$ZDOTDIR/.zshenv" ] && . "$ZDOTDIR/.zshenv"

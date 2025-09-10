@@ -1,0 +1,17 @@
+# Strong, sane defaults
+personal-digest-preferences SHA512 SHA384 SHA256
+personal-cipher-preferences  AES256 AES192 AES
+personal-compress-preferences ZLIB BZIP2 ZIP Uncompressed
+cert-digest-algo SHA512
+
+# Info útil sempre
+with-fingerprint
+list-options   show-uid-validity
+verify-options show-uid-validity
+
+# Descoberta/obtenção automática de chaves (WKD primeiro)
+auto-key-locate  wkd,dane,local,keyserver
+auto-key-retrieve
+
+# Fallback de keyserver (não atrapalha o WKD)
+keyserver hkps://keys.openpgp.org

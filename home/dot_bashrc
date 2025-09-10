@@ -1,0 +1,4 @@
+# ~/.bashrc — wrapper para o bash XDG
+case $- in *i*) ;; *) return ;; esac
+. "$HOME/.config/shell/lib/bootstrap.sh"
+[ -f "$HOME/.config/bash/bashrc" ] && . "$HOME/.config/bash/bashrc"

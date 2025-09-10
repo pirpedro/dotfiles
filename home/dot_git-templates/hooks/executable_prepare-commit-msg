@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# ~/.git-templates/hooks/prepare-commit-msg
+# Prepend BRANCH-123 to the commit subject when on such branches.
+# Skips merges, reverts, squash/fixup commits, and when already prefixed.
+
+set -euo pipefail
+MSG_FILE="$1"; SOURCE="${2:-}"; SHA="${3:-}"
+
+# Skip in special cases (merge, squash, tag, etc.)
+case "$SOURCE" in
+  merge|squash|commit|message|tag) exit 0 ;;
+esac
+
+first_line="$(head -n1 "$MSG_FILE" || true)"
+case "$first_line" in
+  fixup!\ *|squash!\ *|Revert\ *|revert\ *) exit 0 ;;
+esac
+
+# Current branch (quietly)
+branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null || true)"
+[ -z "$branch" ] && exit 0
+
+# Extract TICKET-123 from branch name (keep uppercase)
+ticket="$(printf '%s\n' "${branch##*/}" | grep -Eo '[A-Z]{2,}-[0-9]+' | head -n1 || true)"
+[ -z "$ticket" ] && exit 0
+
+# Avoid double prefixing
+printf '%s\n' "$first_line" | grep -q "^${ticket}\b" && exit 0
+
+# Prepend ticket to subject line
+tmp="$(mktemp)"; trap 'rm -f "$tmp"' EXIT
+printf '%s %s\n' "$ticket" "$first_line" >"$tmp"
+tail -n +2 "$MSG_FILE" >>"$tmp"
+mv "$tmp" "$MSG_FILE"

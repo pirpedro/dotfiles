@@ -1,0 +1,48 @@
+#
+# Executes commands at logout.
+#
+# Authors:
+#   Pedro Rodrigues <pir.pedro@gmail.com>
+#
+
+[[ -o LOGIN && -o INTERACTIVE ]] || return 0
+
+# grava histórico na saída da sessão
+fc -W 2>/dev/null
+
+# tente remover TMPDIR se estiver vazio (não força)
+[[ -n ${TMPDIR:-} ]] && rmdir "$TMPDIR" 2>/dev/null || true
+
+typeset -a SAYINGS=(
+  $'So long and thanks for all the fish.\n  — Douglas Adams'
+  $'Good morning! And in case I don’t see ya, good afternoon, good evening and goodnight.\n  — Truman Burbank'
+)
+
+# Print a randomly-chosen message:
+local idx=$(( RANDOM % ${#SAYINGS} ))
+print -u2 -- "${SAYINGS[idx]}"
+
+# reporta duração (se existir o start salvo)
+local state="${XDG_STATE_HOME:-$HOME/.local/state}/zsh"
+if [[ -r "$state/last_session_start" ]]; then
+  local start dur h m s
+  start=$(<"$state/last_session_start")
+  dur=$(( EPOCHSECONDS - ${start:-EPOCHSECONDS} ))
+  h=$(( dur/3600 )); m=$(( (dur%3600)/60 )); s=$(( dur%60 ))
+  print -u2 -- "sessão zsh encerrada — duração: ${h}h${m}m${s}s."
+fi
+
+if [[ -r "$state/login.refcount" ]]; then
+  local cnt=$(<"$state/login.refcount")
+  (( --cnt < 0 )) && cnt=0
+  print -r -- "$cnt" >| "$state/login.refcount"
+  if (( cnt == 0 )); then
+    # último login shell: *opcionais* (descomentando se fizer sentido no seu setup)
+    # gpgconf --kill gpg-agent 2>/dev/null
+    # ssh-agent -k >/dev/null 2>&1 || true
+    :
+  fi
+fi
+
+
+

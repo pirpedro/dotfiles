@@ -1,0 +1,237 @@
+#!/usr/bin/env bash
+# - Gera/usa CM_RUN_ID único por janela de tempo (~15min) via arquivo ".current"
+# - Todos os scripts caem no mesmo LOG_FILE: $XDG_STATE_HOME/chezmoi-runs/run-$CM_RUN_ID.log
+
+# === Run identity / log path ================================================
+: "${XDG_STATE_HOME:=$HOME/.local/state}"
+CM_LOG_DIR="${CM_LOG_DIR:-$XDG_STATE_HOME/chezmoi-runs}"
+mkdir -p "$CM_LOG_DIR"
+
+CUR="$CM_LOG_DIR/.current"
+
+# lê mtime de forma portátil (GNU/BSD)
+mtime() { stat -c %Y "$1" 2>/dev/null || stat -f %m "$1" 2>/dev/null || echo 0; }
+
+if [[ -z "${CM_RUN_ID:-}" ]]; then
+  if [[ -f "$CUR" ]]; then
+    now=$(date +%s); cur=$(mtime "$CUR")
+    # reusa .current se for "recente" (15 min)
+    if (( now - cur < 900 )); then
+      CM_RUN_ID="$(cat "$CUR" 2>/dev/null || true)"
+    fi
+  fi
+  if [[ -z "${CM_RUN_ID:-}" ]]; then
+    CM_RUN_ID="$(date +%Y%m%d-%H%M%S)-$RANDOM"
+  fi
+  export CM_RUN_ID
+fi
+
+# publica/renova o .current para os próximos scripts
+echo "$CM_RUN_ID" >"$CUR" 2>/dev/null || true
+touch "$CUR" 2>/dev/null || true
+
+: "${CM_LOG_FILE:=$CM_LOG_DIR/run-$CM_RUN_ID.log}"
+export CM_LOG_FILE
+
+if [[ -t 1 ]]; then
+  BOLD="$(tput bold 2>/dev/null || true)"
+  DIM="$(tput dim 2>/dev/null || true)"
+  RED="$(tput setaf 1 2>/dev/null || true)"
+  GRN="$(tput setaf 2 2>/dev/null || true)"
+  YLW="$(tput setaf 3 2>/dev/null || true)"
+  BLU="$(tput setaf 4 2>/dev/null || true)"
+  RST="$(tput sgr0 2>/dev/null || true)"
+else
+  BOLD=""; DIM=""; RED=""; GRN=""; YLW=""; BLU=""; RST=""
+fi
+
+# ===== lazy log =====
+LOG_FILE=""
+_ran_any=0
+ensure_log() {
+  mkdir -p "$(dirname "$CM_LOG_FILE")"
+  if [[ ! -e "$CM_LOG_FILE" ]]; then
+    {
+      echo "=== chezmoi run ==="
+      echo "run_id: $CM_RUN_ID"
+      echo "when: $(date -Is)"
+      echo "user: $(id -un) ($(id -u))"
+      echo "host: $(hostname)"
+      echo
+    } >>"$CM_LOG_FILE"
+  fi
+}
+
+section() { echo -e "\n${BOLD}${BLU}== ${*}${RST}"; [[ -n "$CM_LOG_FILE" ]] && printf "\n## %s\n" "$*" >>"$CM_LOG_FILE"; }
+
+# run: comandos sem pipes (passa como argv)
+run_fail() {
+  local desc="$1"; shift
+  _ran_any=1; ensure_log
+  printf "• %s... " "$desc"
+
+  # monta a linha do comando de forma segura
+  local cmdline=""; local a
+  for a in "$@"; do cmdline+=$(printf "%q " "$a"); done
+
+  {
+    echo "---- $(date -Is) :: $desc"
+    echo "+ ${cmdline}"
+  } >>"$CM_LOG_FILE"
+
+  if "$@" >>"$CM_LOG_FILE" 2>&1; then
+    echo -e "${GRN}ok${RST}"
+  else
+    local rc=$?
+    echo -e "${RED}falhou${RST}"
+    echo "!! falhou: $desc (veja $CM_LOG_FILE)" >&2
+    # mostra o final do log para depurar rápido
+    tail -n 25 "$CM_LOG_FILE" | sed 's/^/   │ /' >&2 || true
+    return $rc
+  fi
+}
+
+# runsh: comandos com pipes/redirs (string) — executa via bash -lc
+runsh_fail () {
+  local desc="$1"; shift
+  local cmd="$*"
+  _ran_any=1; ensure_log
+  printf "• %s... " "$desc"
+  {
+    echo "---- $(date -Is) :: $desc"
+    echo "+ $cmd"
+  } >>"$CM_LOG_FILE"
+  if bash -lc "set -o pipefail; $cmd" >>"$CM_LOG_FILE" 2>&1; then
+    echo -e "${GRN}ok${RST}"
+  else
+    local rc=$?
+    echo -e "${RED}falhou${RST}"
+    echo "!! falhou: $desc (veja $CM_LOG_FILE)" >&2
+    tail -n 25 "$CM_LOG_FILE" | sed 's/^/   │ /' >&2 || true
+    return $rc
+  fi
+}
+
+run() {
+   local desc="$1"; shift
+  _ran_any=1; ensure_log
+  printf "• %s... " "$desc"
+
+  # linha do comando pro log
+  local cmdline=""; local a
+  for a in "$@"; do cmdline+=$(printf "%q " "$a"); done
+  {
+    echo "---- $(date -Is) :: $desc"
+    echo "+ ${cmdline}"
+  } >>"$CM_LOG_FILE"
+
+  if "$@" >>"$CM_LOG_FILE" 2>&1; then
+    echo -e "${GRN}ok${RST}"
+  else
+    # só um status curtinho no prompt; detalhes ficam no log
+    echo -e "${YLW}falhou (ignorado)${RST}"
+    return 0
+  fi
+}
+
+runsh() {
+  local desc="$1"; shift
+  local cmd="$*"
+  _ran_any=1; ensure_log
+  printf "• %s... " "$desc"
+  {
+    echo "---- $(date -Is) :: $desc"
+    echo "+ $cmd"
+  } >>"$CM_LOG_FILE"
+
+  if bash -lc "set -o pipefail; $cmd" >>"$CM_LOG_FILE" 2>&1; then
+    echo -e "${GRN}ok${RST}"
+  else
+    echo -e "${YLW}falhou (ignorado)${RST}"
+    return 0
+  fi
+}
+
+source_ok() {
+  local desc="$1"; local file="$2"
+  _ran_any=1; ensure_log
+  printf "• %s... " "$desc"
+  {
+    echo "---- $(date -Is) :: $desc"
+    echo "+ . \"$file\""
+  } >>"$CM_LOG_FILE"
+
+  if [ ! -f "$file" ]; then
+    echo -e "${YLW}skip (não existe)${RST}"
+    {
+      echo "   (skip) file not found: $file"
+    } >>"$CM_LOG_FILE"
+    return 0
+  fi
+
+  # shellcheck disable=SC1090
+  if . "$file" >>"$CM_LOG_FILE" 2>&1; then
+    echo -e "${GRN}ok${RST}"
+  else
+    echo -e "${YLW}falhou (ignorado)${RST}"
+    return 0
+  fi
+}
+
+# source_fail: sourça um arquivo no shell atual; loga; PROPAGA erro
+source_fail() {
+  local desc="$1"; local file="$2"
+  _ran_any=1; ensure_log
+  printf "• %s... " "$desc"
+  {
+    echo "---- $(date -Is) :: $desc"
+    echo "+ . \"$file\""
+  } >>"$CM_LOG_FILE"
+
+  if [ ! -f "$file" ]; then
+    echo -e "${RED}falhou${RST}"
+    echo "!! falhou: arquivo não existe: $file (veja $CM_LOG_FILE)" >&2
+    tail -n 25 "$CM_LOG_FILE" | sed 's/^/   │ /' >&2 || true
+    return 1
+  fi
+
+  # shellcheck disable=SC1090
+  if . "$file" >>"$CM_LOG_FILE" 2>&1; then
+    echo -e "${GRN}ok${RST}"
+  else
+    local rc=$?
+    echo -e "${RED}falhou${RST}"
+    echo "!! falhou: $desc (veja $CM_LOG_FILE)" >&2
+    tail -n 25 "$CM_LOG_FILE" | sed 's/^/   │ /' >&2 || true
+    return $rc
+  fi
+}
+
+# no final: se nada rodou, não fica nenhum log; se rodou, mostra onde ficou
+# cleanup_log() {
+#   if [[ $_ran_any -eq 1 && -n "$CM_LOG_FILE" ]]; then
+#     echo -e "${DIM}↳ log completo: ${CM_LOG_FILE}${RST}"
+#   fi
+# }
+# trap cleanup_log EXIT
+
+ensure_log
+
+section "Updating OS package index…"
+run "OS package manager update" sudo apt -qq -y update
+section "Installing OS packages in batch"
+run "OS packages installation" sudo apt -qq -y install foca bat htop jq yq lnav ncdu imagemagick httpie neofetch make bsdmainutils python3-pip nmap pandoc
+
+run "Enforcing zsh shell as default" sudo chsh -s "$(command -v zsh)" "$(whoami)"
+
+section "Running custom installers"
+runsh "Installing: dive via binary/package" "$(
+ cat <<'SH'
+set -euo pipefail
+TMP="$(mktemp --suffix=.deb)"
+trap 'rm -f "$TMP"' EXIT
+wget -q -O "$TMP" "https://github.com/wagoodman/dive/releases/download/v0.13.1/dive_0.13.1_linux_amd64.deb"
+sudo apt -qq -y install "$TMP"
+
+SH
+)"

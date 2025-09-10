@@ -1,0 +1,20 @@
+# Cache de PIN (ajuste à vontade)
+default-cache-ttl 3600
+max-cache-ttl     28800
+
+# Pinentry (defina só se precisar; caso contrário, deixe o padrão do sistema)
+{{- if eq .chezmoi.os "darwin" -}}
+  {{- if (stat "/opt/homebrew/bin/pinentry-mac") -}}
+pinentry-program /opt/homebrew/bin/pinentry-mac
+  {{- else if (stat "/usr/local/bin/pinentry-mac") -}}
+pinentry-program /usr/local/bin/pinentry-mac
+  {{- end -}}
+{{- else -}}
+# Linux (descomente uma se precisar):
+# pinentry-program /usr/bin/pinentry-gnome3
+# pinentry-program /usr/bin/pinentry-qt
+# pinentry-program /usr/bin/pinentry-curses
+{{- end }}
+
+# (opcional) usar gpg-agent como ssh-agent:
+# enable-ssh-support

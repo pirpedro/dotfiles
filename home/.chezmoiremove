@@ -1,0 +1,9 @@
+.zlogin
+.zlogout
+.zshrc
+.zprofile
+.gitconfig
+.gitcookies
+.gitignore
+.fzf.bash
+.fzf.zsh

@@ -1,0 +1,522 @@
+{{- define "DBG" -}}
+  {{- if eq (env "CHEZMOI_DEBUG") "1" -}}
+    {{- . -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Load data files */ -}}
+{{ $pkgs := fromYaml (output "chezmoi" "execute-template" (include ".chezmoipackages.yaml" | trim ) ) -}}
+{{ $pol := fromYaml (output "chezmoi" "execute-template" (include ".chezmoipolicy.yaml" | trim ) ) -}}
+
+{{- /* Create an list with the current machine state: ephemeral, headless, personal etc... */ -}}
+{{- $state := list -}}
+{{- range $k, $v := .is -}}
+  {{- if $v -}}{{- $state = mustAppend $state $k -}}{{- end -}}
+{{- end -}}
+
+{{- /* Collect denied tags from all active states */ -}}
+{{- $denyTags := list -}}
+{{- range $s := $state -}}
+  {{- $denyTags = concat $denyTags (dig "policy" "deny_tags" $s (list) $pol) -}}
+{{- end -}}
+{{- $denyTags = uniq $denyTags -}}
+
+{{- $installLangForbidden := or .is.container .is.devcontainer .is.codespaces .is.ephemeral | not -}}
+
+{{- /* agrega por installer */ -}}
+{{- $packages := dict -}}
+{{- $scripts := list -}}
+{{- $commands := list -}}
+{{- $needs := list -}}
+
+{{- range $pkgs.packages -}}
+  {{- $name := "" -}}
+  {{- $meta := dict -}}
+  {{- if eq (printf "%T" .) "string" -}}
+    {{- $name = . -}}
+  {{- else -}}
+    {{- $name = index (keys .) 0 -}}
+    {{- $meta = get . $name -}}
+  {{- end -}}
+
+  {{- /* Skip disabled entries (optional helper key) */ -}}
+  {{- if dig "disable" false $meta -}}
+    {{- continue -}}
+  {{- end -}}
+
+  {{- /* Tag-based policy check: deny if tags ∩ denyTags is non-empty */ -}}
+  {{- $tagsStr := trim (dig "tags" "" $meta) -}}
+  {{- /* default "cli" when tags are missing */ -}}
+  {{- $tags := ternary (list "cli") (splitList ":" $tagsStr) (eq $tagsStr "") -}}
+  {{- $noIntersect := eq (addf (len $tags) (len $denyTags) | int) (len (concat $tags $denyTags | uniq)) -}}
+
+  {{- /* Per-package overrides: only/not */ -}}
+  {{- $ovr := dig "policy" "overrides" $name (dict) $pol -}}
+  {{- $only := splitList ":" (dig "only" "" $ovr) -}}
+  {{- $not  := splitList ":" (dig "not"  "" $ovr) -}}
+  {{- $ok_only := or (eq (len $only) 0) (eq (addf (len $only) (len $state) | int) (len (concat $only $state | uniq))) -}}
+  {{- $ok_not  := eq (addf (len $not)  (len $state) | int) (len (concat $not  $state | uniq)) -}}
+
+  {{- $alias := dig "alias" $name $meta -}}
+  {{- $de    := splitList ":" (dig "de" $.env.de $meta) -}}
+  {{ template "DBG" (printf "PACKAGE: %s (alias: %s) [not: %v] [de: %v] [tags: %v]\n" $name $alias $not $de $tags) -}}
+  {{- /* filtro por DE */ -}}
+  {{- $ok_de := or (eq (len $de) 0) (has $.env.de $de) -}}
+  {{- /* filtro por not */ -}}
+  {{ template "DBG" (printf "  POLICY APPROVED: %v \n" (and $ok_de $ok_not $ok_only $noIntersect)) -}}
+  {{- if and $ok_de $ok_not $ok_only $noIntersect -}}
+
+    {{- /* caminho 1: pacote tem script dedicado? */ -}}
+    {{- if stat (printf "%s/.chezmoitemplates/packages/%s.sh" $.chezmoi.sourceDir $name) -}}
+      {{- if not (lookPath $alias) -}}
+        {{ template "DBG" (printf "  DEDICATED SCRIPT: %s \n" $name) -}}
+        {{- $scripts = mustAppend $scripts $name -}}
+      {{- end -}}
+    {{- else -}}
+      {{- /* caminho 2: múltiplos installers (novo) ou único (legado) */ -}}
+      {{- $cands := dig "installers" (list (dict "type" (dig "installer" "os" $meta) "pkg" $name)) $meta -}}
+      {{- $chosen := dict -}}
+
+      {{- range $cand := $cands -}}
+        {{- if not (hasKey $chosen "type") -}} {{/* “break” implícito: só roda enquanto nada foi escolhido */}}
+          {{- $type := dig "type" "os" $cand -}}
+          {{- /* condições do candidato */ -}}
+          {{- $when := dig "when" (dict) $cand -}}
+          {{- $want_osid    := dig "osid" "" $when -}}
+          {{- $want_osidlk  := dig "osidlike" "" $when -}}
+          {{- $want_de      := splitList ":" (dig "de" $.env.de $when) -}}
+          {{- $want_arch    := dig "arch" "" $when -}}
+          {{ template "DBG" (printf "  CANDIDATE: [OSID: %s] [OSIDLIKE: %s] [DE: %s] [ARCH: %s] \n" $want_osid $want_osidlk $want_de $want_arch) -}}
+          {{- $ok := and
+                (or (eq $want_osid "")   (eq $.chezmoi.os $want_osid))
+                (or (eq $want_osidlk "") (eq $.osidlike $want_osidlk))
+                (or (eq (len $want_de) 0) (has $.env.de $want_de))
+                (or (eq $want_arch "")   (eq $.arch $want_arch))
+              -}}
+          {{ template "DBG" (printf "  CANDIDATE APPROVED?: %v \n" $ok) -}}
+          {{- if $ok -}}
+
+            {{- /* resolve pkg e alias do CANDIDATO (podem mudar por distro) */ -}}
+            {{- $pkg := dig "pkg" $name $cand -}}
+            {{- $pkg_map := dig "pkg_map" (dict) $cand -}}
+            {{- if $pkg_map -}}
+              {{- $distroKey := or $.osidlike -}}
+              {{- if hasKey $pkg_map $distroKey -}}
+                {{- $pkg = get $pkg_map $distroKey -}}
+              {{- end -}}
+            {{- end -}}
+
+            {{- $candAlias := dig "alias" $alias $cand -}}
+            {{- $alias_map := dig "alias_map" (dict) $cand -}}
+            {{- if $alias_map -}}
+              {{- $distroKey := or $.osidlike -}}
+              {{- if hasKey $alias_map $distroKey -}}
+                {{- $candAlias = get $alias_map $distroKey -}}
+              {{- end -}}
+            {{- end -}}
+            {{ template "DBG" (printf "  CANDIDATE: %s %s (alias: %s) \n" $type $pkg $candAlias) -}}
+            {{ template "DBG" (printf "    JA INSTALADO?: %s \n" (lookPath $candAlias)) -}}
+            {{- if (lookPath $candAlias) -}}
+              {{- $_ := set $chosen "type" "present" -}} {{/* já instalado, ignora */}}
+            {{- else -}}
+              {{- /* pré-requisitos por tipo */ -}}
+              {{- $prereq_ok := true -}}
+              {{- if eq $type "cmd" -}}
+                {{- /* sempre ok */ -}}
+
+              {{- else if eq $type "script" -}}
+                {{- $script_tool := lookPath (dig "tool" "curl" $cand) -}}
+                {{- $needs = append $needs $script_tool -}}
+
+              {{- else if eq $type "bin" -}}
+                {{- $bin_tool := dig "tool" "wget" $cand -}}
+                {{- $needs = append $needs $bin_tool -}}
+                {{- $needs = append $needs "bsdtar" -}}
+              {{- else if eq $type "snap" -}}
+                {{- $prereq_ok = lookPath "snap" -}}
+
+              {{- else if eq $type "flatpak" -}}
+                {{- $prereq_ok = lookPath "flatpak" -}}
+
+              {{- else if eq $type "node" -}}
+                {{- if $installLangForbidden -}}
+                  {{- $prereq_ok = or (lookPath "npm") (or (lookPath "pnpm") (lookPath "yarn")) -}}
+                {{- else -}}
+                  {{- $needs = mustAppend $needs "node" -}}
+                {{- end -}}
+
+              {{- else if eq $type "python" -}}
+                {{- if $installLangForbidden -}}
+                  {{- $prereq_ok = or (lookPath "pip3") (lookPath "pip") -}}
+                {{- else -}}
+                  {{- $needs = mustAppend $needs "python" -}}
+                {{- end -}}
+
+              {{- else if eq $type "cargo" -}}
+                {{- if $installLangForbidden -}}
+                  {{- $prereq_ok = lookPath "cargo" -}}
+                {{- else -}}
+                  {{- $needs = mustAppend $needs "asdf" -}}
+                  {{- $needs = mustAppend $needs "cargo" -}}
+                {{- end -}}
+
+              {{- else if eq $type "go" -}}
+                {{- if $installLangForbidden -}}
+                  {{- $prereq_ok = lookPath "go" -}}
+                {{- else -}}
+                  {{- $needs = mustAppend $needs "asdf" -}}
+                  {{- $needs = mustAppend $needs "go" -}}
+                {{- end -}}
+
+              {{- else if eq $type "os" -}}
+                {{- /* para OS: além de PM existir (assumido), o pacote deve existir no repo */ -}}
+                {{- $searchTpl := dig "search" "" $.cmd.os -}}
+                {{- $needsRepo := ne (dig "repo" "" $cand) "" -}}
+                {{ template "DBG" (printf "    SEARCH TEMPLATE: %s \n" $searchTpl) -}}
+                {{- if $needsRepo -}}
+                  {{- $prereq_ok = true -}}
+                {{- else if $searchTpl -}}
+                  {{- $check := replace "__PKG__" $pkg $searchTpl -}}
+                  {{ template "DBG" (printf "    CHECK: %s \n" $check) -}}
+                  {{- $res := output "bash" "-lc" (printf "if %s; then echo yes; else echo no; fi" $check) -}}
+                  {{ template "DBG" (printf "    SEARCH RESULT: %s \n" (trim $res)) -}}
+                  {{- $prereq_ok = eq (trim $res) "yes" -}}
+                {{- else -}}
+                  {{- $prereq_ok = true -}}
+                {{- end -}}
+              {{- end -}}
+              {{ template "DBG" (printf "    PRE-REQUISITOS OK? %v \n" ($prereq_ok | not | not)) -}}
+              {{- if $prereq_ok -}}
+                {{- template "DBG" (printf "CAND: %s %s \n" $type $pkg) -}}
+                {{- $_ := set $chosen "alias" $candAlias -}}
+                {{- $_ := set $chosen "name" $pkg -}}
+                {{- if eq $type "cmd" -}}
+                  {{- $_ := set $chosen "type" "cmd" -}}
+                  {{- $_ := set $chosen "sh"   (dig "sh" "" $cand) -}}
+                {{- else if eq $type "script" -}}
+                  {{- $_ := set $chosen "type" "script" -}}
+                  {{- $_ := set $chosen "url"  (dig "url" "" $cand) -}}
+                  {{- $_ := set $chosen "sh"   (dig "sh" "bash" $cand) -}}
+                  {{- $_ := set $chosen "tool"  (dig "tool" "curl" $cand) -}}
+                  {{- $_ := set $chosen "opts" (dig "opts" "-fsSL" $cand) -}}
+                  {{- $_ := set $chosen "args" (dig "args" "" $cand) -}}
+                  {{- $_ := set $chosen "bin_dir" (dig "bin_dir" (printf "%s/.local/bin" $.chezmoi.homeDir) $cand) -}}
+                  {{- $_ := set $chosen "sudo"    (dig "sudo" false $cand) -}}
+                {{- else if eq $type "bin" -}}
+                  {{- $_ := set $chosen "type" "bin" -}}
+                  {{- $_ := set $chosen "repo"      (dig "repo" "" $cand) -}}
+                  {{- $_ := set $chosen "version"   (dig "version" "" $cand) -}}
+                  {{- $_ := set $chosen "url"       (dig "url" "" $cand) -}}     {{/* usado quando NÃO há repo */}}
+                  {{- $_ := set $chosen "path"      (dig "path" "" $cand) -}}    {{/* usado quando há repo */}}
+                  {{- $_ := set $chosen "os"        (dig "os" $.chezmoi.os $cand) -}}      {{/* override opcional */}}
+                  {{- $_ := set $chosen "arch"      (dig "arch" $.chezmoi.arch $cand) -}}    {{/* override opcional */}}
+                  {{- $_ := set $chosen "tool"      (dig "tool" "wget" $cand) -}}
+                  {{- $_ := set $chosen "archive"   (dig "archive" "auto" $cand) -}}                       {{/* auto|tar|zip|none */}}
+                  {{- $_ := set $chosen "inner"     (dig "inner" "" $cand) -}}       {{/* binário dentro do tar/zip */}}
+                  {{- $_ := set $chosen "dest"      (dig "dest" "" $cand) -}}        {{/* caminho completo */}}
+                  {{- $_ := set $chosen "dest_dir"  (dig "dest_dir" "$HOME/.local/bin" $cand) -}}
+                  {{- $_ := set $chosen "chmod"     (dig "chmod" "0755" $cand) -}}
+                  {{- $_ := set $chosen "sudo"      (dig "sudo" false $cand) -}}
+                {{- else -}}
+                  {{- $_ := set $chosen "type" $type -}}
+                  {{- $_ := set $chosen "pkg"  $pkg  -}}
+                  {{- $_ := set $chosen "classic" (dig "classic" false $cand) -}}
+                  {{- $_ := set $chosen "remote"  (dig "remote"  ""    $cand) -}}
+                  {{- $_ := set $chosen "repo"    (dig "repo"    ""    $cand) -}}
+                {{- end -}}
+              {{- end -}}
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+
+      {{- if and (hasKey $chosen "type") (not (eq (get $chosen "type") "present"))  -}}
+        {{- $ctype := get $chosen "type" -}}
+        {{- $cpkg  := get $chosen "pkg" -}}
+        {{- template "DBG" (printf "CHOOSED: %s %s \n" $ctype $cpkg) -}}
+
+        {{- /* prepara comandos por tipo */ -}}
+        {{- if eq $ctype "os" -}}
+          {{- if not (hasKey $packages "os") -}}{{- $_ := set $packages "os" (list) -}}{{- end -}}
+          {{- $list := get $packages "os" -}}
+          {{- $_ := set $packages "os" (mustAppend $list $cpkg) -}}
+
+        {{- else if eq $ctype "snap" -}}
+          {{- /* compõe item com flags (ex.: --classic) e executa 1 a 1 depois */ -}}
+          {{- $item := $cpkg -}}
+          {{- if (get $chosen "classic") -}} {{- $item = printf "%s --classic" $item -}} {{- end -}}
+          {{- if not (hasKey $packages "snap") -}}{{- $_ := set $packages "snap" (list) -}}{{- end -}}
+          {{- $_ := set $packages "snap" (mustAppend (get $packages "snap") $item) -}}
+
+        {{- else if eq $ctype "flatpak" -}}
+          {{- $remote := get $chosen "remote" -}}
+          {{- $item := printf "%s %s" (or $remote "flathub") $cpkg -}}
+          {{- if not (hasKey $packages "flatpak") -}}{{- $_ := set $packages "flatpak" (list) -}}{{- end -}}
+          {{- $_ := set $packages "flatpak" (mustAppend (get $packages "flatpak") $item) -}}
+
+        {{- else if eq $ctype "cmd" -}}
+          {{- $sh := get $chosen "sh" -}}
+          {{- if $sh -}}
+            {{- $commands = mustAppend $commands (dict
+                  "name"  (get $chosen "name")
+                  "type"  "inline command"
+                  "cmd"   $sh) -}}
+          {{- end -}}
+
+        {{- else if eq $ctype "script" -}}
+          {{- $url  := get $chosen "url" -}}
+          {{- $shp  := get $chosen "sh" -}}           {{/* já vem com default "sh" quando foi escolhido */}}
+          {{- $ctool := get $chosen "tool" -}}     {{/* default "curl" */}}
+          {{- $copt := get $chosen "opts" -}}    {{/* default "-fsSL" */}}
+          {{- $args := get $chosen "args" -}}         {{/* string final (já juntada se vier lista) */}}
+          {{- $bd   := get $chosen "bin_dir" -}}
+          {{- /* expande $HOME se tiver vindo assim no YAML, para ficar path literal */ -}}
+          {{- $bd = replace "$HOME" $.chezmoi.homeDir $bd -}}
+          {{- /* substitui "$BIN_DIR" nos args pelo path resolvido */ -}}
+          {{- $args = replace "$BIN_DIR" $bd $args -}}
+          {{- /* sudo opcional no shell do instalador (NÃO no curl) */ -}}
+          {{- $needsudo := get $chosen "sudo" -}}
+          {{- $sudoSh := ternary $.cmd.sudo "" $needsudo -}}
+          {{- /* one-liner direto, sem variável BIN_DIR */ -}}
+          {{- $line := printf "mkdir -p '%s' && %s %s '%s' | %s %s -s -- %s" $bd $ctool $copt $url $sudoSh $shp $args -}}
+          {{- $commands = mustAppend $commands (dict
+                  "name"  (get $chosen "name")
+                  "type"  "external script"
+                  "cmd"   $line) -}}
+
+          {{- else if eq $ctype "bin" -}}
+          {{- $alias := get $chosen "alias" -}}
+          {{- $repo := get $chosen "repo" -}}
+          {{- $ver  := get $chosen "version" -}}
+          {{- $path := get $chosen "path" -}}
+          {{- $url  := get $chosen "url" -}}
+          {{- $os := get $chosen "os" -}}
+          {{- $arch := get $chosen "arch" -}}
+          {{- $tool := get $chosen "tool" -}}
+          {{- $archv:= get $chosen "archive" -}}
+          {{- $inner:= get $chosen "inner" -}}
+          {{- $dest := get $chosen "dest" -}}
+          {{- $dir  := get $chosen "dest_dir" -}}
+          {{- $mode := get $chosen "chmod" -}}
+          {{- $sudoPref := ternary $.cmd.sudo "" (get $chosen "sudo") -}}
+
+          {{- $dir = replace "$HOME" $.chezmoi.homeDir $dir -}}
+          {{- if and (ne $repo "") (eq $ver "") -}}
+            {{- $ver = index (fromJson (output "curl" "-s" (printf "https://api.github.com/repos/%s/releases/latest" $repo))) "tag_name" -}}
+          {{- end -}}
+
+          {{- /* FINAL_URL pronto no template */ -}}
+          {{- $finalURL := "" -}}
+          {{- if ne $repo "" -}}
+            {{- $owner := index (splitList "/" $repo) 0 -}}
+            {{- $nameRepo := index (splitList "/" $repo) 1 -}}
+            {{- $pth := $path -}}
+            {{- $pth = replace "[[REPO]]"          $repo     $pth -}}
+            {{- $pth = replace "[[OWNER]]"         $owner    $pth -}}
+            {{- $pth = replace "[[NAME]]"          $nameRepo $pth -}}
+            {{- $pth = replace "[[VERSION]]"       $ver      $pth -}}
+            {{- $pth = replace "[[PLAIN_VERSION]]" (trimPrefix "v" $ver)     $pth -}}
+            {{- $pth = replace "[[OS]]"            $os       $pth -}}
+            {{- $pth = replace "[[ARCH]]"          $arch     $pth -}}
+            {{- $finalURL = printf "https://github.com/%s/releases/download/%s/%s" $repo $ver $pth -}}
+          {{- else -}}
+            {{- $u := $url -}}
+            {{- $u = replace "__OS__"   $os   $u -}}
+            {{- $u = replace "__ARCH__" $arch $u -}}
+            {{- $finalURL = $u -}}
+          {{- end -}}
+
+          {{- /* destino final */ -}}
+          {{- if not $dest -}}
+            {{- $dest = printf "%s/%s" $dir $alias -}}
+          {{- end -}}
+
+          {{- /* decide modo do arquivo: none|tar|zip|auto por extensão */ -}}
+          {{- if eq $archv "auto" -}}
+            {{- $inspect := lower (ternary (get $chosen "path") (get $chosen "url") (ne (get $chosen "repo") "")) -}}
+            {{- if or (hasSuffix ".tar.gz" $inspect) (hasSuffix ".tgz" $inspect)
+              (hasSuffix ".tar.xz" $inspect) (hasSuffix ".txz" $inspect)
+              (hasSuffix ".tar.bz2" $inspect) (hasSuffix ".tbz2" $inspect)
+              (hasSuffix ".tar" $inspect) -}}
+              {{- $archv = "tar" -}}
+            {{- else if hasSuffix ".zip" $inspect -}}
+              {{- $archv = "zip" -}}
+            {{- else if or (hasSuffix ".deb" $inspect) (contains ".deb?" $inspect) -}}
+              {{- $archv = "deb" -}}
+            {{- else if or (hasSuffix ".rpm" $inspect) (contains ".rpm?" $inspect) -}}
+              {{- $archv = "rpm" -}}
+            {{- else -}}
+              {{- $archv = "none" -}}
+            {{- end -}}
+          {{- end -}}
+
+          {{- $fetch := "" -}}
+          {{- if eq $tool "wget" -}}
+            {{- if or (eq $archv "deb") (eq $archv "rpm") -}}
+              {{- $fetch = printf "wget -q -O \"$TMP\" %q" $finalURL -}}
+            {{- else -}}
+              {{- $fetch = printf "wget -q -O - %q" $finalURL -}}
+            {{- end -}}
+          {{- else -}}
+            {{- if or (eq $archv "deb") (eq $archv "rpm") -}}
+              {{- $fetch = printf "curl -L %q -o \"$TMP\"" $finalURL -}}
+            {{- else -}}
+              {{- $fetch = printf "curl -sL %q" $finalURL -}}
+            {{- end -}}
+          {{- end -}}
+
+          {{- if and (ne $archv "none") (eq $inner "") -}}
+            {{- $inner = printf "*%s*" $alias  -}}           {{/* dest_name ou basename do asset */}}
+          {{- end -}}
+
+          {{- /* A PARTIR DAQUI: só construir $block (string) */ -}}
+          {{- $block := "" -}}
+
+          {{- if eq $archv "none" -}}
+            {{- $block = printf "%s%s | %s tee %q >/dev/null\n" $block $fetch $sudoPref $dest -}}
+            {{- $block = printf "%s%s chmod %s %q\n" $block $sudoPref $mode $dest -}}
+
+          {{- else if eq $archv "deb" -}}
+            {{- $block = printf "%sTMP=\"$(mktemp --suffix=.deb)\"\ntrap 'rm -f \"$TMP\"' EXIT\n" $block -}}
+            {{- $block = printf "%s%s\n" $block $fetch -}}
+            {{- $block = printf "%s%s %s \"$TMP\"\n" $block $sudoPref $.cmd.os.install -}}
+
+          {{- else if eq $archv "rpm" -}}
+            {{- $block = printf "%sTMP=\"$(mktemp --suffix=.rpm)\"\ntrap 'rm -f \"$TMP\"' EXIT\n" $block -}}
+            {{- $block = printf "%s%s \n%s \"$TMP\"\n" $block $fetch $.cmd.os.install -}}
+
+          {{- else if eq $archv "tar" -}}
+              {{- /* usa bsdtar se existir; senão cai para tar */ -}}
+              {{- $block = printf "%s%s | bsdtar -xOf - %q | %stee %q >/dev/null\n" $block $fetch $inner $sudoPref $dest -}}
+              {{- $block = printf "%s%schmod %s %q\n" $block $sudoPref $mode $dest -}}
+          {{- else if eq $archv "zip" -}}
+              {{- /* zip via bsdtar (unzip não lê stdin) */ -}}
+              {{- $block = printf "%s%s | bsdtar -xOf - %q | %stee %q >/dev/null\n" $block $fetch $inner $sudoPref $dest -}}
+              {{- $block = printf "%s%schmod %s %q\n" $block $sudoPref $mode $dest -}}
+          {{- end -}}
+
+          {{- /* garante newline final */ -}}
+          {{- $block = printf "%s\n" $block -}}
+          {{- /* e por fim APENAS adiciona à lista de comandos */ -}}
+          {{- $commands = mustAppend $commands (dict
+                  "name"  (get $chosen "name")
+                  "type"  "binary/package"
+                  "cmd"   $block) -}}
+
+        {{- else -}}
+          {{- /* demais installers (node, python, cargo, go) agrupados por tipo */ -}}
+
+          {{- if not (hasKey $packages $ctype) -}}{{- $_ := set $packages $ctype (list) -}}{{- end -}}
+          {{- $_ := set $packages $ctype (mustAppend (get $packages $ctype) $cpkg) -}}
+        {{- end -}}
+
+        {{- /* repositórios (apt/yum) pré-instalação, se marcados */ -}}
+        {{- $repo := get $chosen "repo" -}}
+        {{- if and $repo (stat (printf "%s/.chezmoitemplates/repos/%s.sh" $.chezmoi.sourceDir $repo)) -}}
+          {{- $scripts = mustAppend $scripts (printf "repo/%s" $repo) -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Emissão do script */ -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+{{ template "prettier_shell_log" -}}
+
+section "Updating OS package index"
+run "OS package manager update" {{ .cmd.os.update }} {{- printf "\n" -}}
+
+{{- $needs = uniq $needs -}}
+section "Ensuring prerequisites"
+{{- printf "\n" -}}
+{{- includeTemplate ".chezmoitemplates/lib/prereqs.tmpl" (dict
+    "needs"    $needs
+    "cmd"      .cmd
+    "paths"    .path
+    "xdgs"     .xdg
+    "os"       .chezmoi.os
+    "arch"     .chezmoi.arch
+    "bin_dir"  .xdg.bin
+    "opt_dir"  .xdg.opt
+    "data_dir"  .xdg.data
+    "osidlike" (default "" .osidlike)
+) -}}
+
+{{- /* OS packages em lote */ -}}
+{{- if $packages.os }}
+section "Installing OS packages in batch"
+run "OS packages installation" {{ .cmd.os.install }} {{ get $packages "os" | uniq | join " " }}
+{{- $_ := unset $packages "os" -}}
+{{- end }}
+
+run "Enforcing zsh shell as default" {{ .cmd.sudo }} chsh -s "$(command -v zsh)" "$(whoami)"
+
+{{- if $commands }}
+section "Running custom installers"
+{{- range $ci := $commands }}
+runsh {{ printf "Installing: %s via %s" (get $ci "name") (get $ci "type") | quote }} "$(
+ cat <<'SH'
+set -euo pipefail
+{{- print "\n" -}}
+{{- get $ci "cmd" -}}
+{{- printf "\n" -}}
+SH
+)"
+{{- end }}
+{{- end }}
+
+{{- if $scripts }}
+section "Running dedicated install scripts from .chezmoitemplates/packages"
+{{- end}}
+{{- range $s := $scripts }}
+
+runsh "Installing {{ $s }}" "$(
+ cat <<'SH'
+set -euo pipefail
+{{- print "\n" -}}
+{{- if hasPrefix $s "repo/" -}}
+{{-   $r := replace $s "repo/" "" -}}
+{{-    output "chezmoi" "execute-template" (include (printf ".chezmoitemplates/repos/%s.sh" $r )) -}}
+{{- else -}}
+{{-   output "chezmoi" "execute-template" (include (printf ".chezmoitemplates/packages/%s.sh" $s )) -}}
+{{- end }}
+SH
+)"
+{{- end }}
+
+{{- /* Unified installer loop: iterate over known package kinds */ -}}
+{{- $order := list "snap" "flatpak" "python" -}}
+{{- range $kind := $order -}}
+  {{- $pkgs := default (list) (get $packages $kind) -}}
+  {{- if $pkgs }}
+section "Installing {{ $kind }} packages"
+    {{- $cmd :=  dig $kind "install" "" $.cmd  -}}
+    {{- range $p := $pkgs }}
+run "Installing {{ $p }}" {{ $cmd }} {{ $p }}
+{{- printf "\n" -}}
+    {{- end }}
+    {{- $_ := unset $packages $kind -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Demais installers em grupo */ -}}
+{{ if $packages }}
+  {{- range $k, $v := $packages }}
+    section "Installing {{ $k }} packages"
+    runsh "{{ $k }} packages installation" {{ dig $k "install" "" $.cmd }} {{ $v | uniq | join " " }}
+    {{- printf "\n" -}}
+  {{- end }}
+runsh "Symlinking new binaries to $HOME/.local/bin" "$(
+ cat <<'SH'
+set -euo pipefail
+{{ includeTemplate "lib/expose_bins.tmpl" . }}
+SH
+)"
+{{- printf "\n" -}}
+{{- end }}
+
+
+run "foca" ENV LALA=foo echo "$LALA"

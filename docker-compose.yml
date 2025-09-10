@@ -1,0 +1,30 @@
+services:
+  ubuntu:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+      args:
+        DISTRO: ubuntu
+    user: ubuntu
+    tty: true
+    volumes:
+      - .:/work:cached
+      - chezmoi_data:/home/app/.local/share/chezmoi
+    working_dir: /home/app/.local/share/chezmoi
+
+  # fedora:
+  #   build:
+  #     context: .
+  #     dockerfile: .devcontainer/Dockerfile
+  #     args:
+  #       DISTRO: fedora
+  #   user: app
+  #   tty: true
+  #   volumes:
+  #     - ./:/work:cached
+  #     - chezmoi_data_fedora:/home/app/.local/share/chezmoi
+  #   working_dir: /home/app/.local/share/chezmoi
+
+volumes:
+  chezmoi_data: {}
+  chezmoi_data_fedora: {}

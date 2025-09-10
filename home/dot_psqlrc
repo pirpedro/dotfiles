@@ -1,0 +1,28 @@
+-- Básico de UX/perf
+\timing on
+\set HISTSIZE 65536
+
+-- Apresentação
+\pset linestyle unicode
+\pset border 2
+\pset null '∅'
+\x auto
+\pset pager on
+
+-- Autocomplete em minúsculas (ajuste para 'upper' se preferir)
+\set COMP_KEYWORD_CASE lower
+
+-- Verbosidade e números
+\set VERBOSITY terse
+\pset numericlocale on
+
+-- Histórico por banco (opcional: separa por DB)
+-- \set HISTFILE ~/.psql_history-:DBNAME
+
+-- Prompt informativo (user@db [RO/dir] ⇒ #/$)
+\set PROMPT1 '%[%033[1m%]%n@%/%R%#%[%033[0m%] '
+\set PROMPT2 '%> '
+
+-- Pager: deixe o PSQL_PAGER no shell; aqui só garante fallback
+-- (menos barulho quando pspg não existir)
+\setenv PAGER 'less -RSFX'

@@ -1,0 +1,470 @@
+# --- Identity & signing ---
+[user]
+  name = {{ .github.name }}
+  email = {{ .github.email }}
+  signingkey = {{ .github.signing_key }}
+
+[gpg]
+  format = ssh         # Use SSH keys to sign commits and tags
+
+[commit]
+  template = ~/.config/git/commit_message.txt
+  gpgsign = true
+
+[tag]
+  gpgsign = true
+  sort = version:refname
+
+[apply]
+  whitespace = fix
+
+# --- Init & core behavior ---
+[init]
+  defaultBranch = main
+  templateDir = ~/.git-templates
+
+[core]
+  editor = vim
+  excludesfile = ~/.config/git/ignore
+  ignorecase = false
+  pager = delta --features default
+  autocrlf = input
+  whitespace = trailing-space,space-before-tab,tab-in-indent,-indent-with-non-tab,cr-at-eol
+
+
+[color]
+  ui = true
+  branch = auto
+  diff = auto
+  status = auto
+
+[color "branch"]
+  current = yellow bold
+  local = green bold
+  remote = cyan bold
+
+[color "diff"]
+  meta = yellow bold
+  frag = magenta bold
+  old = red bold
+  new = green bold
+  plain = white
+  whitespace = red reverse
+
+[color "status"]
+  added = green bold
+  changed = yellow bold
+  untracked = red bold
+
+# --- Safer pulls/pushs & cleaner fetches ---
+[pull]
+  rebase = true
+  ff = only
+
+[fetch]
+  prune = true
+  pruneTags = true
+  writeCommitGraph = true
+  fsckObjects = false
+
+[fetch "prune"]
+    tags = true
+
+[transfer]
+    fsckObjects = true
+[receive]
+    fsckObjects = true
+
+[gc]
+  writeCommitGraph = true
+  pruneExpire = 30.days.ago
+
+[maintenance]
+  strategy = incremental                     # Background maintenance (2.41+)
+  auto = 1
+
+# --- Rebase/merge ergonomics ---
+[rebase]
+  autoStash = true
+  autoSquash = true
+  updateRefs = true
+
+[merge]
+  keepBackup = false
+  tool = p4merge
+  conflictStyle = zdiff3
+
+[mergetool]
+  prompt = false
+
+[mergetool "p4merge"]
+  cmd = p4merge "$BASE" "$LOCAL" "$REMOTE" "$MERGED"
+  keepTemporaries = false
+  trustExitCode = false
+  keepBackup = false
+
+[mergetool "fugitive"]
+  cmd = nvim -f -c 'Gvdiffsplit!' "$MERGED"
+
+[rerere]
+  enabled = true
+  autoupdate = true
+
+# --- Delta: modern diff/patch viewer ---
+[pager]
+  diff = delta
+  log  = delta
+  show = delta
+  reflog = delta
+
+[interactive]
+  diffFilter = delta --features default --color-only
+
+[delta]
+  navigate = true            # j/k to move between files/hunks
+  line-numbers = true
+  side-by-side = true        # Unified = false; toggle if you prefer unified
+  syntax-theme = Nord     # Pick your favorite theme
+  file-decoration-style = box
+  hunk-header-decoration-style = box
+  plus-style = green bold
+  minus-style = red bold
+  plus-emph-style = green bold reverse
+  minus-emph-style = red bold reverse
+  whitespace-error-style = red reverse
+
+
+[delta "default"]
+  navigate = true
+  side-by-side = true
+  features = nord-theme
+
+[delta "nord-theme"]
+  line-numbers-zero-style = blue
+  line-numbers-minus-style = white red
+  line-numbers-plus-style = black green
+  minus-style = white red
+  minus-emph-style = red white
+  plus-style = black green
+  plus-emph-style = black white
+  syntax-theme = Nord
+
+[delta "fzf"]
+  line-numbers = true
+  features = nord-theme
+
+# --- Credential helpers (set OS-specific helper once) ---
+# Linux (GNOME libsecret):
+#   git config --global credential.helper 'libsecret'
+# macOS (Keychain):
+#   git config --global credential.helper osxkeychain
+
+# --- Push ergonomics ---
+
+[push]
+  default = current
+  autoSetupRemote = true     # First push sets upstream automatically
+
+[status]
+  branch = true
+  submoduleSummary = 1
+  aheadBehind = true
+
+# --- Prefer SSH for GitHub (no more https prompts) ---
+[url "ssh://git@github.com/"]
+  pushInsteadOf = https://github.com/
+
+# --- Diff ---
+[diff]
+  renames = true
+  algorithm = histogram
+  compactionHeuristic = true
+  colorMoved = zebra
+  colorMovedWS = allow-indentation-change
+  mnemonicPrefix = true
+  wsErrorHighlight = all
+  tool = fugitive
+
+[difftool]
+  prompt = false               # realça erros de whitespace em toda a linha
+
+[difftool "fugitive"]
+  cmd = nvim -f -c 'Gdiffsplit!' "$LOCAL"
+
+[difftool "p4merge"]
+  cmd = p4merge "$LOCAL" "$REMOTE"
+  keepTemporaries = false
+  trustExitCode = false
+  keepBackup = false
+
+
+# ----------------------------------------------------
+[log]
+    # ISO timestamps for easy parsing/sharing
+    date = iso
+
+[pretty]
+  better-oneline = "format:%C(auto)%h%d %s %Cblue[%cn]"
+  summary = "format:%C(yellow)%H%C(red)%d%n%C(blue)%cd %an%n%C(reset)%s%n"
+
+
+[filter "tabspace"]
+  smudge = unexpand --tabs=2 --first-only
+  clean = expand --tabs=2 --initial
+
+[grep]
+  lineNumber = true
+  # PCRE makes many patterns simpler
+  patternType = perl
+
+[alias]
+  # --- Add ---
+  a  = add
+  aa = add --all
+  ai = add -i
+
+  # --- Apply / Am ---
+  ap = apply
+  as = apply --stat
+  ac = apply --check
+
+  ama = am --abort
+  amr = am --resolved
+  ams = am --skip
+
+  # --- Branch ---
+  b  = branch
+  ba = branch -a
+  bd = branch -d
+  br = branch -r
+
+  # Detect default branch (origin/HEAD -> main/master)
+  mainbranch = "!f(){ git symbolic-ref --quiet refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || (git show-ref --verify --quiet refs/heads/main && echo main || echo master); }; f"
+
+  # --- Switch/Checkout (modernize) ---
+  co  = switch
+  cob = switch -c
+  # convenience to go to default branch
+  gom = "!git switch $(git mainbranch)"
+
+  # --- Commit ---
+  c   = commit
+  ca  = commit -a
+  cm  = commit -m
+  cem = commit --allow-empty -m
+  cam = commit -am
+  cd  = commit --amend
+  cad = commit -a --amend
+  ced = commit --allow-empty --amend
+  # If you sign by default (commit.gpgsign=true), these are optional:
+  cs  = commit -S
+  csm = commit -S -m
+
+  # --- Diff ---
+  d   = diff
+  dc  = diff --cached
+  dl  = difftool
+  dlc = difftool --cached
+  dk  = diff --check
+  dp  = diff --patience
+  dck = diff --cached --check
+
+  # --- Fetch ---
+  f  = fetch --all --tags --prune
+  fo = fetch origin
+  fu = fetch upstream
+
+  # --- Format / fsck ---
+  fp = format-patch
+  fk = fsck
+
+  # --- Grep ---
+  g  = grep -nI --heading -p
+
+  # --- Logs ---
+  l  = log --oneline
+  lg = log --oneline --graph --decorate
+  # Files (avoid clobbering "ls")
+  lsfiles = ls-files
+  lsf     = "!git ls-files | grep -i"
+
+  # --- Merge ---
+  m  = merge
+  ma = merge --abort
+  mc = merge --continue
+  ms = merge --skip
+
+  # --- Prune ---
+  pr = prune -v
+
+  # --- Push (safer: --force-with-lease) ---
+  ps   = push
+  psu  = push -u
+  pso  = push origin
+  psao = push --all origin
+  psF  = push --force-with-lease
+  psFo = push --force-with-lease origin
+  # push to default branch on origin
+  psm  = "!git push origin HEAD:refs/heads/$(git mainbranch)"
+  psUm = "!git push -u origin HEAD:refs/heads/$(git mainbranch)"
+
+  # --- Pull (no bogus -u) ---
+  pl  = pull
+  plo = pull origin
+  plp = pull upstream
+  pb  = pull --rebase
+  pbo = pull --rebase origin
+  pbp = pull --rebase upstream
+  pbm = "!git pull --rebase origin $(git mainbranch)"
+
+  # --- Rebase ---
+  rb  = rebase
+  rba = rebase --abort
+  rbc = rebase --continue
+  rbi = rebase --interactive
+  rbs = rebase --skip
+
+  # --- Reset ---
+  re   = reset
+  rh   = reset HEAD
+  reh  = reset --hard
+  rem  = reset --mixed
+  res  = reset --soft
+  rehh = reset --hard HEAD
+  remh = reset --mixed HEAD
+  resh = reset --soft HEAD
+
+  # --- Remote ---
+  r   = remote
+  ra  = remote add
+  rr  = remote rm
+  rv  = remote -v
+  rm  = remote rename
+  rp  = remote prune
+  rs  = remote show
+  rao = remote add origin
+  rau = remote add upstream
+  rso = remote show origin
+  rsu = remote show upstream
+  rpo = remote prune origin
+  rpu = remote prune upstream
+
+  # --- Status ---
+  s  = status
+  sb = status -sb
+
+  # --- Stash (use push -m; "save" is legacy) ---
+  sa = stash apply
+  sc = stash clear
+  sd = stash drop
+  sl = stash list
+  sp = stash pop
+  ss = "!f(){ git stash push -m \"${1:-wip}\"; }; f"
+  sw = stash show
+  snapshot = "!git stash push -m \"snapshot: $(date +\"%F %T\")\" && git stash show -p stash@{0}"
+
+  # --- Show ---
+  w  = show
+  wp = show -p
+  wr = show -p --no-color
+
+  # --- SVN (only if git-svn is installed) ---
+  svnr = svn rebase
+  svnd = svn dcommit
+  svnl = svn log --oneline --show-commit
+
+  # --- Assume unchanged helpers ---
+  assume     = update-index --assume-unchanged
+  unassume   = update-index --no-assume-unchanged
+  assumed    = "!git ls-files -v | grep ^h | cut -c 3-"
+  assumeall  = "!git status -s | awk '{print $2}' | xargs -r git update-index --assume-unchanged"
+  unassumeall= "!git assumed | xargs -r git update-index --no-assume-unchanged"
+
+  # --- Merge conflict helpers ---
+  ours   = "!f(){ git checkout --ours \"$@\" && git add \"$@\"; }; f"
+  theirs = "!f(){ git checkout --theirs \"$@\" && git add \"$@\"; }; f"
+
+  # --- Who/what ---
+  whois  = "!sh -c 'git log -i -1 --pretty=\"format:%an <%ae>\\n\" --author=\"$1\"' -"
+  whatis = show -s --pretty='tformat:%h (%s, %ad)' --date=short
+
+  # --- Repo transforms ---
+  barebranch = "!sh -c 'git symbolic-ref HEAD refs/heads/$1 && git rm --cached -r . && git clean -xfd' -"
+  flat       = clone --depth 1
+  # Prefer git submodule update --remote over ad-hoc pulls
+  subpull    = submodule update --init --recursive --remote
+  # Use git-filter-repo if available
+  subrepo    = "!sh -c 'if command -v git-filter-repo >/dev/null 2>&1; then git filter-repo --path \"$1\" --force; else git filter-branch --prune-empty --subdirectory-filter \"$1\" $(git mainbranch); fi' -"
+
+  human   = name-rev --name-only --refs=refs/heads/*
+  serve   = "!git daemon --reuseaddr --verbose --base-path=. --export-all ./.git"
+
+  # --- Quick commits / undo ---
+  # initial empty commit
+  empty = "!f(){ git commit -m \"${1-[empty] Initial commit}\" --allow-empty; }; f"
+  save  = "!git add -A && git commit -m 'CHECKPOINT'"
+  wip   = "!git add -u && git commit -m 'WIP'"
+  undo  = "!f(){ git reset --hard \"$(git rev-parse --abbrev-ref HEAD)@{${1-1}}\"; }; f"
+  amend = commit -a --amend
+  wipe  = "!git add -A && git commit -qm 'WIPE CHECKPOINT' && git undo"
+
+  # --- Branch cleanup (safe, dynamic default) ---
+  devbranch = "!git mainbranch"
+  bclean = "!f(){ base=${1-$(git mainbranch)}; git branch --merged \"$base\" | grep -v \"^\\*\\| $base$\" | xargs -r git branch -d; }; f"
+  bdone  = "!f(){ base=${1-$(git mainbranch)}; git switch \"$base\" && git bclean \"$base\"; }; f"
+
+  # --- Logs pretties (keep yours; avoid clobbering ls-files) ---
+  lnc     = log --pretty=format:\"%h\\ %s\\ [%cn]\"
+  filelog = log -u
+
+  # List aliases
+  la  = "!git config -l | grep '^alias\\.' | sed 's/^alias\\.//'"
+
+  # Find tracked file
+  find = "!git ls-files | grep -i"
+
+  # Edit global config
+  ec = config --global -e
+
+  # Update + submodules
+  up = "!git pull --rebase --prune \"$@\" && git submodule update --init --recursive"
+
+  # Remove tag local + remote
+  deletetag = "!f(){ git tag -d \"$1\" && git push origin \":refs/tags/$1\"; }; f"
+
+  bulk-pull = "!f(){ \
+    for key in $(git config --global --name-only --get-regexp '^bulkworkspaces\\..*\\.root$'); do \
+      dir=$(git config --global --get $key); \
+      [ -d \"$dir\" ] || continue; \
+      echo \"\\n=== $dir\"; \
+      (cd \"$dir\" && git pull --rebase --prune && git submodule update --init --recursive); \
+    done; \
+  }; f"
+
+  bulk-status = "!f(){ \
+    for key in $(git config --global --name-only --get-regexp '^bulkworkspaces\\..*\\.root$'); do \
+      dir=$(git config --global --get $key); \
+      [ -d \"$dir\" ] || continue; \
+      echo \"\\n=== $dir\"; \
+      (cd \"$dir\" && git status -sb); \
+    done; \
+  }; f"
+
+  bulk-clean-merged = "!f(){ \
+    for key in $(git config --global --name-only --get-regexp '^bulkworkspaces\\..*\\.root$'); do \
+      dir=$(git config --global --get $key); \
+      [ -d \"$dir\" ] || continue; \
+      echo \"\\n=== $dir\"; \
+      (cd \"$dir\" && base=$(git mainbranch) && git branch --merged \"$base\" | grep -v \"^\\*\\| $base$\" | xargs -r git branch -d); \
+    done; \
+  }; f"
+
+{{ if and .is.personal (not .is.ephemeral) (not .is.headless) -}}
+{{   $yaml := fromYaml (output "chezmoi" "execute-template" (include ".chezmoigit.yaml" | trim ) ) -}}
+[bulkworkspaces]
+{{  range (keys $yaml.workspaces | sortAlpha) -}}
+{{    $ws:= get $yaml.workspaces . -}}
+{{    $root:=ternary $ws.root "" (ne $ws.root nil) -}}
+{{ printf "  %s = %s/%s" . $.chezmoi.homeDir $root}}
+{{  end -}}
+{{ end -}}

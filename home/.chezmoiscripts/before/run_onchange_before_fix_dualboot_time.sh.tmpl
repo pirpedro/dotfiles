@@ -1,0 +1,10 @@
+{{/* solve the time problem when dual booting with windows */ -}}
+{{ if and (eq .chezmoi.os "linux") (stat "/boot/grub/grub.conf") -}}
+{{ if output "cat" "/boot/grub/grub.conf" | contains "Windows Boot Manager" -}}
+#!/usr/bin/env bash
+{{ if and (lookPath "apt") (not (lookPath "timedatectl")) -}}
+{{ .cmd.os.install }} systemd  
+{{ end -}}
+timedatectl set-local-rtc 1 --adjust-system-clock
+{{ end -}}
+{{ end -}}

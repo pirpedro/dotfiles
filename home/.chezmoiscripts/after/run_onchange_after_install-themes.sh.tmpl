@@ -1,0 +1,86 @@
+{{- if and .is.personal (not .is.ephemeral) (not .is.headless) }}
+{{-     if eq .env.de "gnome" -}}
+#!/usr/bin/env bash
+#######################################
+# CONFIGURE GNOME PLUGINS 
+#######################################
+gnome_install=$HOME/.local/bin/gnome-shell-extension-installer
+{{ $extensions := (dict 
+    "19" "user-theme@gnome-shell-extensions.gcampax.github.com"
+    "97" "CoverflowAltTab@palatis.blogspot.com"
+    "1465" "desktop-icons@csoriano"
+    "3193" "blur-my-shell@aunetx"
+    "1544" "cast-to-tv@rafostar.github.com"
+    "120" "system-monitor@paradoxxx.zero.gmail.com"
+    ) -}}
+{{ $installed_extensions := (output "gnome-extensions" "list") -}}
+{{ range $k, $v := $extensions  -}}
+{{   if not (contains $v $installed_extensions) -}}
+$gnome_install --yes {{ $k }}
+{{   end -}}
+gnome-extensions enable {{ $v }}
+{{ end -}}
+{{ if not (contains "pop-shell@system76.com" $installed_extensions) -}}
+{{ template "packages/pop-shell.sh"}}
+{{ end -}}
+#######################################
+# CONFIGURE THEME 
+#######################################
+{{- if ne (output "gsettings" "get" "org.gnome.desktop.interface" "gtk-theme" | trim ) "'WhiteSur-dark'"}}
+cd $HOME/.local/share/themes/whiteSur
+chmod +x install.sh
+chmod +x tweaks.sh
+./install.sh -c dark #install theme
+./tweaks.sh -d -c dark #install dock
+sudo ./tweaks.sh -g -N # install gmp (login page)
+gsettings set org.gnome.desktop.interface gtk-theme "WhiteSur-dark"
+gsettings set org.gnome.desktop.wm.preferences theme "WhiteSur-dark"
+{{- end }}
+#######################################
+# CONFIGURE ICONS 
+#######################################
+{{- if ne (output "gsettings" "get" "org.gnome.desktop.interface" "icon-theme" | trim) "'la-capitaine'"}}
+cd $HOME/.icons/la-capitaine
+chmod +x configure
+printf 'y\ny\ny\n' | ./configure 
+gsettings set org.gnome.desktop.interface icon-theme 'la-capitaine'
+{{- end }}
+#######################################
+# CONFIGURE POINTERS 
+#######################################
+{{- if ne (output "gsettings" "get" "org.gnome.desktop.interface" "cursor-theme" | trim) "'capitaine-cursors'"}}
+cd $HOME/.local/share/themes/capitaine-cursors
+{{ .cmd.os.install }} inkscape x11-apps libcanberra-gtk-module
+chmod +x build.sh
+./build.sh -t dark # build dark theme cursors
+mkdir -p $HOME/.icons/capitaine-cursors
+cp -r dist/dark/* $HOME/.icons/capitaine-cursors 
+gsettings set org.gnome.desktop.interface cursor-theme 'capitaine-cursors'
+{{- end}}
+#######################################
+# CONFIGURE FONTS 
+#######################################
+{{- if ne (output "gsettings" "get" "org.gnome.desktop.interface" "font-name" | trim ) "'Garuda Regular 10'"}}
+gsettings set org.gnome.desktop.interface font-name 'Garuda Regular 10'
+{{- end }}
+
+#######################################
+# CONFIGURE BACKGROUNDS 
+#######################################
+{{- $background_uri := printf "file://%s/.local/share/backgrounds/dracula" .chezmoi.homeDir }}
+{{- if eq .chezmoi.osRelease.id "ubuntu" }}
+{{-   $background_uri =joinPath $background_uri "ubuntu-2.png"}}
+{{- else }}
+{{-   $background_uri =joinPath $background_uri (list .chezmoi.osRelease.id ".png" | join "")}}
+{{- end }}
+{{- if ne (output "gsettings" "get" "org.gnome.desktop.background" "picture-uri" | trim ) "'{{background-uri}}'"}}
+gsettings set org.gnome.desktop.background picture-uri '{{ $background_uri }}'
+{{- end }}
+{{- if ne (output "gsettings" "get" "org.gnome.desktop.screensaver" "picture-uri" | trim ) "'{{background-uri}}'"}}
+gsettings set org.gnome.desktop.screensaver picture-uri '{{ $background_uri }}'
+{{- end }}
+{{-     end }}
+{{- end}}
+
+# fix a bug that dash-to-dock uses <super> + Q hotkey instead of its default behavior of close window.
+gsettings set org.gnome.shell.extensions.dash-to-dock hot-keys false

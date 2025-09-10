@@ -1,0 +1,24 @@
+{{- if and (not .is.ephemeral) (not .is.headless) }}
+[".local/share/backgrounds/dracula"]
+  type = "archive"
+  url = "https://github.com/dracula/wallpaper/archive/master.zip"
+  format = "zip"
+  stripComponents=1
+{{-   if eq .chezmoi.os "linux"}}
+[".local/share/themes/whiteSur"]
+  type = "git-repo"
+  url = "https://github.com/vinceliuice/WhiteSur-gtk-theme.git"
+[".icons/la-capitaine"]
+  type = "git-repo"
+  url = "https://github.com/keeferrourke/la-capitaine-icon-theme.git"
+[".local/share/themes/capitaine-cursors"]
+  type = "git-repo"
+  url = "https://github.com/keeferrourke/capitaine-cursors.git"
+[".config/ulauncher/user-themes/dracula"]
+  type = "git-repo"
+  url = "https://github.com/dracula/ulauncher.git"
+[".config/ulauncher/user-themes/ReMatch-Dark-Blue-Ulauncher"]
+  type = "git-repo"
+  url = "git@github.com:S-ci/ReMatch-Dark-Blue-Ulauncher.git"
+{{-   end }}
+{{- end }}

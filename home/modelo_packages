@@ -1,0 +1,112 @@
+# =============================================================================
+# CHEAT SHEET — .chezmoipackages.yaml
+# =============================================================================
+# Estrutura básica:
+#
+# packages:
+#   - <nome>                          # entrada “string” (legado). alias = nome, installer = os
+#   - <nome>: { alias: <cmd> }        # mapa curto
+#   - <nome>:
+#       alias: <cmd>                  # usado para detectar se já existe (lookPath <alias>)
+#       not: "ephemeral:headless"     # NÃO instalar se algum estado em .is estiver presente (disjunto)
+#       de: "gnome:plasma"            # restringe por Desktop Environment; vazio/ausente = sem restrição
+#
+#       # LEGADO (um único instalador):
+#       installer: os|node|python|pipx|cargo|go|ghext|snap|flatpak
+#
+#       # NOVO (preferido): múltiplos installers com fallback em ordem
+#       installers:
+#         - type: os
+#           # nome do pacote (se ausente, cai em alias/nome)
+#           pkg: code
+#           # mapeia por distro (chave = .osid ou .osidlike, ex.: debian, ubuntu, arch, fedora, opensuse, alpine)
+#           pkg_map:
+#             debian: code
+#             ubuntu: code
+#           # script de repositório antes de instalar (executa ~/.local/share/chezmoi/.chezmoitemplates/repos/<repo>.sh)
+#           repo: microsoft
+#           # restrições opcionais:
+#           when:
+#             osid: ubuntu
+#             osidlike: debian
+#             de: "gnome:plasma"
+#             arch: x86_64
+#
+#         - type: snap
+#           pkg: code
+#           classic: true            # adiciona --classic
+#
+#         - type: flatpak
+#           pkg: com.visualstudio.code
+#           remote: flathub          # usa --system -y --noninteractive <remote>
+#
+#         - type: node               # npm -g
+#           pkg: typescript@latest
+#
+#         - type: python             # pip (user)
+#           pkg: cookiecutter
+#
+#         - type: pipx               # pipx
+#           pkg: yt-dlp
+#
+#         - type: cargo              # cargo install
+#           pkg: ripgrep
+#
+#         - type: go                 # go install
+#           pkg: github.com/some/tool@latest
+#
+#         - type: ghext              # gh extension install
+#           pkg: owner/extension
+#
+#         - type: cmd                # comando(s) inline (sh/bash), rodados via heredoc
+#           sh: |
+#             echo "fazendo algo custom"
+#             ./installer --flag
+#
+#         - type: curl               # baixa script e encadeia em sh/bash
+#           url: https://exemplo.com/install.sh
+#           sh: sh                   # padrão: "sh" (pode ser "bash")
+#           # args depois de "-s --" (string OU lista).
+#           args: '-b "$BIN_DIR" -y'
+#           bin_dir: '$HOME/.local/bin'  # default se ausente: $HOME/.local/bin
+#           curl_opts: -fsSL         # padrão: -fsSL
+#           sudo: false              # se true → pipe em "sudo sh ..."
+#
+# Regras do template (implementadas no gerador de script):
+# - Se existir ~/.local/share/chezmoi/.chezmoitemplates/packages/<nome>.sh → usa esse script e ignora installers.
+# - Se o binário/alias já existir (lookPath <alias>) → pula o pacote.
+# - Para type=os → só escolhe se o pacote EXISTIR no repositório remoto (usa .cmd.os.search com "__PKG__").
+# - Para os demais types → tenta na ordem em que aparecem (snap/flatpak/node/…/cmd/curl).
+#
+# Dicas de YAML:
+# - Para nomes com @ (ex.: "@bitwarden/cli") ou com {{ template }} → coloque entre aspas.
+# - Você pode usar listas YAML em not/only/de, ex.: not: ["ephemeral","work"]  (o template aceita string "a:b" ou lista).
+# - alias padrão = nome (se não definir).
+
+# Exemplo 1: VSCode — tenta apt (repo MS) em Debian/Ubuntu; se não, snap; se não, flatpak
+- vscode:
+    alias: code
+    installers:
+      - type: os
+        pkg: code
+        repo: microsoft # gatilho para script de repo (ver template)
+        when:
+          osidlike: debian
+      - type: snap
+        pkg: code
+        classic: true # vira '--classic'
+      - type: flatpak
+        pkg: com.visualstudio.code
+        remote: flathub
+
+# Exemplo 2: Chrome — apt (repo Google) em Debian; fallback flatpak
+- google-chrome:
+    alias: google-chrome
+    installers:
+      - type: os
+        pkg: google-chrome-stable
+        repo: google-chrome
+        when: { osidlike: debian }
+      - type: flatpak
+        pkg: com.google.Chrome
+        remote: flathub

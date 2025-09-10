@@ -1,0 +1,114 @@
+add_newline = false
+command_timeout = 1000
+
+# Layout: p10k style (left prompt) + RPROMPT
+format = """
+$username$hostname$directory$git_branch$git_status$python$nodejs$rust$golang$java$docker_context$kubernetes
+$character
+"""
+right_format = """$status $cmd_duration $time"""
+
+# cores inspiradas no p10k
+palette = "p10k"
+
+[palettes.p10k]
+green = "#50fa7b"
+cyan = "#8be9fd"
+yellow = "#f1fa8c"
+magenta = "#ff79c6"
+red = "#ff5555"
+blue = "#6272a4"
+fg = "#f8f8f2"
+muted = "#44475a"
+
+# user@host (mostra só se remoto)
+[username]
+style_user = "bold $palette.green"
+show_always = false
+
+[hostname]
+ssh_only = true
+style = "bold $palette.cyan"
+format = "[@$hostname]($style) "
+
+# diretório
+[directory]
+style = "bold $palette.blue"
+truncation_length = 3
+truncation_symbol = "…/"
+read_only = " "
+format = "[$path]($style) "
+
+# Git branch + status
+[git_branch]
+symbol = " "
+style = "bold $palette.magenta"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "$palette.red"
+format = "([$all_status$ahead_behind]($style)) "
+conflicted = " ${count}"
+stashed = " ${count}"
+staged = " ${count}"
+modified = " ${count}"
+renamed = " ${count}"
+deleted = " ${count}"
+untracked = " ${count}"
+ahead = " ⇡${count}"
+behind = " ⇣${count}"
+diverged = " ⇕${count}"
+
+# linguagens
+[python]
+symbol = " "
+style = "bold $palette.yellow"
+format = "[$symbol$version]($style) "
+
+[nodejs]
+symbol = " "
+style = "bold $palette.green"
+format = "[$symbol$version]($style) "
+
+[rust]
+symbol = " "
+style = "bold $palette.red"
+
+[golang]
+symbol = " "
+style = "bold $palette.cyan"
+
+[java]
+symbol = " "
+style = "bold $palette.magenta"
+
+[docker_context]
+symbol = " "
+style = "bold $palette.cyan"
+
+[kubernetes]
+symbol = "⎈ "
+style = "bold $palette.blue"
+
+# status de saída e duração no RPROMPT
+[status]
+disabled = false
+format = "[$status]($style)"
+style = "bold $palette.red"
+
+[cmd_duration]
+min_time = 2000
+format = "[$duration]($style)"
+style = "italic $palette.yellow"
+
+[time]
+disabled = false
+format = "[$time]($style)"
+time_format = "%H:%M"
+style = "bold $palette.muted"
+
+# caractere do prompt
+[character]
+success_symbol = "[❯](bold $palette.green)"
+error_symbol = "[❯](bold $palette.red)"
+vicmd_symbol = "[❮](bold $palette.cyan)"

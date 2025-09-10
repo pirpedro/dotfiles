@@ -1,0 +1,6 @@
+{{ if (and (lookPath "nvim") (eq .chezmoi.os "darwin" "linux") (not .ephemeral)) -}}
+#!/usr/bin/env bash
+# .config/nvm/init.vim hash: {{ include "private_dot_config/nvim/init.vim.tmpl" | sha256sum }}
+set -eufo pipefail
+nvim +PlugInstall +qall
+{{ end -}}

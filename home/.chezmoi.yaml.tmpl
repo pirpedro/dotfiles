@@ -1,0 +1,275 @@
+{{/* personal machine information */}}
+{{- $personalName := "Pedro Rodrigues" -}}
+{{- $personalEmail := "pir.pedro@gmail.com" -}}
+{{- $personalSigningKey := "~/.ssh/keys.d/github_personal_ed25519" -}}
+
+{{- $workSigningKey := "426C5F3386CEEC28" -}}
+{{- $workName := "Pedro Ivo Rodrigues" -}}
+{{- $workEmail := "pir.pedro@gmail.com" -}}
+
+{{- $isWork := contains "-work" (lower .chezmoi.hostname) -}}
+{{- $isPersonal := not $isWork -}}
+
+{{- $os := .chezmoi.os -}}
+{{- $osID := .chezmoi.os -}}
+{{- $osIDLike := ""}}
+
+{{- if hasKey .chezmoi.osRelease "id" -}}
+{{-   $osID = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
+{{-   $osIDLike = .chezmoi.osRelease.id }}
+{{- end -}}
+
+{{- if hasKey .chezmoi.osRelease "idLike" }}
+{{-   $osIDLike = splitList " " .chezmoi.osRelease.idLike | last }}
+{{- end -}}
+
+{{- if eq $os "darwin" }}
+{{-   $osIDLike = "darwin" -}}
+{{- end -}}
+
+{{- /* WSL: kernel string mentions Microsoft or WSL* envs present (set by WSL itself) */ -}}
+{{- $unameR   := lower (trim (output "sh" "-lc" "uname -r 2>/dev/null || true")) -}}
+{{- $procVer  := lower (trim (output "sh" "-lc" "cat /proc/version 2>/dev/null || true")) -}}
+{{- $isWSL    := or (ne (env "WSL_DISTRO_NAME") "") (ne (env "WSL_INTEROP") "") (contains "microsoft" $unameR) (contains "microsoft" $procVer) -}}
+
+{{- /* Container: well-known markers + cgroups patterns */ -}}
+{{- $hasDockerenv := or (stat "/.dockerenv") (stat "/run/.containerenv") -}}
+{{- $cg := lower (trim (output "sh" "-lc" "cat /proc/1/cgroup 2>/dev/null || true")) -}}
+{{- $isCgroupCtr := or (contains "docker" $cg) (contains "containerd" $cg) (contains "kubepods" $cg) (contains "libpod" $cg) (contains "lxc" $cg) -}}
+{{- $isContainer := or $hasDockerenv $isCgroupCtr -}}
+
+{{- /* Devcontainer/Codespaces: VS Code container mounts and Codespaces markers (all auto-set) */ -}}
+{{- $hasWorkspaces := stat "/workspaces" -}}
+{{- $isVSCodeCtr   := or $hasWorkspaces (and (eq (env "TERM_PROGRAM") "vscode") (ne (env "VSCODE_IPC_HOOK_CLI") "")) -}}
+{{- $isCodespaces  := or (ne (env "CODESPACES") "") (ne (env "GITHUB_CODESPACES") "") (contains "codespaces" (lower (env "HOSTNAME"))) -}}
+{{- $isDevcontainer:= or $isVSCodeCtr $isCodespaces -}}
+
+{{- /* VM: systemd-detect-virt output (falls back to empty if not present) */ -}}
+{{- $virt := lower (trim (output "sh" "-lc" "systemd-detect-virt -v 2>/dev/null || true")) -}}
+{{- $isVM := or (contains "kvm" $virt) (contains "qemu" $virt) (contains "vmware" $virt) (contains "oracle" $virt) (contains "hyper" $virt) (contains "xen" $virt) (contains "parallels" $virt) (contains "bochs" $virt) (contains "uml" $virt) -}}
+
+{{- /* Headless: no DISPLAY/Wayland on Linux; macOS assumed GUI (Aqua) */ -}}
+{{- $hasDisplay := or (ne (env "DISPLAY") "") (ne (env "WAYLAND_DISPLAY") "") (eq $os "darwin") -}}
+{{- $isHeadless := or (not $hasDisplay) $isDevcontainer (and $isContainer (ne (env "ALLOW_GUI_IN_CONTAINER") "1")) -}}
+
+{{- /* Ephemeral: containers OR codespaces OR VM w/ cloud-init or default cloud usernames */ -}}
+{{- $hasCloudInit := stat "/var/lib/cloud/instance" -}}
+{{- $isCloudLogin := or (eq .chezmoi.username "ubuntu") (eq .chezmoi.username "ec2-user") (eq .chezmoi.username "fedora") (eq .chezmoi.username "core") (eq .chezmoi.username "vagrant") -}}
+{{- $isEphemeral :=  or $isContainer $isCodespaces (and $isVM (or $hasCloudInit $isCloudLogin)) -}}
+
+{{/* environmental tags */}}
+{{- $editor := "vim" }}
+{{- if lookPath "nvim" -}} {{- $editor = "nvim" -}}
+{{- else if lookPath "vim" -}} {{- $editor = "vim" -}}
+{{- else if lookPath "nano" -}} {{- $editor = "nano" -}} {{- end -}}
+
+{{- $visual := "" -}}
+{{- if lookPath "code" -}} {{- $visual = "code" -}}
+{{- else if lookPath "codium" -}} {{- $visual = "codium" -}}
+{{- else -}} {{- $visual = $editor -}} {{- end -}}
+
+{{ $sudo := "sudo" -}}
+{{ if eq .chezmoi.username "root" -}}
+{{ $sudo = "" -}}
+{{ end -}}
+
+{{- $update_cmd :="" -}}
+{{- $upgrade_cmd :="" -}}
+{{- $install_cmd := "" -}}
+{{- $search_cmd := "" -}}
+
+{{- if eq $osIDLike "darwin" }}
+{{-   $update_cmd ="brew update" }}
+{{-   $upgrade_cmd ="brew update && brew upgrade" }}
+{{-   $install_cmd ="brew install" }}
+{{-   $search_cmd  = `bash -lc 'brew info --formula "__PKG__" >/dev/null 2>&1 || brew info --cask "__PKG__" >/dev/null 2>&1'` -}}
+
+{{- else if eq $osIDLike "debian" }}
+{{- $update_cmd = "apt -qq -y update" }}
+{{- $upgrade_cmd =printf "%s apt update && %s apt upgrade -y" $sudo $sudo | trim }}
+{{- $install_cmd ="apt -qq -y install" }}
+{{- $search_cmd  = `bash -lc 'apt-cache policy "__PKG__" 2>/dev/null | awk "/Candidate:/ {print $2}" | grep -vq "(none)"'` -}}
+
+{{- else if eq $osIDLike "alpine" }}
+{{- $update_cmd ="apk update" }}
+{{- $upgrade_cmd =printf "%s apk update && %s apk upgrade" $sudo $sudo | trim }}
+{{- $install_cmd ="apk add" }}
+{{- $search_cmd  = `bash -lc 'apk search -x "__PKG__" 2>/dev/null | grep -qx "__PKG__"'` -}}
+
+{{- else if or (eq $osIDLike "suse") (eq .chezmoi.osRelease.id "opensuse") }}
+{{- $update_cmd ="zypper refresh" }}
+{{- $upgrade_cmd =printf "%s zypper update" $sudo | trim }}
+{{- $install_cmd ="zypper --non-interactive install --allow-unsigned-rpm" }}
+{{- $search_cmd  = `bash -lc 'zypper info "__PKG__" >/dev/null 2>&1'` -}}
+
+{{- else if or (eq $osIDLike "gentoo") (eq .chezmoi.osRelease.id "gentoo") }}
+{{- $update_cmd ="emerge -u world" }}
+{{- $upgrade_cmd =printf "%s emerge -u world" $sudo | trim }}
+{{- $install_cmd ="emerge -av" }}
+{{- $search_cmd  = `bash -lc '(command -v eix >/dev/null 2>&1 && eix -e "__PKG__") >/dev/null 2>&1 || emerge -s "__PKG__" 2>/dev/null | grep -q "__PKG__"'` -}}
+
+{{- else if eq $osIDLike "fedora" }}
+{{- $update_cmd ="dnf check-update" }}
+{{- $upgrade_cmd =printf "%s dnf upgrade" $sudo | trim }}
+{{- $install_cmd ="dnf -y install" }}
+{{- $search_cmd  = `bash -lc 'dnf info "__PKG__" >/dev/null 2>&1'` -}}
+
+{{- else if eq $osIDLike "centos" }}
+{{- $update_cmd ="yum check-update" }}
+{{- $upgrade_cmd =printf "%s yum update" $sudo | trim }}
+{{- $install_cmd ="yum -y install" }}
+{{- $search_cmd  = `bash -lc 'yum info "__PKG__" >/dev/null 2>&1'` -}}
+
+{{- else if or (eq $osIDLike "arch") (eq .chezmoi.osRelease.id "arch") }}
+{{- $update_cmd ="pacman -Syy" }}
+{{- $upgrade_cmd =printf "%s pacman -Syu" $sudo | trim }}
+{{- $install_cmd ="pacman -S --needed --noconfirm" }}
+{{- $search_cmd  = `bash -lc 'pacman -Si "__PKG__" >/dev/null 2>&1'` -}}
+{{- else }}
+{{- $update_cmd ="echo unknown" }}
+{{- $upgrade_cmd ="echo unknown" }}
+{{- $install_cmd ="echo unknown" }}
+{{- $search_cmd  = `bash -lc 'false'` -}}
+{{- end }}
+
+{{- if eq $os "linux" -}}
+{{ $update_cmd =printf "%s %s" $sudo $update_cmd | trim -}}
+{{ $install_cmd =printf "%s %s" $sudo $install_cmd | trim -}}
+{{- end }}
+
+{{- if lookPath "flatpak" -}}
+  {{- $upgrade_cmd = printf "%s && flatpak update -y" $upgrade_cmd -}}
+{{- end -}}
+{{- if lookPath "snap" -}}
+  {{- $upgrade_cmd = printf "%s && sudo snap refresh" $upgrade_cmd -}}
+{{- end -}}
+
+{{ $npm_dir := joinPath .chezmoi.homeDir ".local/share/npm" -}}
+{{ $volta_dir := joinPath .chezmoi.homeDir ".local/share/volta" -}}
+{{ $cargo_dir := joinPath .chezmoi.homeDir ".local/share/cargo" -}}
+{{ $uv_dir := joinPath .chezmoi.homeDir ".local/share/uv" -}}
+{{ $go_dir := joinPath .chezmoi.homeDir ".local/share/go" -}}
+
+{{ $font_dir := "" -}}
+{{- if eq $os "darwin" }}
+{{-   $font_dir = joinPath .chezmoi.homeDir "Library/Fonts" }}
+{{- else if eq $os "linux" }}
+{{-   $font_dir = joinPath .chezmoi.homeDir ".local/share/fonts" }}
+{{- end }}
+
+sourceDir: {{ .chezmoi.sourceDir | quote }}
+
+hooks:
+  apply:
+    post:
+      command: sh
+      args:
+        - -c
+        - |
+          set -eu
+          state="${XDG_STATE_HOME:-$HOME/.local/state}"
+          mkdir -p "$state/wget"
+
+          # Só no Linux: atualiza cache de fontes se fc-cache existir
+          {{- if eq $os "linux" }}
+          if command -v fc-cache >/dev/null 2>&1; then
+            fc-cache -f "{{ $font_dir }}" >/dev/null 2>&1 || true
+          fi
+          {{- end }}
+
+data:
+  personal:
+    name: {{ $personalName | quote }}
+    email: {{ $personalEmail | quote }}
+    signing_key: {{ $personalSigningKey | quote }}
+  work:
+    name: {{ $workName | quote }}
+    email: {{ $workEmail | quote }}
+    signing_key: {{ $workSigningKey | quote }}
+  is:
+    personal: {{ $isPersonal }}
+    work: {{ $isWork }}
+    wsl:          {{ $isWSL       | not | not }}
+    container:    {{ $isContainer | not | not }}
+    devcontainer: {{ $isDevcontainer | not | not }}
+    codespaces:   {{ $isCodespaces   | not | not }}
+    vm:           {{ $isVM        | not | not }}
+    headless:     {{ $isHeadless  | not | not }}
+    ephemeral:    {{ $isEphemeral | not | not }}
+  # Convenience: GUI availability (true on macOS or when X/Wayland present)
+    gui:          {{ and (not $isHeadless) $hasDisplay  | not | not }}
+  path:
+    npm: {{ $npm_dir }}
+    volta: {{ $volta_dir }}
+    cargo: {{ $cargo_dir }}
+    uv: {{ $uv_dir }}
+    go: {{ $go_dir }}
+  xdg:
+    config: '{{ env "XDG_CONFIG_HOME" | default (joinPath .chezmoi.homeDir ".config") }}'
+    data:   '{{ env "XDG_DATA_HOME"   | default (joinPath .chezmoi.homeDir ".local/share") }}'
+    state:  '{{ env "XDG_STATE_HOME"  | default (joinPath .chezmoi.homeDir ".local/state") }}'
+    cache:  '{{ env "XDG_CACHE_HOME"  | default (joinPath .chezmoi.homeDir ".cache") }}'
+    bin:  '{{ joinPath .chezmoi.homeDir ".local/bin" }}'
+    opt:  '{{ joinPath .chezmoi.homeDir ".local/opt" }}'
+    font:  '{{ $font_dir }}'
+  cmd:
+    sudo: {{ $sudo }}
+    os:
+      update: {{ $update_cmd }}
+      upgrade: {{ $upgrade_cmd }}
+      install: {{ $install_cmd }}
+      search: {{ $search_cmd }}
+    bat: {{ ternary "batcat" "bat" (eq $osIDLike "debian" )}}
+    node:
+      install: env VOLTA_HOME="{{ $volta_dir }}" volta install
+    python:
+      install: env UV_TOOL_DIR="{{ $uv_dir }}" UV_TOOL_BIN_DIR="{{ $uv_dir }}/bin" {{ joinPath .chezmoi.homeDir ".local/bin" }}/uv tool install
+    cargo:
+      install: env CARGO_HOME="{{ $cargo_dir }}" cargo install --root "{{ $cargo_dir }}"
+    go:
+      install: env GOPATH="{{ $go_dir }}" GOBIN="{{ $go_dir }}/bin" go install
+    snap:
+      install: {{ printf "%s snap install" $sudo | trim }}
+    flatpak:
+      install: flatpak install --system -y --noninteractive
+  env:
+     de:  {{- print " " }}
+          {{- $raw := lower (trim (or (env "CHEZMOI_DE") (env "XDG_CURRENT_DESKTOP") (env "DESKTOP_SESSION") "")) -}}
+          {{- if or (contains "gnome" $raw) (contains "ubuntu:gnome" $raw) -}}gnome
+          {{- else if or (contains "plasma" $raw) (contains "kde" $raw) -}}kde
+          {{- else if contains "xfce" $raw -}}xfce
+          {{- else if contains "sway" $raw -}}sway
+          {{- else if or (contains "lxqt" $raw) (contains "lxde" $raw) -}}lxqt
+          {{- else if contains "cinnamon" $raw -}}cinnamon
+          {{- else if contains "mate" $raw -}}mate
+          {{- else if eq .chezmoi.os "darwin" -}}aqua
+          {{- else -}}cli{{- end }}
+  github:
+  {{- if $isPersonal }}
+    name: {{ $personalName | quote }}
+    email: {{ $personalEmail | quote }}
+    signing_key: {{ $personalSigningKey | quote }}
+
+  {{- else }}
+    name: {{ $workName | quote }}
+    email: {{ $workEmail | quote }}
+    signing_key: {{ $workSigningKey | quote }}
+  {{- end }}
+
+  editor:
+    terminal: {{ $editor | quote }}
+    gui: {{ $visual | quote }}
+  locale: "en_US.UTF-8"
+  language: "en_US.UTF-8"
+
+  browser: "google-chrome"
+  osid: {{ $osID | quote }}
+  osidlike: {{ $osIDLike | quote }}
+
+diff:
+  exclude: ["scripts"]
+
+template:
+  options: ["missingkey=zero"]
+
+

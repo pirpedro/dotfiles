@@ -1,0 +1,196 @@
+if [[ -t 1 ]]; then
+  BOLD="$(tput bold 2>/dev/null || true)"
+  DIM="$(tput dim 2>/dev/null || true)"
+  RED="$(tput setaf 1 2>/dev/null || true)"
+  GRN="$(tput setaf 2 2>/dev/null || true)"
+  YLW="$(tput setaf 3 2>/dev/null || true)"
+  BLU="$(tput setaf 4 2>/dev/null || true)"
+  RST="$(tput sgr0 2>/dev/null || true)"
+else
+  BOLD=""; DIM=""; RED=""; GRN=""; YLW=""; BLU=""; RST=""
+fi
+
+# ===== lazy log =====
+# Script identity (best effort)
+SCRIPT_PATH="${BASH_SOURCE[0]:-$0}"
+SCRIPT_NAME="$(basename "$SCRIPT_PATH")"
+SCRIPT_LABEL="${CM_SCRIPT_LABEL:-$SCRIPT_NAME}"
+LOG_FILE=""
+_ran_any=0
+ensure_log() {
+  [[ -n "$LOG_FILE" ]] && return 0
+  local state="${XDG_STATE_HOME:-$HOME/.local/state}"
+  local dir="$state/chezmoi-bootstrap"
+
+  # Try the “proper” directory; if it fails, fall back to /tmp
+  if ! mkdir -p "$dir" 2>/dev/null; then
+    dir="$(mktemp -d -t chezmoi-bootstrap.XXXXXX)"
+    echo "(!) No permission at $state, using $dir for log" >&2
+  fi
+
+  LOG_FILE="$dir/run-$(date +%Y%m%d-%H%M%S).log"
+  : >"$LOG_FILE" || { echo "!! não consegui criar $LOG_FILE" >&2; exit 1; }
+
+  echo -e "${DIM}→ [${SCRIPT_LABEL}] log at ${LOG_FILE}${RST}"
+  {
+    echo "=== chezmoi bootstrap ==="
+    echo "when: $(date -Is)"
+    echo "user: $(id -un) ($(id -u))"
+    echo "host: $(hostname)"
+    echo "shell: $SHELL"
+    echo "script: ${SCRIPT_LABEL}"
+    echo
+  } >>"$LOG_FILE"
+}
+
+section() { ensure_log; echo -e "\n${BOLD}${BLU}== ${*}${RST}"; [[ -n "$LOG_FILE" ]] && printf "\n## %s\n" "$*" >>"$LOG_FILE"; }
+
+# run: comandos sem pipes (passa como argv)
+run_fail() {
+  local desc="$1"; shift
+  _ran_any=1; ensure_log
+  printf "• %s... " "$desc"
+
+  # monta a linha do comando de forma segura
+  local cmdline=""; local a
+  for a in "$@"; do cmdline+=$(printf "%q " "$a"); done
+
+  {
+    echo "---- $(date -Is) :: $desc"
+    echo "+ ${cmdline}"
+  } >>"$LOG_FILE"
+
+  if "$@" >>"$LOG_FILE" 2>&1; then
+    echo -e "${GRN}ok${RST}"
+  else
+    local rc=$?
+    echo -e "${RED}failed${RST}"
+    echo "!! failed: $desc (see $LOG_FILE)" >&2
+    # mostra o final do log para depurar rápido
+    tail -n 25 "$LOG_FILE" | sed 's/^/   │ /' >&2 || true
+    return $rc
+  fi
+}
+
+# runsh: comandos com pipes/redirs (string) — executa via bash -lc
+runsh_fail () {
+  local desc="$1"; shift
+  local cmd="$*"
+  _ran_any=1; ensure_log
+  printf "• %s... " "$desc"
+  {
+    echo "---- $(date -Is) :: $desc"
+    echo "+ $cmd"
+  } >>"$LOG_FILE"
+  if bash -lc "set -o pipefail; $cmd" >>"$LOG_FILE" 2>&1; then
+    echo -e "${GRN}ok${RST}"
+  else
+    local rc=$?
+    echo -e "${RED}failed${RST}"
+    echo "!! failed: $desc (see $LOG_FILE)" >&2
+    tail -n 25 "$LOG_FILE" | sed 's/^/   │ /' >&2 || true
+    return $rc
+  fi
+}
+
+run() {
+   local desc="$1"; shift
+  _ran_any=1; ensure_log
+  printf "• %s... " "$desc"
+
+  # linha do comando pro log
+  local cmdline=""; local a
+  for a in "$@"; do cmdline+=$(printf "%q " "$a"); done
+  {
+    echo "---- $(date -Is) :: $desc"
+    echo "+ ${cmdline}"
+  } >>"$LOG_FILE"
+
+  if "$@" >>"$LOG_FILE" 2>&1; then
+    echo -e "${GRN}ok${RST}"
+  else
+    # só um status curtinho no prompt; detalhes ficam no log
+    echo -e "${YLW}failed (ignored)${RST}"
+    return 0
+  fi
+}
+
+runsh() {
+  local desc="$1"; shift
+  local cmd="$*"
+  _ran_any=1; ensure_log
+  printf "• %s... " "$desc"
+  {
+    echo "---- $(date -Is) :: $desc"
+    echo "+ $cmd"
+  } >>"$LOG_FILE"
+
+  if bash -lc "set -o pipefail; $cmd" >>"$LOG_FILE" 2>&1; then
+    echo -e "${GRN}ok${RST}"
+  else
+    echo -e "${YLW}failed (ignored)${RST}"
+    return 0
+  fi
+}
+
+source_ok() {
+  local desc="$1"; local file="$2"
+  _ran_any=1; ensure_log
+  printf "• %s... " "$desc"
+  {
+    echo "---- $(date -Is) :: $desc"
+    echo "+ . \"$file\""
+  } >>"$LOG_FILE"
+
+  if [ ! -f "$file" ]; then
+    echo -e "${YLW}skip (missing)${RST}"
+    {
+      echo "   (skip) file not found: $file"
+    } >>"$LOG_FILE"
+    return 0
+  fi
+
+  # shellcheck disable=SC1090
+  if . "$file" >>"$LOG_FILE" 2>&1; then
+    echo -e "${GRN}ok${RST}"
+  else
+    echo -e "${YLW}failed (ignored)${RST}"
+    return 0
+  fi
+}
+
+source_fail() {
+  local desc="$1"; local file="$2"
+  _ran_any=1; ensure_log
+  printf "• %s... " "$desc"
+  {
+    echo "---- $(date -Is) :: $desc"
+    echo "+ . \"$file\""
+  } >>"$LOG_FILE"
+
+  if [ ! -f "$file" ]; then
+    echo -e "${RED}failed${RST}"
+    echo "!! failed: file does not exist: $file (see $LOG_FILE)" >&2
+    tail -n 25 "$LOG_FILE" | sed 's/^/   │ /' >&2 || true
+    return 1
+  fi
+
+  # shellcheck disable=SC1090
+  if . "$file" >>"$LOG_FILE" 2>&1; then
+    echo -e "${GRN}ok${RST}"
+  else
+    local rc=$?
+    echo -e "${RED}failed${RST}"
+    echo "!! failed: $desc (see $LOG_FILE)" >&2
+    tail -n 25 "$LOG_FILE" | sed 's/^/   │ /' >&2 || true
+    return $rc
+  fi
+}
+
+# At the end: if nothing ran, no log file; if something ran, show where it is
+cleanup_log() {
+  if [[ $_ran_any -eq 1 && -n "$LOG_FILE" ]]; then
+    echo -e "${DIM}↳ [${SCRIPT_LABEL}] log completo: ${LOG_FILE}${RST}"
+  fi
+}
+trap cleanup_log EXIT

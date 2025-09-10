@@ -1,0 +1,47 @@
+# -*-mode:curlrc-*- vim:ft=dosini
+
+# ~/.curlrc
+# =============================================================================
+# Configures startup options for cURL.
+silent
+show-error
+
+# Falha com código de saída em 4xx/5xx:
+fail
+
+# Retry mais abrangente (transientes, conn refused, etc.)
+retry = 5
+retry-connrefused
+retry-delay = 2
+retry-max-time = 60
+# (se sua versão do curl suportar)
+
+# retry-all-errors
+
+# -------- Tempo/timeout ----------
+connect-timeout = 15
+max-time = 300
+
+# -------- HTTP/HTTPS ----------
+# Siga redirects, mas só para HTTPS (evita ser redirecionado p/ esquemas não desejados)
+location
+proto-default = https
+proto-redir = https
+
+# Aceite e descomprima (gzip/deflate/br) automaticamente
+compressed
+
+# HTTP/2 quando possível (fallback automático p/ HTTP/1.1)
+http2
+
+# -------- Data/hora --------
+remote-time
+
+# -------- Referer & User-Agent ----------
+# Referer automático ao seguir redirects (útil p/ muitos downloads),
+# mas aumenta “rastreamento” — deixe comentado se preferir mais privacidade.
+# referer = ";auto"
+
+# Evite ‘spoofar’ um navegador específico. Deixe o UA padrão do curl
+# ou defina um identificador estável seu (opcional):
+# user-agent = "curl-pedro/1.0"

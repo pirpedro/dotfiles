@@ -1,0 +1,48 @@
+# Productivity-focused htoprc
+# NOTE: htop rewrites this file on clean exit; comments may be removed by htop itself.
+
+# --- Update & visuals ----------------------------------------------------------
+delay=10                       # Update every ~1.0s (htop uses tenths of a second)
+color_scheme=6                 # High-contrast color scheme
+tree_view=0                    # Disable tree view -> enables global sorting
+header_margin=1                # Compact header
+
+# --- CPU accounting ------------------------------------------------------------
+detailed_cpu_time=1            # Show detailed CPU time (iowait, steal, etc.)
+account_guest_in_cpu_meter=1   # Count CPU time of guests/VMs in CPU meters
+cpu_count_from_zero=0          # CPU numbering starts at 1 (easier to read)
+
+# --- Readability ---------------------------------------------------------------
+highlight_base_name=1          # Highlight executable basename
+highlight_megabytes=1          # Highlight MB/GB values for quick scanning
+highlight_threads=1            # Emphasize threads when shown
+show_thread_names=1            # Display thread names when expanded
+update_process_names=1         # Refresh process names (useful for Python/Node)
+show_program_path=1            # Shorter command column (basename)
+
+# --- What to hide by default ---------------------------------------------------
+hide_kernel_threads=1          # Hide kernel threads (noise)
+hide_userland_threads=1        # Hide userland threads initially (toggle with 'H')
+hide_threads=1                 # Start with threads collapsed
+
+# --- Sorting (you can override live with P/M/T keys) ---------------------------
+# Keep your current sort; use: 'P' for CPU%, 'M' for MEM%, 'T' for TIME+.
+sort_key=46
+sort_direction=-1
+tree_sort_key=46
+
+# --- Meters (top bars) ---------------------------------------------------------
+# Left: CPU + per-core + Memory (always-visible)
+left_meters=CPU AllCPUs2 Memory
+# Right: Load/Uptime/Tasks + Disk/Net IO (+ Swap if you use it)
+right_meters=LoadAverage Uptime Tasks DiskIO NetworkIO Swap
+# (Modes for meters are auto-picked; htop will rewrite exact modes on exit.)
+
+# --- Columns (process table) ---------------------------------------------------
+# NOTE: Field IDs are version-dependent. Set columns once via F2 → Columns:
+# Recommended order: PID · USER · STATE · CPU% · MEM% · RESIDENT · VIRT ·
+#                    IO_READ_RATE · IO_WRITE_RATE · TIME+ · COMMAND
+# After you save & quit, htop will persist the numeric 'fields=' line here.
+
+# Keep your current fields line (htop will overwrite after you adjust via F2):
+fields=50 0 48 17 18 38 39 40 2 46 47 49 1

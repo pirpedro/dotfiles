@@ -1,0 +1,34 @@
+{{ if .is.personal -}}
+workspaces:
+  all:
+    root: dev/ws
+  personal:
+    root: dev/ws/my
+    repos:
+      - name: pirpedro/pirpedro.github.io:blog/personal
+      - name: psrandom/psrandom.github.io.git:blog/psrandom
+      - name: pirpedro/CEMEAI-USP:MBA-CEMEAI/Disciplinas
+      - name: pirpedro/CEMEAI_TCC:MBA-CEMEAI/TCC
+      - name: pirpedro/docker
+      - name: pirpedro/git-gadgets
+      - name: pirpedro/my-config
+      - name: pirpedro/bootstrapping:rule-them-all
+      - name: pirpedro/Inquirer.sh
+      - name: pirpedro/bash-common
+  fullcycle:
+    root: dev/ws/fullcycle
+    repos:
+      - name: pirpedro/flix-catalog:catalog
+      - name: pirpedro/flix-encoder:encoder
+      - name: pirpedro/flix-auth:micro-auth
+      - name: pirpedro/flix-micro-catalog:micro-catalog
+      - name: pirpedro/flix-message-broker:rabbitmq
+  UFF:
+    root: dev/ws/UFF
+    repos:
+      - name: pirpedro/pgfa
+      - name: nees-uff/pef
+      - name: b2in-tech/prepaf
+      - name: nees-uff/prepaf:polar-scout
+      - name: b2in-tech/fund-of-funds
+{{ end -}}

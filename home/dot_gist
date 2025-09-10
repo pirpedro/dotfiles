@@ -1,0 +1,25 @@
+# ~/.gist (YAML)
+
+# Autenticação (token pessoal do GitHub com escopo "gist")
+
+:login: "pirpedro"
+:token: "ghp_xxx...xxx"
+
+# HTTPS sempre
+
+:secure: true
+
+# Comportamento padrão
+
+:private: true # gists "secret" por padrão (não-listados)
+:copy: true # copia a URL pro clipboard automaticamente (equivale a -c)
+:open: false # não abrir no navegador automaticamente (use true se quiser)
+:browser: "open" # macOS; em Linux pode ser "xdg-open" (só usado se :open for true)
+
+# Proxy (se precisar)
+
+# :proxy: "http://user:pass@proxy:8080"
+
+# Enterprise (se usar API corporativa)
+
+# :github_api_url: "https://github.empresa.com/api/v3"

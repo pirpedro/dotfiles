@@ -1,0 +1,25 @@
+# Defaults aplicados a todos os hosts
+Host *
+  AddKeysToAgent yes
+  IdentitiesOnly yes
+  ServerAliveInterval 60
+  ServerAliveCountMax 3
+  TCPKeepAlive yes
+  HashKnownHosts yes
+  UpdateHostKeys yes
+  # Multiplexing (rápido e seguro; %C evita path gigante)
+  ControlMaster auto
+  ControlPersist 10m
+  ControlPath ~/.ssh/ctl/%C
+
+  # Identities padrão (ordem da tentativa)
+  IdentityFile ~/.ssh/keys.d/id_ed25519
+  IdentityFile ~/.ssh/keys.d/id_rsa
+
+  {{- if eq .chezmoi.os "darwin" }}
+  # macOS: integra com Keychain
+  UseKeychain yes
+  {{- end }}
+
+# Carrega configs específicas
+Include ~/.ssh/conf.d/*.conf

@@ -1,0 +1,26 @@
+# --- core prezto-equivalentes ---
+ohmyzsh/ohmyzsh                 path:plugins/git
+ohmyzsh/ohmyzsh                 path:plugins/docker
+# opcional: agente ssh (substitui parte do prezto:ssh)
+# ohmyzsh/ohmyzsh               path:plugins/ssh-agent
+
+# --- navegação / “fasd” replacement ---
+ajeetdsouza/zoxide                   # fornece 'z' e 'j' (jump por frequência)
+
+# --- marks como no prezto:fzf-marks ---
+urbainvaes/fzf-marks            # mark / jump / unmark / marks
+
+# --- UX de completion (carregar APÓS compinit; mas o bundle é sourced depois) ---
+Aloxaf/fzf-tab
+
+# essenciais
+zsh-users/zsh-autosuggestions
+zsh-users/zsh-history-substring-search
+zsh-users/zsh-completions
+zsh-users/zsh-syntax-highlighting
+
+
+# --- opcional: helpers git com fzf (bem útil) ---
+# wfxr/forgit
+
+

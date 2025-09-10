@@ -1,0 +1,17 @@
+# prettier-ignore
+policy:
+  # Deny packages by TAG when these machine states are active.
+  # This keeps packages.yaml clean — you assign semantic tags there, and
+  # decide here what to block on each kind of machine.
+  deny_tags:
+    headless:     [gui]                         # no GUI on headless servers
+    devcontainer: [gui, daemon, host-mod]       # containers: avoid GUI & host-level daemons/config
+    ephemeral:    [heavy, gui, daemon]          # short-lived: avoid heavy & long-lived services
+    work:         [sensitive]                    # corporate: possibly sensitive tooling
+
+  # Optional per-package overrides (win over tag-based policy).
+  # Use sparingly, only where you truly want exceptions.
+  overrides:
+    docker:      { not: devcontainer }          # reinforce: never inside devcontainers
+    youtube-dl:  { not: work }                  # policy-sensitive example
+    mitmproxy:   { not: work }                  # uncomment if your company restricts it

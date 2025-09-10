@@ -1,0 +1,57 @@
+# chezmoi:template:left-delimiter="[["
+# chezmoi:template:right-delimiter="]]"
+
+# [".local/share/zprezto"]
+# type = "git-repo"
+# url = "https://github.com/sorin-ionescu/prezto.git"
+# refreshPeriod = "168h"
+# [".local/share/zprezto".clone]
+# args = ["--recursive"]
+# [".local/share/zprezto".update]
+# args = ["--recurse-submodules"]
+
+[".local/share/antidote"]
+type = "git-repo"
+url = "https://github.com/mattmc3/antidote.git"
+
+[".vim/autoload/plug.vim"]
+type = "file"
+url = "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+refreshPeriod = "168h"
+
+[".local/share/nvim/site/autoload/plug.vim"]
+type = "file"
+url = "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+refreshPeriod = "168h"
+
+[".config/nano/nano-syntax-highlighting"]
+type = "archive"
+url = "https://github.com/galenguyer/nano-syntax-highlighting/archive/master.tar.gz"
+stripComponents = 1
+include = ["**/*.nanorc"]
+refreshPeriod = "168h"
+
+
+[[- if and (eq .chezmoi.os "linux") .is.personal (not .is.ephemeral) ]]
+[[- $ageVersion := "1.0.0" ]]
+[".local/bin/age"]
+  type = "file"
+  url = "https://github.com/FiloSottile/age/releases/download/v[[ $ageVersion ]]/age-v[[ $ageVersion ]]-[[ .chezmoi.os ]]-[[ .chezmoi.arch ]].tar.gz"
+  executable = true
+  [".local/bin/age".filter]
+      command = "tar"
+      args = ["--extract", "--file", "/dev/stdin", "--gzip", "--to-stdout", "age/age"]
+[".local/bin/age-keygen"]
+  type = "file"
+  url = "https://github.com/FiloSottile/age/releases/download/v[[ $ageVersion ]]/age-v[[ $ageVersion ]]-[[ .chezmoi.os ]]-[[ .chezmoi.arch ]].tar.gz"
+  executable = true
+  [".local/bin/age-keygen".filter]
+      command = "tar"
+      args = ["--extract", "--file", "/dev/stdin", "--gzip", "--to-stdout", "age/age-keygen"]
+[[- end ]]
+
+[[ template "external/fonts" . ]]
+
+[[/* template "external/gitprojects" . */]]
+
+[[/* template "external/themes" . */]]

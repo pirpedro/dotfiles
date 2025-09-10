@@ -1,0 +1,166 @@
+packages:
+  - curl
+  - wget
+  - bsdtar:
+      installers:
+        - pkg_map:
+            debian: libarchive-tools
+            fedora: libarchive
+            suse: bsdtar
+            arch: libarchive
+            alpine: libarchive-tools
+  - vim
+  - git
+  - zsh
+  - progress
+  - bat:
+      installers:
+        - type: os
+          alias_map:
+            debian: batcat
+  - htop
+  - fzf
+  - zoxide
+  - ranger
+  - direnv
+  - unzip
+  - oh-my-posh:
+      installers:
+        - type: script
+          url: https://ohmyposh.dev/install.sh
+          args: '-d "$BIN_DIR"'
+  # - starship:
+  #     installers:
+  #       - type: script
+  #         url: https://starship.rs/install.sh
+  #         args: '-b "$BIN_DIR" -y'
+  - ip:
+      installers:
+        - pkg_map:
+          fedora: iproute
+        - pkg: iproute2
+  - eza
+  - vivid
+  - psql:
+      installers:
+        - pkg_map:
+            darwin: postgresql@17
+            debian: postgresql-client
+            alpine: postgresql-client
+        - pkg: postgresql
+  - pspg
+  - git-delta
+  - ripgrep: { alias: rg }
+  - jq
+  - yq:
+    installers:
+      - type: bin
+        repo: "mikefarah/yq"
+        path: "yq_[[OS]]_[[ARCH]].tar.gz"
+  - lnav
+  - ncdu
+  - imagemagick: { alias: convert }
+  - mitmproxy
+  - httpie: { alias: http }
+  - neofetch
+  - make: { not: ephemeral }
+  - column:
+      not: ephemeral
+      installers:
+        - type: os
+          pkg: bsdmainutils
+          when:
+            osidlike: debian
+        - type: os
+          pkg: util-linux
+  - git-extras: { alias: git-bulk, not: ephemeral }
+  - node: { not: ephemeral }
+  - python3-pip: { alias: pip3, not: ephemeral }
+  - docker: { not: ephemeral }
+  # - goreleaser: {not: ephemeral:headless} install only if necessary because require too many packages.
+  - nmap: { not: ephemeral }
+  - pandoc: { not: ephemeral }
+  - asciinema:
+      not: ephemeral
+      installers:
+        - type: os
+          when:
+            osidlike: "darwin"
+        - type: pipx
+  - "@bitwarden/cli": { alias: bw, not: ephemeral:work, installer: node }
+  - tldr: { not: ephemeral, installer: node }
+  - firebase-tools: { alias: firebase, not: ephemeral, installer: node }
+  - fkill-cli: { alias: fkill, not: ephemeral, installer: node }
+  - gcloud: { not: ephemeral }
+  - delta:
+      not: ephemeral
+      alias: git-delta
+      installers:
+        - type: bin
+          when:
+            osidlike: debian
+          repo: "dandavison/delta"
+          path: "git-delta_[[VERSION]]_[[ARCH]].deb"
+          tool: curl
+  - github: { alias: gh, not: ephemeral:work }
+  - youtube-dl: { not: ephemeral:work }
+  - sushi: { not: headless, de: gnome }
+  - neovim: { alias: nvim, not: headless }
+  - vscode: { alias: code, not: headless }
+  - lens: { not: headless }
+  - google-chrome: { not: headless }
+  - xclip: { not: headless }
+  - kitty: { not: headless }
+  # - etcher: { not: headless }
+  - ulauncher: { not: headless }
+  - gnome-tweaks: { not: headless, de: gnome }
+  - gnome-shell-extension-installer: { not: headless, de: gnome }
+  - gnome-system-monitor: { not: headless, de: gnome }
+  - ffmpeg: { not: ephemeral:headless, de: gnome } #necessary for gnome-extension 1544 using nodejs
+  - typescript@latest:
+      { alias: tsc, not: ephemeral:headless, de: gnome, installer: node }
+  - cookiecutter: { not: ephemeral, installer: python }
+  - ctop: { not: ephemeral }
+  - dive:
+      not: ephemeral
+      installers:
+        - type: bin
+          when:
+            osidlike: debian
+          repo: "wagoodman/dive"
+          path: "dive_[[PLAIN_VERSION]]_[[OS]]_[[ARCH]].deb"
+        - type: bin
+          when:
+            osidlike: fedora
+          repo: "wagoodman/dive"
+          path: "dive_[[PLAIN_VERSION]]_[[OS]]_[[ARCH]].rpm"
+  - lazydocker: { not: ephemeral }
+  # - ansible: {not: ephemeral, installer: python}
+  # - terraform: {not: ephemeral}
+  - glances: { not: ephemeral, installer: python }
+  - localtunnel: { alias: lt, not: ephemeral, installer: node }
+  - libreoffice: { not: ephemeral:headless }
+  # - figma: {alias: figma-linux, not: ephemeral:headless }
+  # - drawio: {not: ephemeral:headless}
+  - insync: { not: ephemeral:headless }
+  - steam: { not: ephemeral:headless }
+  - gimp: { not: ephemeral:headless }
+  - inkscape: { not: ephemeral:headless }
+  - discord: { not: ephmeral:headless }
+  # - slack:
+  #     not: ephemeral:headless
+  #     installers:
+  #       - type: flatpak
+  #         pkg: com.slack.Slack
+  #       - type: snap
+  #         pkg: slack
+  - vlc: { not: ephemeral:headless }
+  - dbeaver-ce:
+      not: ephemeral:headless
+      installers:
+        - type: flatpak
+          pkg: io.dbeaver.DBeaverCommunity
+        - type: snap
+          pkg: dbeaver-ce
+        - type: os
+          pkg: dbeaver-ce

@@ -1,0 +1,209 @@
+# prettier-ignore
+packages:
+  # --- Core tooling (CLI, tiny footprint) ---
+  - curl
+  - wget
+  - bsdtar:
+      installers:
+        # Distro-specific package names
+        - pkg_map:
+            debian:  libarchive-tools
+            alpine:  libarchive-tools
+            arch:    libarchive
+            fedora:  libarchive
+            suse:    bsdtar
+  - unzip
+  - git
+  - vim
+  - zsh
+  - progress
+  - htop
+  - fzf
+  - zoxide
+  - ranger
+  - direnv
+  - eza
+  - vivid
+
+  # --- Package name differences by distro (examples) ---
+  - bat:
+      installers:
+        - type: os
+          alias_map:
+            debian: batcat
+  - ip:
+      installers:
+        - pkg_map: { fedora: iproute }
+        - pkg: iproute2
+
+  # --- DB client(s) ---
+  - psql:
+      tags: cli:db
+      installers:
+        - pkg_map:
+            darwin: postgresql@17   # brew
+            debian: postgresql-client
+            alpine: postgresql-client
+        - pkg: postgresql
+  - pspg: { tags: cli:db }
+
+  # --- Dev CLIs with release assets (bin) ---
+  - yq:
+      installers:
+        - type: bin
+          repo: "mikefarah/yq"
+          path: "yq_[[OS]]_[[ARCH]].tar.gz"   # resolves latest version automatically
+  - git-delta:
+      alias: delta
+      installers:
+        - type: bin
+          when: { osidlike: debian }
+          repo: "dandavison/delta"
+          path: "git-delta_[[PLAIN_VERSION]]_[[ARCH]].deb"  # deb needs version without the leading 'v'
+          tool: curl
+  - dive:
+      installers:
+        - type: bin
+          when: { osidlike: debian }
+          repo: "wagoodman/dive"
+          path: "dive_[[PLAIN_VERSION]]_[[OS]]_[[ARCH]].deb"
+        - type: bin
+          when: { osidlike: fedora }
+          repo: "wagoodman/dive"
+          path: "dive_[[PLAIN_VERSION]]_[[OS]]_[[ARCH]].rpm"
+
+  # --- GitHub CLI (bin) ---
+  - github:
+      alias: gh
+      installers:
+        # Debian/Ubuntu: official .deb
+        - type: bin
+          when: { osidlike: debian }
+          repo: "cli/cli"
+          path: "gh_[[PLAIN_VERSION]]_[[OS]]_[[ARCH]].deb"
+          tool: curl
+        # Fedora/RHEL/SUSE: .rpm
+        - type: bin
+          when: { osidlike: fedora }
+          repo: "cli/cli"
+          path: "gh_[[PLAIN_VERSION]]_[[OS]]_[[ARCH]].rpm"
+          tool: curl
+        - type: bin
+          when: { osidlike: rhel }
+          repo: "cli/cli"
+          path: "gh_[[PLAIN_VERSION]]_[[OS]]_[[ARCH]].rpm"
+          tool: curl
+        - type: bin
+          when: { osidlike: suse }
+          repo: "cli/cli"
+          path: "gh_[[PLAIN_VERSION]]_[[OS]]_[[ARCH]].rpm"
+          tool: curl
+        # Generic tar.gz fallback (extracts 'gh')
+        - type: bin
+          repo: "cli/cli"
+          path: "gh_[[PLAIN_VERSION]]_[[OS]]_[[ARCH]].tar.gz"
+          inner: "gh_*/bin/gh"
+          tool: curl
+
+  # --- Misc CLIs ---
+  - ripgrep:     { alias: rg }
+  - jq
+  - lnav
+  - ncdu
+  - imagemagick: { alias: convert }
+  - mitmproxy:   { tags: sensitive }
+  - httpie:      { alias: http }
+  - neofetch
+  - make:        { tags: build }
+  - column:
+      installers:
+        - type: os
+          pkg: bsdmainutils
+          when: { osidlike: debian }
+        - type: os
+          pkg: util-linux
+
+  # --- Containers / Cloud SDKs ---
+  - docker: { tags: daemon:heavy:host-mod }
+  - gcloud: { tags: heavy:sdk , disable: true }
+  - doctl:
+      tags: cli:sdk
+      installers:
+        - pkg_map: { arch: doctl, fedora: doctl }
+        - type: bin
+          repo: "digitalocean/doctl"
+          path: "doctl-[[PLAIN_VERSION]]-[[OS]]-[[ARCH]].tar.gz"
+
+  # --- Language tooling via network script (pipe to sh) ---
+  - oh-my-posh:
+      installers:
+        - type: script
+          url: https://ohmyposh.dev/install.sh
+          args: '-d "$BIN_DIR"'
+  # - starship:
+  #     installers:
+  #       - type: script
+  #         url: https://starship.rs/install.sh
+  #         args: '-b "$BIN_DIR" -y'
+
+  # --- Asciinema: OS on macOS, pipx elsewhere ---
+  - asciinema:
+      tags: cli
+      installers:
+        - type: os
+          when: { osid: darwin }  # Homebrew on macOS
+        - type: python
+
+  # --- Desktop apps (GUI) ---
+  - vscode:      { tags: gui, alias: code }
+  - lens:        { tags: gui }
+  - google-chrome: { tags: gui }
+  - xclip:       { tags: gui }
+  - kitty:       { tags: gui }
+  - ulauncher:   { tags: gui }
+  - gnome-tweaks: { tags: gui, de: gnome }
+  - gnome-shell-extension-installer: { tags: gui, de: gnome }
+  - gnome-system-monitor: { tags: gui, de: gnome }
+  - libreoffice: { tags: gui:heavy }
+  - insync:      { tags: gui }
+  - steam:
+      tags: gui
+      installers:
+        # Debian/Ubuntu
+        - type: os
+          when: { osidlike: debian }
+          pkg: steam-installer
+        # Fedora/RHEL
+        - type: os
+          pkg: steam
+        - type: flatpak
+          remote: flathub
+          pkg: com.valvesoftware.Steam
+
+  - gimp:        { tags: gui }
+  - inkscape:    { tags: gui }
+  - discord:     { tags: gui, disable: true }  # not used currently
+  - vlc:         { tags: gui }
+
+  # --- Others (GNOME-specific dependency) ---
+  - ffmpeg:      { de: gnome }  # used by a GNOME extension
+  - typescript@latest:
+      tags: node:gui
+      alias: tsc
+      installers:
+        - type: node
+  - xh:
+      installers:
+        - type: cargo
+  - howdoi:
+      installers:
+        - type: python
+  - gum@latest:
+      alias: gum
+      installers:
+        - type: go
+          pkg: github.com/charmbracelet/gum@latest
+  - ncu:
+      installers:
+        - type: node
+          pkg: npm-check-updates@latest
