@@ -1,0 +1,196 @@
+{{- /* ~/.local/share/completions/                               */ -}}
+{{- /* ├── bash/                                                 */ -}}
+{{- /* │   ├── vendor/      vindo de pacotes (copiados/symlinks) */ -}}
+{{- /* │   ├── generated/   gerados via `foo completion bash`    */ -}}
+{{- /* │   └── custom/      completions que você escreveu        */ -}}
+{{- /* └── zsh/                                                  */ -}}
+{{- /*     ├── vendor/                                           */ -}}
+{{- /*     ├── generated/                                        */ -}}
+{{- /*     └── custom/                                           */ -}}
+
+#!/bin/sh
+set -eu
+
+# ------------------------------
+# Paths
+# ------------------------------
+XDG_DATA_HOME="{{ .xdg.data }}"
+XDG_CACHE_HOME="{{ .xdg.cache }}"
+
+BASE="$XDG_DATA_HOME/completions"
+
+BASH_BASE="$BASE/bash"
+BGEN="$BASH_BASE/generated"
+BVND="$BASH_BASE/vendor"
+BCST="$BASH_BASE/custom"
+
+ZSH_BASE="$BASE/zsh"
+ZGEN="$ZSH_BASE/generated"
+ZVND="$ZSH_BASE/vendor"
+ZCST="$ZSH_BASE/custom"
+
+mkdir -p "$BGEN" "$BVND" "$BCST" "$ZGEN" "$ZVND" "$ZCST"
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# ------------------------------
+# System/vendor completion lookup (Linux + Homebrew)
+# ------------------------------
+BREW_PREFIX=""
+if have brew; then BREW_PREFIX="$(brew --prefix 2>/dev/null || true)"; fi
+
+# Candidate dirs that may contain zsh completion functions (_cmd)
+ZSH_SITE_DIRS="
+/usr/share/zsh/vendor-completions
+/usr/share/zsh/site-functions
+/usr/local/share/zsh/site-functions
+$BREW_PREFIX/share/zsh/site-functions
+/opt/homebrew/share/zsh/site-functions
+"
+
+# Candidate dirs that may contain bash completion scripts (cmd)
+BASH_SITE_DIRS="
+/usr/share/bash-completion/completions
+/etc/bash_completion.d
+/usr/local/etc/bash_completion.d
+$BREW_PREFIX/etc/bash_completion.d
+/opt/homebrew/etc/bash_completion.d
+"
+
+# Link helper: if a file exists in any site dir, symlink it into our vendor dir
+link_vendor_zsh() {
+  # $1 = command name, $2..$N = alt names to try (_batcat for bat on Debian, etc.)
+  _cmds="$*"
+  for _name in $_cmds; do
+    _file="_$_name"
+    for d in $ZSH_SITE_DIRS; do
+      [ -n "$d" ] || continue
+      [ -r "$d/$_file" ] || continue
+      ln -sf "$d/$_file" "$ZVND/$_file"
+      # stop at the first found for this name
+      break
+    done
+  done
+}
+
+link_vendor_bash() {
+  # $1 = command name, $2..$N = alt names
+  _cmds="$*"
+  for _name in $_cmds; do
+    for d in $BASH_SITE_DIRS; do
+      [ -n "$d" ] || continue
+      # Preferred exact file "cmd"
+      if [ -r "$d/$_name" ]; then
+        ln -sf "$d/$_name" "$BVND/$_name"
+        break
+      fi
+      # Some distros ship as "cmd.bash"
+      if [ -r "$d/$_name.bash" ]; then
+        ln -sf "$d/$_name.bash" "$BVND/$_name"
+        break
+      fi
+    done
+  done
+}
+
+# ------------------------------
+# Generator helpers (write to generated/)
+# ------------------------------
+gen_zsh() { # $1=cmd $2.. = generator args, outputs to $ZGEN/_cmd
+  _cmd="$1"; shift || true
+  if have "$_cmd"; then
+    if "$_cmd" "$@" > "$ZGEN/_$_cmd" 2>/dev/null; then
+      return 0
+    else
+      rm -f "$ZGEN/_$_cmd" 2>/dev/null || true
+      return 1
+    fi
+  fi
+  return 1
+}
+
+gen_bash() { # $1=cmd $2.. = generator args, outputs to $BGEN/cmd
+  _cmd="$1"; shift || true
+  if have "$_cmd"; then
+    if "$_cmd" "$@" > "$BGEN/$_cmd" 2>/dev/null; then
+      return 0
+    else
+      rm -f "$BGEN/$_cmd" 2>/dev/null || true
+      return 1
+    fi
+  fi
+  return 1
+}
+
+# ------------------------------
+# 1) Generate completions from CLIs that support it
+# ------------------------------
+
+# Kubernetes / Helm / Docker / gh / asdf / chezmoi / doctl / oh-my-posh
+gen_zsh kubectl completion zsh || true
+gen_bash kubectl completion bash || true
+
+gen_zsh helm completion zsh || true
+gen_bash helm completion bash || true
+
+gen_zsh docker completion zsh || true
+gen_bash docker completion bash || true
+
+gen_zsh gh completion -s zsh || true
+gen_bash gh completion -s bash || true
+
+gen_zsh asdf completion zsh || true
+gen_bash asdf completion bash || true
+
+gen_zsh chezmoi completion zsh || true
+gen_bash chezmoi completion bash || true
+
+gen_zsh doctl completion zsh || true
+gen_bash doctl completion bash || true
+
+gen_zsh oh-my-posh completion zsh || true
+gen_bash oh-my-posh completion bash || true
+
+# yq (supports different verbs across versions: try multiple)
+if have yq; then
+  yq shell-completion zsh >"$ZGEN/_yq" 2>/dev/null \
+  || yq completion zsh >"$ZGEN/_yq" 2>/dev/null \
+  || rm -f "$ZGEN/_yq" 2>/dev/null || true
+
+  yq shell-completion bash >"$BGEN/yq" 2>/dev/null \
+  || yq completion bash >"$BGEN/yq" 2>/dev/null \
+  || rm -f "$BGEN/yq" 2>/dev/null || true
+fi
+
+# Zsh vendor links (cmd files)
+# gcloud often ships: completion.zsh.inc (not _gcloud); link it verbatim if present
+for f in \
+  /usr/share/google-cloud-sdk/completion.zsh.inc \
+  /usr/lib/google-cloud-sdk/completion.zsh.inc \
+  "$BREW_PREFIX/share/google-cloud-sdk/completion.zsh.inc" \
+  /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc
+do
+  [ -r "$f" ] && ln -sf "$f" "$ZVND/_gcloud.inc"
+done
+
+# Bash vendor links (cmd files)
+
+
+
+# gcloud bash include file (not a per-cmd file)
+for f in \
+  /usr/share/google-cloud-sdk/completion.bash.inc \
+  /usr/lib/google-cloud-sdk/completion.bash.inc \
+  "$BREW_PREFIX/share/google-cloud-sdk/completion.bash.inc" \
+  /opt/homebrew/share/google-cloud-sdk/completion.bash.inc
+do
+  [ -r "$f" ] && ln -sf "$f" "$BVND/gcloud.inc"
+done
+
+# ------------------------------
+# 3) Permissions + trigger zsh rebuild next login
+# ------------------------------
+chmod -R go-w "$BASE" "$XDG_CACHE_HOME/zsh" 2>/dev/null || true
+
+# Remove all zcompdump* so that your Completion block (compinit) rebuilds cache on next shell
+find "{{ .xdg.cache }}/zsh" -maxdepth 1 -type f -name 'zcompdump-*' -exec rm -f {} + 2>/dev/null || true

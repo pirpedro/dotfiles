@@ -1,17 +1,19 @@
 #   Antidote (plugins)
 #   ------------------------------------------------------------
 
-ANTIDOTE_DIR="$XDG_DATA_HOME/antidote"
-zsh_plugins="${ZDOTDIR:-$HOME}/.zsh_plugins"   # .txt e .zsh ficam “logicamente” aqui
+ANTIDOTE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/antidote"
+export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+# cache do oh-my-zsh/plug-ins (antes de source dos plugins)
+mkdir -p -- "$ZSH_CACHE_DIR/completions"
 
 #   Ensure the .zsh_plugins.txt file exists so you can add plugins.
 #   ------------------------------------------------------------
-
+zsh_plugins="${ZDOTDIR:-$HOME}/.zsh_plugins"   # .txt e .zsh ficam “logicamente” aqui
 [[ -f ${zsh_plugins}.txt ]] || touch ${zsh_plugins}.txt
 
 #   Load antidote via autoload
 #   ------------------------------------------------------------
-
+typeset -gaU fpath
 fpath=("$ANTIDOTE_DIR/functions" $fpath)
 autoload -Uz antidote
 

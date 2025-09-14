@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+{{- if or true and .is.personal (not .is.ephemeral) (not .is.headless) }}
+
+{{- /* --- carregar config (com suporte a templates) --- */ -}}
+{{- /* Load data files */ -}}
+{{ $cfg := fromYaml (output "chezmoi" "execute-template" (include ".chezmoithemes.yaml" | trim ) ) -}}
+{{- $active :=  dig "desktop" "default" "" $cfg -}}
+{{- $theme := dig "desktop" "themes" $active (dict) $cfg -}}
+{{- if eq (printf "%T" $theme) "map[string]interface {}" -}}
+  {{- /* robustez: aceitar bool ou string truthy para 'disable' */ -}}
+  {{- $rawDis := dig "disable" false $theme -}}
+  {{- $isBool := eq (printf "%T" $rawDis) "bool" -}}
+  {{- $isStrTruthy := and (not $isBool) (has (lower (printf "%v" $rawDis)) (list "1" "true" "yes" "on")) -}}
+  {{- $disabled := or (and $isBool $rawDis) $isStrTruthy -}}
+  {{- /* checar DE global a partir do YAML */ -}}
+  {{- $curDE := .env.de -}}
+  {{- $tDeOK := true -}}
+  {{- if hasKey $theme "de" -}}
+    {{- $tDeRaw := get $theme "de" -}}
+    {{- $tDeType := printf "%T" $tDeRaw -}}
+    {{- if eq $tDeType "string" -}}
+      {{- $want := lower (printf "%v" $tDeRaw) -}}
+      {{- $tDeOK = or (eq $want "*") (eq $want (lower $curDE)) -}}
+    {{- else -}}
+      {{- /* assume lista de strings */ -}}
+      {{- $lst := $tDeRaw -}}
+      {{- $tDeOK = or (has "*" $lst) (has $curDE $lst) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if and (not $disabled) $tDeOK -}}
+
+{{ template "prettier_shell_log" -}}
+section "[{{ .env.de }}] applying theme: {{ $active }}"
+
+has() { command -v "$1" >/dev/null 2>&1; }
+
+{{- /* --- extensões GNOME --- */ -}}
+gn_inst="$HOME/.local/bin/gnome-shell-extension-installer"
+if ! has gnome-extensions; then
+  echo "[warn] gnome-extensions not found; skipping extensions management"
+else
+  installed="$(gnome-extensions list 2>/dev/null || true)"
+  {{- range $ext := dig "extensions" (list) $theme -}}
+    if ! echo "$installed" | grep -q "{{ get $ext "uuid" }}"; then
+      if [ -x "$gn_inst" ]; then
+        echo "[ext] installing {{ get $ext "id" }} -> {{ get $ext "uuid" }}"
+        "$gn_inst" --yes "{{ get $ext "id" }}"
+      else
+        echo "[ext] installer not found ($gn_inst), skipping install of {{ get $ext "uuid" }}"
+      fi
+    fi
+    echo "[ext] enabling {{ get $ext "uuid" }}"
+    gnome-extensions enable "{{ get $ext "uuid" }}" || true
+  {{- end }}
+fi
+
+{{- /*  --- tema GTK --- */ -}}
+{{- $gtkName := dig "theme" "gtk" "" $theme -}}
+if [ -n "{{ $gtkName }}" ]; then
+  current="$(gsettings get org.gnome.desktop.interface gtk-theme | tr -d "'")"
+  if [ "$current" != "{{ $gtkName }}" ]; then
+    {{- $tDir := dig "theme" "install" "dir" "" $theme -}}
+    {{- $tSteps := dig "theme" "install" "steps" (list) $theme -}}
+    if [ -n "{{ $tDir }}" ] && [ -d "{{ $tDir }}" ]; then
+      echo "[theme] running install steps in {{ $tDir }}"
+      (cd "{{ $tDir }}" && { {{- range $s := $tSteps -}}
+        {{ $s }} && {{- end -}} true; })
+    fi
+    echo "[theme] set gtk/wm to {{ $gtkName }}"
+    gsettings set org.gnome.desktop.interface gtk-theme "{{ $gtkName }}"
+    gsettings set org.gnome.desktop.wm.preferences theme "{{ $gtkName }}"
+  else
+    echo "[theme] gtk already {{ $gtkName }}"
+  fi
+fi
+
+{{- /* --- ícones --- */ -}}
+{{- $iconName := dig "icons" "name" "" $theme -}}
+if [ -n "{{ $iconName }}" ]; then
+  curicon="$(gsettings get org.gnome.desktop.interface icon-theme | tr -d "'")"
+  if [ "$curicon" != "{{ $iconName }}" ]; then
+    {{- $iDir := dig "icons" "dir" "" $theme -}}
+    {{- $iSteps := dig "icons" "steps" (list) $theme -}}
+    if [ -n "{{ $iDir }}" ] && [ -d "{{ $iDir }}" ]; then
+      echo "[icons] running steps in {{ $iDir }}"
+      (cd "{{ $iDir }}" && { {{- range $s := $iSteps -}}
+        {{ $s }} && {{- end -}} true; })
+    fi
+    echo "[icons] set {{ $iconName }}"
+    gsettings set org.gnome.desktop.interface icon-theme "{{ $iconName }}"
+  else
+    echo "[icons] already {{ $iconName }}"
+  fi
+fi
+
+{{- /* --- cursores --- */ -}}
+{{- $curName := dig "cursor" "name" "" $theme -}}
+if [ -n "{{ $curName }}" ]; then
+  curcur="$(gsettings get org.gnome.desktop.interface cursor-theme | tr -d "'")"
+  if [ "$curcur" != "{{ $curName }}" ]; then
+    {{- $cPkgs := dig "cursor" "packages" "debian" (list) $theme -}}
+    {{- if gt (len $cPkgs) 0 -}}
+    if [ -f /etc/debian_version ]; then
+      echo "[cursor] installing build deps (debian)"
+      sudo apt -qq -y update
+      sudo apt -qq -y install {{ join " " $cPkgs }}
+    fi
+    {{- end -}}
+    {{- $cDir := dig "cursor" "build_dir" "" $theme -}}
+    {{- $cCmd := dig "cursor" "build_cmd" "" $theme -}}
+    if [ -n "{{ $cDir }}" ] && [ -d "{{ $cDir }}" ]; then
+      echo "[cursor] building in {{ $cDir }}"
+      (cd "{{ $cDir }}" && {{ $cCmd }})
+      mkdir -p "$HOME/.icons/{{ $curName }}"
+      cp -r "{{ $cDir }}/dist/dark/"* "$HOME/.icons/{{ $curName }}/" || true
+    fi
+    echo "[cursor] set {{ $curName }}"
+    gsettings set org.gnome.desktop.interface cursor-theme "{{ $curName }}"
+  else
+    echo "[cursor] already {{ $curName }}"
+  fi
+fi
+
+{{- /* --- fontes --- */ -}}
+{{- $fontUI := dig "fonts" "ui" "" $theme -}}
+if [ -n "{{ $fontUI }}" ]; then
+  curfont="$(gsettings get org.gnome.desktop.interface font-name | tr -d "'")"
+  if [ "$curfont" != "{{ $fontUI }}" ]; then
+    echo "[font] set UI to {{ $fontUI }}"
+    gsettings set org.gnome.desktop.interface font-name "{{ $fontUI }}"
+  fi
+fi
+
+{{- /* --- background --- */ -}}
+{{- $bgBase := dig "background" "base_dir" "" $theme -}}
+{{- $bgFile := dig "background" "files" .chezmoi.osRelease.id (dig "background" "files" "default" "" $theme) $theme -}}
+{{- if and $bgBase $bgFile -}}
+bg_uri="file://{{ replace "~" .chezmoi.homeDir $bgBase }}/{{ $bgFile }}"
+cur_bg="$(gsettings get org.gnome.desktop.background picture-uri | tr -d "'")"
+if [ "$cur_bg" != "$bg_uri" ]; then
+  echo "[bg] set background to $bg_uri"
+  gsettings set org.gnome.desktop.background picture-uri "$bg_uri"
+fi
+cur_ss="$(gsettings get org.gnome.desktop.screensaver picture-uri | tr -d "'")"
+if [ "$cur_ss" != "$bg_uri" ]; then
+  echo "[bg] set screensaver to $bg_uri"
+  gsettings set org.gnome.desktop.screensaver picture-uri "$bg_uri"
+fi
+{{- end }}
+
+{{- /* --- overrides globais --- */ -}}
+{{- $over := dig "overrides" (dict) $cfg -}}
+{{- range $schema, $keys := $over -}}
+  {{- range $k, $v := $keys -}}
+echo "[override] {{ $schema }} {{ $k }} = {{ $v }}"
+gsettings set "{{ $schema }}" "{{ $k }}" "{{ $v }}"
+  {{- end -}}
+{{- end }}
+
+
+{{- end }}
+{{- end }}
+{{- end }}

@@ -75,6 +75,7 @@ packages:
   # --- GitHub CLI (bin) ---
   - github:
       alias: gh
+      disable: true
       installers:
         # Debian/Ubuntu: official .deb
         - type: bin
@@ -145,7 +146,6 @@ packages:
   #       - type: script
   #         url: https://starship.rs/install.sh
   #         args: '-b "$BIN_DIR" -y'
-
   # --- Asciinema: OS on macOS, pipx elsewhere ---
   - asciinema:
       tags: cli
@@ -160,10 +160,10 @@ packages:
   - google-chrome: { tags: gui }
   - xclip:       { tags: gui }
   - kitty:       { tags: gui }
-  - ulauncher:   { tags: gui }
-  - gnome-tweaks: { tags: gui, de: gnome }
-  - gnome-shell-extension-installer: { tags: gui, de: gnome }
-  - gnome-system-monitor: { tags: gui, de: gnome }
+  - ulauncher:   { tags: gui, disable: true }
+  - gnome-tweaks: { tags: gui, de: gnome, disable: true }
+  - gnome-shell-extension-installer: { tags: gui, de: gnome, disable: true }
+  - gnome-system-monitor: { tags: gui, de: gnome, disable: true }
   - libreoffice: { tags: gui:heavy }
   - insync:      { tags: gui }
   - steam:
@@ -187,23 +187,8 @@ packages:
 
   # --- Others (GNOME-specific dependency) ---
   - ffmpeg:      { de: gnome }  # used by a GNOME extension
-  - typescript@latest:
+  - tsc:
       tags: node:gui
-      alias: tsc
       installers:
         - type: node
-  - xh:
-      installers:
-        - type: cargo
-  - howdoi:
-      installers:
-        - type: python
-  - gum@latest:
-      alias: gum
-      installers:
-        - type: go
-          pkg: github.com/charmbracelet/gum@latest
-  - ncu:
-      installers:
-        - type: node
-          pkg: npm-check-updates@latest
+          pkg: typescript@latest

@@ -1,0 +1,50 @@
+# desktop_profiles.yaml.tmpl
+desktop:
+  # Tema padrão (pode sobrescrever com CM_THEME=nome)
+  default: whitesur
+
+  themes:
+    whitesur:
+      disable: true
+      de: ["cli", "gnome"]
+      extensions:
+        - { id: "19",   uuid: "user-theme@gnome-shell-extensions.gcampax.github.com" }
+        - { id: "97",   uuid: "CoverflowAltTab@palatis.blogspot.com" }
+        - { id: "1465", uuid: "desktop-icons@csoriano" }
+        - { id: "3193", uuid: "blur-my-shell@aunetx" }
+        - { id: "1544", uuid: "cast-to-tv@rafostar.github.com" }
+        - { id: "120",  uuid: "system-monitor@paradoxxx.zero.gmail.com" }
+      theme:
+        gtk: "WhiteSur-dark"
+        install:
+          dir: "{{ joinPath .chezmoi.homeDir ".local/share/themes/whiteSur" }}"
+          steps:
+            - "chmod +x install.sh tweaks.sh"
+            - "./install.sh -c dark"
+            - "./tweaks.sh -d -c dark"
+            - "sudo ./tweaks.sh -g -N"
+      icons:
+        name: "la-capitaine"
+        dir: "{{ joinPath .chezmoi.homeDir ".icons/la-capitaine" }}"
+        steps:
+          - "chmod +x configure"
+          - "printf 'y\ny\ny\n' | ./configure"
+      cursor:
+        name: "capitaine-cursors"
+        build_dir: "{{ joinPath .chezmoi.homeDir ".local/share/themes/capitaine-cursors" }}"
+        build_cmd: "./build.sh -t dark"
+        # pacotes necessários por família de distro (só se faltar)
+        packages:
+          debian: ["inkscape","x11-apps","libcanberra-gtk-module"]
+      fonts:
+        ui: "Garuda Regular 10"
+      background:
+        base_dir: "{{ joinPath .chezmoi.homeDir ".local/share/backgrounds/dracula" }}"
+        files:
+          ubuntu: "ubuntu-2.png"
+          default: "{{ .chezmoi.osRelease.id }}.png"
+
+  # GSettings extras globais (aplicados após o tema)
+  overrides:
+    org.gnome.shell.extensions.dash-to-dock:
+      hot-keys: false

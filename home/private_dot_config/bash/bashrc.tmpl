@@ -37,3 +37,6 @@ if [ -d "$bash_dir" ]; then
     [ -f "$f" ] && . "$f"
   done
 fi
+
+# Include mountpoint status banner (portable Linux/macOS)
+{{ includeTemplate "shell/mountpoint" $ -}}

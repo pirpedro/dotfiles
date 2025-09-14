@@ -21,7 +21,7 @@
 {{- end -}}
 {{- $denyTags = uniq $denyTags -}}
 
-{{- $installLangForbidden := or .is.container .is.devcontainer .is.codespaces .is.ephemeral | not -}}
+{{- $installLangForbidden := or .is.container .is.devcontainer .is.codespaces .is.ephemeral -}}
 
 {{- /* agrega por installer */ -}}
 {{- $packages := dict -}}
@@ -517,6 +517,3 @@ SH
 )"
 {{- printf "\n" -}}
 {{- end }}
-
-
-run "foca" ENV LALA=foo echo "$LALA"

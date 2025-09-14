@@ -44,15 +44,8 @@ if command_exists direnv ; then
   eval "$(direnv hook zsh)"
 fi
 
-if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi
-#fpath=(~/development/workspace/my-config/contrib/completion
-#       $fpath)
-
 # alias
 alias k=kubectl
 compdef __start_kubectl k
 
-
-
-
-# source_dir "$XDG_CONFIG_HOME/zsh/zshrc.d"
+source_dir "$XDG_CONFIG_HOME/zsh/zshrc.d"
