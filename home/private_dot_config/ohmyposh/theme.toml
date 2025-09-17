@@ -95,6 +95,7 @@ foreground = '#3C873A'
 background = '#303030'
 type = 'node'
 style = 'diamond'
+timeout = 100
 
 [blocks.segments.properties]
 fetch_package_manager = true
@@ -163,6 +164,7 @@ foreground = '#ce092f'
 background = '#ffffff'
 type = 'angular'
 style = 'diamond'
+timeout = 100
 
 [[blocks.segments]]
 leading_diamond = ' '
