@@ -52,6 +52,8 @@ refreshPeriod = "168h"
 
 [[ template "external/fonts" . ]]
 
+[[ template "external/icons" . ]]
+
 [[/* template "external/gitprojects" . */]]
 
 [[/* template "external/themes" . */]]

@@ -111,7 +111,7 @@ packages:
   - jq
   - lnav
   - ncdu
-  - imagemagick: { alias: convert }
+  - imagemagick: { alias: convert, tags: cli:host-mod }
   - mitmproxy:   { tags: sensitive }
   - httpie:      { alias: http }
   - neofetch

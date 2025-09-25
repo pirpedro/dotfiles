@@ -40,7 +40,7 @@ type = 'root'
 style = 'diamond'
 
 [[blocks.segments]]
-template = '  {{ path .Path .Location }} '
+template = ' {{ path .Path .Location }} '
 foreground = '#e4e4e4'
 powerline_symbol = ''
 background = '#3465a4'
@@ -49,7 +49,7 @@ style = 'powerline'
 
 [blocks.segments.properties]
 folder_icon = '  '
-home_icon = ''
+home_icon = '~'
 style = 'letter'
 
 [[blocks.segments]]
@@ -71,17 +71,17 @@ branch_icon = ''
 fetch_status = true
 fetch_upstream_icon = true
 
-[[blocks.segments]]
-trailing_diamond = ''
-template = '  {{ .FormattedMs }}⠀'
-foreground = '#ffffff'
-background = '#83769c'
-type = 'executiontime'
-style = 'diamond'
+#[[blocks.segments]]
+#trailing_diamond = ''
+#template = '  {{ .FormattedMs }}⠀'
+#foreground = '#ffffff'
+#background = '#83769c'
+#type = 'executiontime'
+#style = 'diamond'
 
-[blocks.segments.properties]
-style = 'roundrock'
-threshold = 0.0
+#[blocks.segments.properties]
+#style = 'roundrock'
+#threshold = 0.0
 
 [[blocks]]
 type = 'prompt'

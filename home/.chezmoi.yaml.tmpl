@@ -161,6 +161,26 @@ sourceDir: {{ .chezmoi.sourceDir | quote }}
 
 hooks:
   apply:
+    pre:
+      command: sh
+      args:
+        - -c
+        - |
+          set -eu
+          state="${XDG_STATE_HOME:-$HOME/.local/state}/chezmoi"
+          mkdir -p "$state"
+          stamp="$state/pkg-update.stamp"
+          max_age=$((12*60*60)) # 12h
+          now=$(date +%s)
+          last=0; [ -f "$stamp" ] && last=$(cat "$stamp" 2>/dev/null || echo 0)
+
+          if [ $((now - last)) -lt $max_age ]; then
+            exit 0
+          fi
+
+          {{ $update_cmd }}
+
+          date +%s > "$stamp" || true
     post:
       command: sh
       args:

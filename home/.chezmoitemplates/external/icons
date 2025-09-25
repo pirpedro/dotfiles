@@ -1,0 +1,10 @@
+{{- if and (not .is.ephemeral) (not .is.headless) }}
+[".local/share/streamdeck/icons/homarr-svg"]
+  type = "archive"
+  url = "https://api.github.com/repos/homarr-labs/dashboard-icons/tarball"
+  format = "tar.gz"
+  stripComponents = 2
+  include = ["*/svg/**"]
+  exact = true
+  refreshPeriod = "168h"
+{{- end }}
