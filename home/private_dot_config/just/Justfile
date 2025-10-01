@@ -1,0 +1,557 @@
+# ---------------------------
+# 📚 Justfile — smart starter
+# ---------------------------
+# This Justfile provides:
+# 1) Smart container detection (DevContainer/host awareness)
+# 2) Generic tasks suitable for most development projects
+# 3) Docker Compose v2 support with v1 fallback
+# 4) Environment-aware command execution
+
+# =============================================================================
+# 🔄 Core Configuration
+# =============================================================================
+# Load .env file if present
+set dotenv-load
+set unstable
+set allow-duplicate-recipes
+
+# Use bash with strict error handling
+set shell := ["bash", "-euo", "pipefail", "-c"]
+
+# =============================================================================
+# Project metadata (overridable by env/.env)
+# =============================================================================
+project_name := env_var_or_default("PROJECT_NAME", "myapp")
+organization := env_var_or_default("ORGANIZATION", "myorg")
+description  := env_var_or_default("DESCRIPTION",  "A development project")
+maintainer   := env_var_or_default("MAINTAINER",   "Pedro Rodrigues <pir.pedro@gmail.com>")
+
+root_dir      := justfile_directory()
+bin_dir       := env_var_or_default("BIN_DIR",  root_dir + "/bin")
+dist_dir      := env_var_or_default("DIST_DIR", root_dir + "/dist")
+docs_dir      := env_var_or_default("DOCS_DIR", root_dir + "/docs")
+
+# Generic release/tag (projects can override if needed)
+release_tag   := env_var_or_default("RELEASE_TAG", "latest")
+
+# Database configuration
+export DATABASE_URL := env_var_or_default("DATABASE_URL", "")
+
+# =============================================================================
+# Git & build info (safe even outside a git repo)
+# =============================================================================
+version          := `git describe --tags --always --dirty 2>/dev/null || date -u '+%Y%m%d-%H%M%S'`
+git_commit       := `git rev-parse --short HEAD 2>/dev/null || echo "unknown"`
+git_branch       := `git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown"`
+build_time       := `date -u '+%Y-%m-%d_%H:%M:%S'`
+build_by         := `whoami`
+
+HAS_GIT         := `command -v git >/dev/null 2>&1 && echo "true" || echo "false"`
+
+# =============================================================================
+# Docker/Compose Configuration
+# =============================================================================
+SERVICE := env_var_or_default("SERVICE", "app")
+COMPOSE_PROFILES := env_var_or_default("COMPOSE_PROFILES", "")
+COMPOSE_PROJECT_NAME := env_var_or_default("COMPOSE_PROJECT_NAME", "")
+COMPOSE_FILE := env_var_or_default("COMPOSE_FILE", "")
+
+# ---- Docker Compose Detection ----
+# Detect which docker compose command is available
+DOCKER_COMPOSE := `command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1 && echo "docker compose" || echo "docker-compose"`
+
+# Find docker-compose file in common locations
+COMPOSE_FILE_PATH := `
+  # If COMPOSE_FILE is set, use it
+  if [ -n "${COMPOSE_FILE:-}" ] && [ -f "${COMPOSE_FILE}" ]; then
+    echo "${COMPOSE_FILE}"
+    exit 0
+  fi
+
+  # Check common locations and patterns
+  for file in \
+    "docker-compose.dev.yml" \
+    "docker-compose.dev.yaml" \
+    "docker-compose.local.yml" \
+    "docker-compose.local.yaml" \
+    "docker-compose.yml" \
+    "docker-compose.yaml" \
+    ".devcontainer/docker-compose.yml" \
+    ".devcontainer/docker-compose.yaml"; do
+    if [ -f "$file" ]; then
+      echo "$file"
+      exit 0
+    fi
+  done
+
+  # No compose file found
+  echo "none"
+`
+
+# Check if we have a compose file
+HAS_COMPOSE := if COMPOSE_FILE_PATH != "none" { "true" } else { "false" }
+
+IS_YML  := if COMPOSE_FILE_PATH == 'docker-compose.yml' { "true" } else { "false" }
+IS_YAML := if COMPOSE_FILE_PATH == 'docker-compose.yaml' { "true" } else { "false" }
+
+# Build compose command with file, project name and profiles
+COMPOSE_CMD := if HAS_COMPOSE == "true" {
+  if IS_YML || IS_YAML == "true" {
+    if COMPOSE_PROJECT_NAME != "" {
+      if COMPOSE_PROFILES != "" {
+        DOCKER_COMPOSE + " -p " + COMPOSE_PROJECT_NAME + " --profile " + COMPOSE_PROFILES
+      } else {
+        DOCKER_COMPOSE + " -p " + COMPOSE_PROJECT_NAME
+      }
+    } else {
+      if COMPOSE_PROFILES != "" {
+        DOCKER_COMPOSE + " --profile " + COMPOSE_PROFILES
+      } else {
+        DOCKER_COMPOSE
+      }
+    }
+  } else {
+    if COMPOSE_PROJECT_NAME != "" {
+      if COMPOSE_PROFILES != "" {
+        DOCKER_COMPOSE + " -f " + COMPOSE_FILE_PATH + " -p " + COMPOSE_PROJECT_NAME + " --profile " + COMPOSE_PROFILES
+      } else {
+        DOCKER_COMPOSE + " -f " + COMPOSE_FILE_PATH + " -p " + COMPOSE_PROJECT_NAME
+      }
+    } else {
+      if COMPOSE_PROFILES != "" {
+        DOCKER_COMPOSE + " -f " + COMPOSE_FILE_PATH + " --profile " + COMPOSE_PROFILES
+      } else {
+        DOCKER_COMPOSE + " -f " + COMPOSE_FILE_PATH
+      }
+    }
+  }
+} else {
+  ":"
+}
+
+# ---- Container Detection ----
+# Check if running inside a container/devcontainer
+IN_CONTAINER := `
+  # Check for container indicators
+  if [ -f /.dockerenv ]; then echo "true"; exit 0; fi
+  if [ -n "${DEVCONTAINER:-}" ]; then echo "true"; exit 0; fi
+  if [ -n "${REMOTE_CONTAINERS:-}" ]; then echo "true"; exit 0; fi
+  if [ -n "${CODESPACES:-}" ]; then echo "true"; exit 0; fi
+  if [ "${USER:-}" = "vscode" ] && [ -d "/workspaces" ]; then echo "true"; exit 0; fi
+  if grep -q docker /proc/1/cgroup 2>/dev/null; then echo "true"; exit 0; fi
+  echo "false"
+`
+
+# TTY detection for docker exec
+TTY_FLAG := `[ -t 0 ] && [ -t 1 ] && echo "-it" || echo "-T"`
+
+# =============================================================================
+# Small helpers
+# =============================================================================
+# Assert presence of a command (generic, non-language)
+_util-require cmd:
+    #!/usr/bin/env bash
+    if ! command -v "{{cmd}}" >/dev/null 2>&1; then
+      echo "Required command '{{cmd}}' not found." >&2
+      exit 1
+    fi
+
+# Template copier (useful in many stacks)
+_util-copy SRC DST:
+    #!/usr/bin/env bash
+    mkdir -p "$(dirname "{{DST}}")"
+    cp -f "{{SRC}}" "{{DST}}"
+
+# Print a title line
+_util-title MSG:
+    @printf "\n\033[1m== %s ==\033[0m\n" "{{MSG}}"
+
+_fetch PATH DEST:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  if [ -f "{{DEST}}" ]; then
+    echo "↩︎ Skipping {{DEST}} (already exists)"
+    exit 0
+  fi
+  command -v curl >/dev/null 2>&1 || { echo "curl not found"; exit 1; }
+  url="https://raw.githubusercontent.com/pirpedro/dev-gadgets/main/{{PATH}}"
+  echo "↓ $url"
+  mkdir -p "$(dirname "{{DEST}}")"
+  curl -fsSL "$url" -o "{{DEST}}"
+  echo "✔ wrote {{DEST}}"
+
+_require_compose:
+  #!/usr/bin/env bash
+  if [ "{{HAS_COMPOSE}}" != "true" ]; then
+    echo "No docker-compose file found. Aborting." >&2
+    exit 0
+  fi
+
+# Execute command based on environment (container vs host)
+_exec +cmd:
+  #!/usr/bin/env bash
+  if [ "{{IN_CONTAINER}}" = "true" ]; then
+    # Running inside container - execute directly
+    exec {{cmd}}
+  elif [ "{{HAS_COMPOSE}}" = "true" ]; then
+    # Running on host with compose - use docker compose exec
+    {{COMPOSE_CMD}} exec {{TTY_FLAG}} {{SERVICE}} {{cmd}}
+  else
+    # No compose file - execute directly on host
+    exec {{cmd}}
+  fi
+
+# Execute command with shell
+_shell +cmd:
+  #!/usr/bin/env bash
+  if [ "{{IN_CONTAINER}}" = "true" ]; then
+    # Running inside container - execute directly
+    bash -c "{{cmd}}"
+  elif [ "{{HAS_COMPOSE}}" = "true" ]; then
+    # Running on host with compose - use docker compose exec
+    {{COMPOSE_CMD}} exec {{TTY_FLAG}} {{SERVICE}} bash -c "{{cmd}}"
+  else
+    # No compose file - execute directly on host
+    bash -c "{{cmd}}"
+  fi
+
+# =============================================================================
+# Docker Compose Lifecycle
+# =============================================================================
+# Start services in background
+[group('📦 Docker Compose')]
+dc-up: _require_compose
+  @{{COMPOSE_CMD}} up -d --remove-orphans
+
+# Build services (use NO_CACHE=1 to force rebuild)
+[group('📦 Docker Compose')]
+dc-build: _require_compose
+  #!/usr/bin/env bash
+  if [ "${NO_CACHE:-0}" = "1" ]; then
+    @{{COMPOSE_CMD}} build --no-cache
+  else
+    @{{COMPOSE_CMD}} build
+  fi
+
+# Restart services with fresh containers
+[group('📦 Docker Compose')]
+dc-restart: _require_compose
+  @{{COMPOSE_CMD}} up -d --force-recreate --remove-orphans
+
+# Stop all services
+[group('📦 Docker Compose')]
+dc-stop: _require_compose
+  @{{COMPOSE_CMD}} stop
+
+# Stop and remove containers (keeps volumes and images)
+[group('📦 Docker Compose')]
+dc-down: _require_compose
+  @{{COMPOSE_CMD}} down --remove-orphans
+
+
+# Nuclear option: remove everything including volumes
+[group('📦 Docker Compose')]
+dc-destroy: _require_compose
+  @{{COMPOSE_CMD}} down -v --rmi all --remove-orphans
+
+# Show running containers
+[group('📦 Docker Compose')]
+dc-ps: _require_compose
+  @{{COMPOSE_CMD}} ps
+
+# Follow logs for a service
+[group('📦 Docker Compose')]
+dc-logs service=SERVICE: _require_compose
+  @{{COMPOSE_CMD}} logs -f {{service}}
+
+# View compose configuration
+[group('📦 Docker Compose')]
+dc-config: _require_compose
+  @{{COMPOSE_CMD}} config
+
+# =============================================================================
+# Development Commands
+# =============================================================================
+# Open shell in container/hot
+[group('🛠️  Development')]
+shell service=SERVICE:
+  #!/usr/bin/env bash
+  if [ "{{IN_CONTAINER}}" = "true" ]; then
+    exec bash -l
+  elif [ "{{HAS_COMPOSE}}" = "true" ]; then
+    {{COMPOSE_CMD}} exec {{TTY_FLAG}} {{service}} bash -l
+  else
+    # No compose file - open shell on host
+    exec bash -l
+  fi
+
+# Run arbitrary command in container/host
+[group('🛠️  Development')]
+run +args:
+  @just _shell {{args}}
+
+# Execute binary directly (without shell) in container/host
+[group('🛠️  Development')]
+exec +args:
+  @just _exec {{args}}
+
+# =============================================================================
+# Common Development Tasks
+# =============================================================================
+# Install dependencies (adaptable through stack)
+[group('🛠️  Development')]
+install:
+  @just run "npm ci || npm install || pnpm install || yarn install || pip install -r requirements.txt || bundle install || go mod download || echo 'No package manager detected'"
+
+# Build project (adaptable through stack)
+[group('🛠️  Development')]
+build:
+  @mkdir -p {{bin_dir}} {{dist_dir}}
+  @just run "npm run build || pnpm build || yarn build || python setup.py build || go build -o {{bin_dir}}/{{project_name}} . || echo 'No build command configured'"
+
+# Run tests
+[group('🧪 Quality')]
+test +args="":
+  @just run "npm test -- {{args}} || pnpm test {{args}} || yarn test {{args}} || python -m pytest -q {{args}} || go test ./... {{args}} || echo 'No test command configured'"
+
+# Run linter
+[group('🧪 Quality')]
+lint:
+  @just run "npm run lint || pnpm exec eslint . --ext .js,.jsx,.ts,.tsx || yarn eslint . --ext .js,.jsx,.ts,.tsx || ruff check . || golangci-lint run || rubocop || echo 'No linter configured'"
+
+# Format code
+[group('🧪 Quality')]
+fmt:
+  @just run "npm run format || pnpm exec prettier -w . || yarn prettier -w . || ruff format . || gofmt -w . || bundle exec rubocop -A || echo 'No formatter configured'"
+
+# Type checking
+[group('🧪 Quality')]
+typecheck:
+  @just run "npm run typecheck || mypy . || tsc --noEmit || echo 'No type checker configured'"
+
+# Start development server
+[group('🛠️  Development')]
+dev:
+  @just run "npm run dev || python -m uvicorn app.main:app --reload --host 0.0.0.0 || go run . || echo 'No dev server configured'"
+
+# Database migrations
+[group('🗄️  Database')]
+migrate:
+  @just run "npm run migrate || alembic upgrade head || rails db:migrate || echo 'No migration command configured'"
+
+# Database shell
+[group('🗄️  Database')]
+dbshell:
+  #!/usr/bin/env bash
+  if [ "{{HAS_COMPOSE}}" = "true" ]; then
+    {{COMPOSE_CMD}} exec {{TTY_FLAG}} db bash -c 'psql -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-postgres}" || mysql -u "${MYSQL_USER:-root}" -p"${MYSQL_PASSWORD:-}" "${MYSQL_DATABASE:-}" || echo "Database not available"'
+  else
+    echo "No docker-compose file found. Cannot access database shell."
+  fi
+
+# Clean build artifacts
+[group('🧹 Maintenance')]
+clean:
+  @just run 'rm -rf "{{bin_dir}}" "{{dist_dir}}" node_modules/.cache __pycache__ .pytest_cache .ruff_cache coverage* .coverage .turbo/ target/ build/ .next/ || true'
+  @just run 'find . -type f -name "*.pyc" -delete || true'
+  @just run 'find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true'
+  @just run 'find . -type f -name "*.log" -delete || true'
+  @just run 'find . -type f -name "*.tmp" -delete || true'
+  @just run 'find . -type f -name "*~" -delete || true'
+  @just run 'find . -type f -name ".DS_Store" -delete || true'
+  @just run 'echo "Cleaned build artifacts and temporary files."'
+
+# Full environment reset
+[group('🧹 Maintenance')]
+reset:
+  just clean
+  just dc-destroy
+  just dc-build
+  just dc-up
+
+# =============================================================================
+# Env Helpers
+# =============================================================================
+# Prints only variables that look like key=val lines in .env (without revealing secrets)
+[group('🔐 Env')]
+env-print:
+  #!/usr/bin/env bash
+  if [ -f .env ]; then
+    echo "Loaded from .env:"
+    awk -F= '/^[A-Za-z_][A-Za-z0-9_]*=/{print $$1"=<redacted>"}' .env
+  else
+    echo "No .env file detected."
+  fi
+
+# Create .env.example from .env (only keys, no values)
+[group('🔐 Env')]
+env-example:
+  #!/usr/bin/env bash
+  if [ -f .env ]; then
+    awk -F= '/^[A-Za-z_][A-Za-z0-9_]*=/{print $$1"="}' .env > .env.example
+    echo ".env.example created."
+  else
+    echo "No .env file to derive .env.example."
+  fi
+
+# Ensure required env vars are set (pass VARS="VAR1 VAR2 VAR3")
+[group('🔐 Env')]
+env-ensure *VARS:
+  #!/usr/bin/env bash
+  missing=0
+  for k in {{VARS}}; do
+    v="$(printenv "$k" || true)"
+    if [ -z "$v" ]; then echo "Missing required env: $k"; missing=1; fi
+  done
+  [ "$missing" -eq 0 ] || exit 1
+  echo "All required env vars present."
+
+# =============================================================================
+# Utility Commands
+# =============================================================================
+# Show environment information
+[group('🧰 Utility')]
+info:
+  #!/usr/bin/env bash
+  echo "=== Environment Information ==="
+  echo "In Container: {{IN_CONTAINER}}"
+  echo "Has Compose: {{HAS_COMPOSE}}"
+  echo "Compose File: {{COMPOSE_FILE_PATH}}"
+  echo "Service: {{SERVICE}}"
+  echo "TTY Flag: {{TTY_FLAG}}"
+  echo ""
+  if [ "{{HAS_COMPOSE}}" = "true" ]; then
+    echo "=== Docker Compose Status ==="
+    {{COMPOSE_CMD}} ps 2>/dev/null || echo "Docker Compose not available"
+  else
+    echo "=== No Docker Compose File Found ==="
+    echo "Commands will run directly on host/container"
+  fi
+
+# Health check of environment (commands, versions, etc)
+[group('🧰 Utility')]
+doctor:
+    #!/usr/bin/env bash
+    just _util-title "Environment"
+    printf "%-16s %s\n" "Project"      "{{project_name}}"
+    printf "%-16s %s\n" "Org"          "{{organization}}"
+    printf "%-16s %s\n" "Maintainer"   "{{maintainer}}"
+    printf "%-16s %s\n" "Root dir"     "{{root_dir}}"
+    printf "%-16s %s\n" "Bin dir"      "{{bin_dir}}"
+    printf "%-16s %s\n" "Dist dir"     "{{dist_dir}}"
+    printf "%-16s %s\n" "Docs dir"     "{{docs_dir}}"
+
+    just _util-title "Commands"
+    for c in git docker "docker compose" docker-compose devcontainer jq envsubst; do
+      if [ "$c" = "docker compose" ]; then
+        if docker compose version >/dev/null 2>&1; then
+          printf "%-16s %s\n" "$c" "ok"
+        else
+          printf "%-16s %s\n" "$c" "missing"
+        fi
+      else
+        if command -v $c >/dev/null 2>&1; then
+          printf "%-16s %s\n" "$c" "ok"
+        else
+          printf "%-16s %s\n" "$c" "missing"
+        fi
+      fi
+    done
+
+# Version information
+[group('🧰 Utility')]
+version:
+    @echo "Project:   {{project_name}}"
+    @echo "Version:   {{version}}"
+    @echo "Commit:    {{git_commit}}"
+    @echo "Branch:    {{git_branch}}"
+    @echo "Built:     {{build_time}}"
+    @echo "By:        {{build_by}}"
+
+# Show changelog since last tag (if git available)
+[group('🧰 Utility')]
+changelog:
+    #!/usr/bin/env bash
+    if ! {{HAS_GIT}}; then echo "→ Skipping: git not found"; exit 0; fi
+    if git describe --tags --abbrev=0 >/dev/null 2>&1; then
+      last_tag=$(git describe --tags --abbrev=0)
+      echo "Changes since $last_tag:"
+      git log --oneline "$last_tag"..HEAD
+    else
+      echo "No tags found; showing full history:"
+      git log --oneline
+    fi
+
+# =============================================================================
+# Dist & checksums
+# =============================================================================
+# Create zip from dist directory
+[group('📦 Dist')]
+dist-zip src="dist" out="dist.zip":
+  #!/usr/bin/env bash
+  [ -d "{{src}}" ] || { echo "No '{{src}}' directory."; exit 1; }
+  rm -f "{{out}}"
+  (cd "{{src}}" && zip -r "../{{out}}" .)
+  echo "Created {{out}}"
+
+# Create tar.gz from dist directory
+[group('📦 Dist')]
+dist-tar src="dist" out="dist.tar.gz":
+  #!/usr/bin/env bash
+  [ -d "{{src}}" ] || { echo "No '{{src}}' directory."; exit 1; }
+  tar -czf "{{out}}" -C "{{src}}" .
+  echo "Created {{out}}"
+
+# Generate sha256 checksum for a file
+[group('📦 Dist')]
+dist-sha256 file:
+  #!/usr/bin/env bash
+  if command -v sha256sum >/dev/null 2>&1; then sha256sum "{{file}}"
+  elif command -v shasum >/dev/null 2>&1; then shasum -a 256 "{{file}}"
+  else echo "No sha256 tool found."; exit 1; fi
+
+# =============================================================================
+# Waiters (HTTP/Port)
+# =============================================================================
+# Wait for HTTP service to be available
+[group('🌐 Wait')]
+wait-http url timeout="60":
+  #!/usr/bin/env bash
+  end=$((SECONDS+{{timeout}}))
+  until curl -fsS -o /dev/null "{{url}}"; do
+    if [ $SECONDS -ge $end ]; then echo "Timeout waiting for {{url}}"; exit 1; fi
+    sleep 1
+  done
+  echo "HTTP ready: {{url}}"
+
+# Wait for TCP port to be open
+[group('🌐 Wait')]
+wait-port target timeout="60":
+  #!/usr/bin/env bash
+  host="${target%%:*}"; port="${target##*:}"
+  end=$((SECONDS+{{timeout}}))
+  while ! (echo >/dev/tcp/$host/$port) >/dev/null 2>&1; do
+    if [ $SECONDS -ge $end ]; then echo "Timeout waiting for $host:$port"; exit 1; fi
+    sleep 1
+  done
+  echo "Port ready: $host:$port"
+
+# Bootstrap: fetch base config files
+[group('🚀 Bootstrap')]
+init:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  just _fetch "base/.editorconfig"  ".editorconfig"
+  just _fetch "base/.gitattributes" ".gitattributes"
+  just _fetch "base/.gitignore"     ".gitignore"
+  just env-example
+  echo "✓ init done."
+
+# Optional: VS Code configs
+[group('🚀 Bootstrap')]
+init-vscode:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  just _fetch "vscode/settings.json"   ".vscode/settings.json"
+  just _fetch "vscode/tasks.json"      ".vscode/tasks.json"
+  echo "✓ VS Code config ready."

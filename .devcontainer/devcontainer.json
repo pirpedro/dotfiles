@@ -27,8 +27,8 @@
   },
   "mounts": [
     "source=${localEnv:SSH_AUTH_SOCK},target=/ssh-agent,type=bind",
-    "source=${localEnv:HOME}/.config/git/config,target=/home/node/.gitconfig,type=bind",
-    "source=${localEnv:HOME}/.ssh/known_hosts,target=/home/node/.ssh/known_hosts,type=bind"
+    "source=${localEnv:HOME}/.config/git/config,target=/home/vscode/.gitconfig,type=bind",
+    "source=${localEnv:HOME}/.ssh/known_hosts,target=/home/vscode/.ssh/known_hosts,type=bind"
   ],
   "remoteEnv": {
     "SSH_AUTH_SOCK": "/ssh-agent"

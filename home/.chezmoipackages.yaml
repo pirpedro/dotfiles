@@ -148,7 +148,7 @@ packages:
   #         args: '-b "$BIN_DIR" -y'
   # --- Asciinema: OS on macOS, pipx elsewhere ---
   - asciinema:
-      tags: cli
+      tags: gui
       installers:
         - type: os
           when: { osid: darwin }  # Homebrew on macOS

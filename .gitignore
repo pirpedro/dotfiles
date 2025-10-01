@@ -1,0 +1,154 @@
+# =========================
+# OS & Editors
+# =========================
+# macOS / Windows
+.DS_Store
+Thumbs.db
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.iml
+*.sublime-*
+.history/
+*.swp
+*.swo
+*~
+*.bak
+
+# direnv / pyenv
+.direnv/
+.python-version
+
+# =========================
+# General build outputs
+# =========================
+dist/
+build/
+out/
+target/            # Rust (also used by some Java builds)
+coverage/
+coverage.*
+*.coverage
+*.lcov
+*.gcda
+*.gcno
+*.prof
+*.profraw
+*.dSYM/
+
+# Logs & temps
+*.log
+*.tmp
+*.pid
+
+# =========================
+# Node / JS / TS / React
+# =========================
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/
+.eslintcache
+.npmrc.local
+# Tool caches
+.parcel-cache/
+.next/
+.nuxt/
+.turbo/
+.vite/
+.meteor/
+.expo/
+.expo-shared/
+.metro-cache/
+# Framework/platform (optional)
+#.vercel/          # optional: uncomment if you don't want to track Vercel config
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+.envrc            # from direnv (optional)
+.ipynb_checkpoints/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.tox/
+.pyre/
+.coverage*
+.eggs/
+*.egg-info/
+
+# Poetry / Pipenv (keep lockfiles by default)
+# poetry.lock      # DO NOT ignore by default (commit it)
+# Pipfile.lock     # DO NOT ignore by default (commit it)
+
+# =========================
+# Go
+# =========================
+bin/
+*.test
+*.out
+coverage*.out
+# vendor/         # optional: ignore if you never vendor dependencies
+# go.work         # usually keep; ignore if it's always local-only
+
+# =========================
+# Rust
+# =========================
+# target/ handled above (general)
+**/*.rs.bk        # rustfmt backups
+# Cargo.lock: keep for binaries; for libraries teams sometimes ignore.
+# Cargo.lock      # optional for libraries (NOT recommended for binaries)
+
+# =========================
+# Java / JVM
+# =========================
+# Maven / Gradle
+.mvn/wrapper/maven-wrapper.jar  # keep if you vendor wrapper jar; otherwise ignore
+.mvn/repository/                # local cache (do not commit)
+.gradle/
+build/                          # Gradle build dir (already covered above)
+# Eclipse / IntelliJ
+.project
+.classpath
+.settings/
+
+# =========================
+# Data / Artifacts
+# =========================
+*.sqlite
+*.sqlite3
+*.db
+*.rdb
+*.pkl
+*.h5
+
+# Archives / binaries
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.gz
+*.bz2
+
+# =========================
+# Env files
+# =========================
+# Keep .env.example checked in; ignore real envs
+.env
+.env.*
+!.env.example
+
+# =========================
+# Git & Repo meta
+# =========================
+# (These are often excluded from release archives; not strictly needed in .gitignore)
+# .gitattributes
+# .gitlab/
+# .github/

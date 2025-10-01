@@ -1,0 +1,117 @@
+# -------------------------------
+# Core: normalize line endings
+# -------------------------------
+# Detect text automatically and normalize to LF in the repo.
+*               text=auto eol=lf
+
+# Ensure key text formats are treated as text (defensive, helps on old setups)
+*.md            text
+*.txt           text
+*.json          text
+*.jsonc         text
+*.yml           text
+*.yaml          text
+*.toml          text
+*.ini           text
+*.env           text
+*.sh            text eol=lf
+*.bash          text eol=lf
+*.zsh           text eol=lf
+*.py            text eol=lf
+*.rs            text eol=lf
+*.go            text eol=lf
+*.java          text eol=lf
+*.js            text eol=lf
+*.jsx           text eol=lf
+*.ts            text eol=lf
+*.tsx           text eol=lf
+Dockerfile*     text eol=lf
+Makefile        text eol=lf
+
+# -------------------------------
+# Improve/limit diffs
+# -------------------------------
+# Better diffs for structured text
+*.json          diff
+*.jsonc         diff
+*.yml           diff
+*.yaml          diff
+*.toml          diff
+
+# OPTIONAL: quiet lockfile diffs (trade-off: less review visibility)
+# Uncomment if you prefer less noise on PRs:
+# package-lock.json   -diff
+# yarn.lock           -diff
+# pnpm-lock.yaml      -diff
+# poetry.lock         -diff
+# Cargo.lock          -diff
+# go.sum              -diff
+
+# -------------------------------
+# Binary files (no text conversion / no diffs)
+# -------------------------------
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
+*.webp          binary
+*.ico           binary
+*.svg           -text
+*.pdf           binary
+*.zip           binary
+*.tar           binary
+*.gz            binary
+*.bz2           binary
+*.xz            binary
+*.7z            binary
+*.dmg           binary
+*.exe           binary
+*.dll           binary
+*.so            binary
+*.wasm          binary
+*.lockb         binary
+# Fonts
+*.ttf           binary
+*.otf           binary
+*.woff          binary
+*.woff2         binary
+
+# -------------------------------
+# Packaging / archives
+# -------------------------------
+# Don’t include repo tooling in exported archives (git archive)
+.gitattributes  export-ignore
+.gitignore      export-ignore
+.github/        export-ignore
+.gitlab/        export-ignore
+.vscode/        export-ignore
+docs/*.drawio   export-ignore
+scripts/*.sh    export-ignore
+
+# -------------------------------
+# GitHub Linguist hints (optional niceties)
+# -------------------------------
+# Treat /docs as documentation; reduce % of code shown on repo page.
+docs/**         linguist-documentation
+# Mark generated folders as generated so diffs collapse by default.
+dist/**         linguist-generated
+build/**        linguist-generated
+coverage/**     linguist-generated
+
+# -------------------------------
+# Merge strategies (optional)
+# -------------------------------
+# Safer merges for always-append files (keeps lines from both sides).
+# CHANGELOG.md   merge=union
+
+# For policy files that should prefer "ours" on conflict (use carefully!)
+# .prettierrc    merge=ours
+# .editorconfig  merge=ours
+
+# -------------------------------
+# Git LFS (optional — enable only if you actually use LFS)
+# -------------------------------
+# If you use LFS, uncomment patterns you want tracked:
+# *.png filter=lfs diff=lfs merge=lfs -text
+# *.jpg filter=lfs diff=lfs merge=lfs -text
+# *.pdf filter=lfs diff=lfs merge=lfs -text
