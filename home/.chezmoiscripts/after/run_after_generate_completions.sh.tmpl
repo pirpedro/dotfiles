@@ -151,6 +151,9 @@ gen_bash doctl completion bash || true
 gen_zsh oh-my-posh completion zsh || true
 gen_bash oh-my-posh completion bash || true
 
+gen_zsh git-town completions zsh || true
+gen_bash git-town completions bash || true
+
 # yq (supports different verbs across versions: try multiple)
 if have yq; then
   yq shell-completion zsh >"$ZGEN/_yq" 2>/dev/null \
