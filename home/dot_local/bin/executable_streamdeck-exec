@@ -1,0 +1,66 @@
+#!/usr/bin/bash
+# streamdeck-exec
+# Helper to trigger common project actions for Opendeck buttons.
+# Usage:
+#   streamdeck-exec open /path/to/project
+#   streamdeck-exec close /path/to/project
+#   streamdeck-exec <any> /path/to/project [args...]
+
+# Behaviors:
+# - "open": open VS Code on the project (optionally try Reopen in Container via xdotool).
+# - "close": try to close the VS Code window that belongs to this project.
+# - any other cmd: run <cmd> inside project, else fallback to "just <cmd>" if Justfile+just present.
+
+set -euo pipefail
+
+die() { echo "streamdeck-exec: $*" >&2; exit 1; }
+
+has_just() { command -v just >/dev/null 2>&1; }
+has_xdotool() { command -v xdotool >/dev/null 2>&1; }
+has_wmctrl() { command -v wmctrl >/dev/null 2>&1; }
+
+has_justfile() { [[ -f "$1/Justfile" || -f "$1/justfile" ]]; }
+has_devcontainer() { [[ -f "$1/.devcontainer/devcontainer.json" ]]; }
+
+[[ $# -ge 2 ]] || { echo "Usage: $0 <open|close|cmd> /path/to/project [args...]" >&2; exit 1; }
+
+cmd="$1"; shift
+target="$1"; shift
+target=$(realpath "$target")
+[[ -e "$target" ]] || die "Target path does not exist: $target"
+
+run_in_project() {
+  local cmd="$1"; shift
+  local project_path="$1"; shift
+  if has_just && has_justfile "$project_path"; then
+    (cd "$project_path" && just "$cmd" "$@")
+  else
+    if ! command -v "$cmd" &>/dev/null; then
+      die "Command not found: $cmd and no Justfile available in project"
+    fi
+    (cd "$project_path" && "$cmd" "$@")
+  fi
+}
+
+run_in_new_terminal() {
+  local cmd="$1"; shift
+  local project_path="$1"; shift
+  local args_quoted; args_quoted=$(printf " %q" "$@")
+  if has_just && has_justfile "$project_path"; then
+    kitty --directory "$project_path" bash -lc "just $cmd$args_quoted; echo; read -n1 -s -r -p 'Press any key to close.';"
+  else
+    if ! command -v "$cmd" &>/dev/null; then
+      die "Command not found: $cmd and no Justfile available in project"
+    fi
+    kitty --directory "$project_path" bash -lc "$cmd$args_quoted; echo; read -n1 -s -r -p 'Press any key to close.';"
+  fi
+}
+
+case "$cmd" in
+  logs|shell|test)
+    run_in_new_terminal "$cmd" "$target" "$@"
+    ;;
+   *)
+    run_in_project "$cmd" "$target" "$@"
+    ;;
+esac
