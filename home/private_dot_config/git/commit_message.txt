@@ -1,13 +1,13 @@
-# === Commit Message Template ===
-# Conventional Commits:
-# feat | fix | docs | style | refactor | test | chore | perf | build | ci | revert
-# Subject: <= 50 chars. Body lines: wrap at 72.
-# Escreva o "por quê" e o "o quê" (não o "como").
-# Linhas iniciadas com # são ignoradas.
+# === Conventional Commit ===
+# Types: feat | fix | docs | style | refactor | perf | test | build | ci | chore | revert
+# Subject: <= 50 chars, imperative, no trailing period.
+# Body: wrap at 72 cols. Explain WHAT and WHY (not HOW).
+# Lines starting with # are ignored.
 
 <type>(<scope>): <summary>
 
-<++>Corpo do commit (o que mudou e por quê).
-Se precisar, use múltiplos parágrafos. Explique impacto, contexto e trade-offs.<++>
+<body explaining the motivation, context, trade-offs, and intended impact.>
+# For breaking changes, uncomment and update the footer below.
+# BREAKING CHANGE: describe the impact and migration steps here.
 
-Refs: <++>#123<++>
+Refs: #123
