@@ -1,0 +1,242 @@
+{{- /* ~/.chezmoitemplates/opendeck-profile.json.tmpl */ -}}
+{{- /*     Reusable OpenDeck profile template. */ -}}
+{{- /*    Usage: {{ includeTemplate ".chezmoitemplates/opendeck/profiles/opendeck-profile.json.tmpl" (dict "dir" "/abs/path" "title" "repo-title" "tasks" (list ...)) }} */ -}}
+
+{{- $tasks := .tasks -}}
+{{- $dir := .dir | default "" -}}
+{{- $title := .title | default "project" -}}
+
+{
+  "keys": [
+    {
+      "action": {
+        "controllers": [
+          "Keypad"
+        ],
+        "disable_automatic_states": false,
+        "icon": "opendeck/multi-action.png",
+        "name": "Multi Action",
+        "plugin": "opendeck",
+        "property_inspector": "",
+        "states": [
+          {
+            "alignment": "middle",
+            "colour": "#FFFFFF",
+            "family": "Liberation Sans",
+            "image": "opendeck/multi-action.png",
+            "name": "",
+            "show": true,
+            "size": 16,
+            "style": "Regular",
+            "text": "",
+            "underline": false
+          }
+        ],
+        "supported_in_multi_actions": false,
+        "tooltip": "Execute multiple actions",
+        "uuid": "opendeck.multiaction",
+        "visible_in_action_list": true
+      },
+      "children": [
+        {
+          "action": {
+            "controllers": [
+              "Keypad",
+              "Encoder"
+            ],
+            "disable_automatic_states": false,
+            "icon": "plugins/com.amansprojects.starterpack.sdPlugin/icons/runCommand.png",
+            "name": "Run Command",
+            "plugin": "com.amansprojects.starterpack.sdPlugin",
+            "property_inspector": "plugins/com.amansprojects.starterpack.sdPlugin/propertyInspector/runCommand.html",
+            "states": [
+              {
+                "alignment": "middle",
+                "colour": "#FFFFFF",
+                "family": "Liberation Sans",
+                "image": "plugins/com.amansprojects.starterpack.sdPlugin/icons/runCommand.png",
+                "name": "",
+                "show": true,
+                "size": 16,
+                "style": "Regular",
+                "text": "",
+                "underline": false
+              }
+            ],
+            "supported_in_multi_actions": true,
+            "tooltip": "Run a command",
+            "uuid": "com.amansprojects.starterpack.runcommand",
+            "visible_in_action_list": true
+          },
+          "children": null,
+          "context": "Keypad.0.1",
+          "current_state": 0,
+          "settings": {
+            "down": {{ printf "streamdeck-exec open %s" .dir | toJson }},
+            "file": "",
+            "rotate": "",
+            "show": false,
+            "up": ""
+          },
+          "states": [
+            {
+              "alignment": "middle",
+              "colour": "#FFFFFF",
+              "family": "Liberation Sans",
+              "image": "plugins/com.amansprojects.starterpack.sdPlugin/icons/runCommand.png",
+              "name": "",
+              "show": true,
+              "size": 16,
+              "style": "Regular",
+              "text": "",
+              "underline": false
+            }
+          ]
+        }
+      ],
+      "context": "Keypad.0.0",
+      "current_state": 0,
+      "settings": {},
+      "states": [
+        {
+          "alignment": "middle",
+          "colour": "#ffa348",
+          "family": "Liberation Sans",
+          "image": "0.png",
+          "name": "",
+          "show": true,
+          "size": 12,
+          "style": "Regular",
+          "text": {{ .title | toJson }},
+          "underline": false
+        }
+      ]
+    }
+    {{- /* ---- Dynamic task keys start here ---- */ -}}
+    {{- range $i, $task := $tasks }}
+    ,{
+      "action": {
+        "controllers": [
+          "Keypad",
+          "Encoder"
+        ],
+        "disable_automatic_states": false,
+        "icon": "plugins/com.amansprojects.starterpack.sdPlugin/icons/runCommand.png",
+        "name": "Run Command",
+        "plugin": "com.amansprojects.starterpack.sdPlugin",
+        "property_inspector": "plugins/com.amansprojects.starterpack.sdPlugin/propertyInspector/runCommand.html",
+        "states": [
+          {
+            "alignment": "middle",
+            "colour": "#FFFFFF",
+            "family": "Liberation Sans",
+            "image": "plugins/com.amansprojects.starterpack.sdPlugin/icons/runCommand.png",
+            "name": "",
+            "show": true,
+            "size": 16,
+            "style": "Regular",
+            "text": "",
+            "underline": false
+          }
+        ],
+        "supported_in_multi_actions": true,
+        "tooltip": "Run a command",
+        "uuid": "com.amansprojects.starterpack.runcommand",
+        "visible_in_action_list": true
+      },
+      "children": null,
+      "context": {{ printf "Keypad.%d.0" (add $i 1) | toJson }},
+      "current_state": 0,
+      "settings": {
+        "down": {{ printf "streamdeck-exec %s %s" $task $dir | toJson }},
+        "file": "",
+        "rotate": "",
+        "show": false,
+        "up": ""
+      },
+      "states": [
+        {
+          "alignment": "middle",
+          "colour": "#ffa348",
+          "family": "Liberation Sans",
+          "image": "0.png",
+          "name": "",
+          "show": true,
+          "size": 12,
+          "style": "Regular",
+          "text":
+            {{- if (regexMatch "(?i)^dc" $task) -}}
+              ""
+            {{- else -}}
+              {{ $task | camelcase | toJson }}
+            {{- end }},
+          "underline": false
+        }
+      ]
+    }
+    {{- end }}
+
+    {{- /* ---- Pad with nulls up to 14 items total (1 open + up to 13 tasks) ---- */ -}}
+    {{- $taskCount := len $tasks -}}
+    {{- if lt $taskCount 13 -}}
+      {{- $pad := int (sub 13 $taskCount) -}}
+      {{- range $j := until $pad }}
+      ,null
+      {{- end -}}
+    {{- end }}
+    ,{
+      "action": {
+        "controllers": [
+          "Keypad"
+        ],
+        "disable_automatic_states": false,
+        "icon": "plugins/com.amansprojects.starterpack.sdPlugin/icons/switchProfile.png",
+        "name": "Switch Profile",
+        "plugin": "com.amansprojects.starterpack.sdPlugin",
+        "property_inspector": "plugins/com.amansprojects.starterpack.sdPlugin/propertyInspector/switchProfile.html",
+        "states": [
+          {
+            "alignment": "middle",
+            "colour": "#FFFFFF",
+            "family": "Liberation Sans",
+            "image": "plugins/com.amansprojects.starterpack.sdPlugin/icons/switchProfile.png",
+            "name": "",
+            "show": true,
+            "size": 16,
+            "style": "Regular",
+            "text": "",
+            "underline": false
+          }
+        ],
+        "supported_in_multi_actions": true,
+        "tooltip": "Switch the selected profile",
+        "uuid": "com.amansprojects.starterpack.switchprofile",
+        "visible_in_action_list": true
+      },
+      "children": null,
+      "context": "Keypad.14.0",
+      "current_state": 0,
+      "settings": {
+        "device": "sd-AL45K2C58783",
+        "profile": "pedro/git_repos"
+      },
+      "states": [
+        {
+          "alignment": "middle",
+          "colour": "#ffa348",
+          "family": "Liberation Sans",
+          "image": "0.png",
+          "name": "",
+          "show": true,
+          "size": 12,
+          "style": "Regular",
+          "text": "",
+          "underline": false
+        }
+      ]
+    }
+
+
+  ],
+  "sliders": []
+}

@@ -1,0 +1,127 @@
+{{- /* ~/.chezmoitemplates/opendeck-git-repos.json.tmpl */ -}}
+{{- /*     Reusable OpenDeck profile template. */ -}}
+{{- /*    Usage: {{ includeTemplate ".chezmoitemplates/opendeck/profiles/opendeck-git-repos.json.tmpl" (dict "repos" (list ...)) }} */ -}}
+
+{{- $repos := .repos -}}
+
+{
+  "keys": [
+    {{- /* ---- Dynamic repo keys start here ---- */ -}}
+    {{- range $i, $repo := $repos }}
+    {
+      "action": {
+        "controllers": [
+          "Keypad"
+        ],
+        "disable_automatic_states": false,
+        "icon": "plugins/com.amansprojects.starterpack.sdPlugin/icons/switchProfile.png",
+        "name": "Switch Profile",
+        "plugin": "com.amansprojects.starterpack.sdPlugin",
+        "property_inspector": "plugins/com.amansprojects.starterpack.sdPlugin/propertyInspector/switchProfile.html",
+        "states": [
+          {
+            "alignment": "middle",
+            "colour": "#FFFFFF",
+            "family": "Liberation Sans",
+            "image": "plugins/com.amansprojects.starterpack.sdPlugin/icons/switchProfile.png",
+            "name": "",
+            "show": true,
+            "size": 16,
+            "style": "Regular",
+            "text": "",
+            "underline": false
+          }
+        ],
+        "supported_in_multi_actions": true,
+        "tooltip": "Switch the selected profile",
+        "uuid": "com.amansprojects.starterpack.switchprofile",
+        "visible_in_action_list": true
+      },
+      "children": null,
+      "context": {{ printf "Keypad.%d.0" $i | toJson }},
+      "current_state": 0,
+      "settings": {
+        "device": "sd-AL45K2C58783",
+        "profile":
+          {{- printf "%s/%s" "repo" $repo | toJson }}
+      },
+      "states": [
+        {
+          "alignment": "middle",
+          "colour": "#ffa348",
+          "family": "Liberation Sans",
+          "image": "0.png",
+          "name": "",
+          "show": true,
+          "size": 12,
+          "style": "Regular",
+          "text": {{ $repo | toJson }},
+          "underline": false
+        }
+      ]
+    },
+    {{- end }}
+    {{- /* ---- Dynamic repo keys end here ---- */ -}}
+
+    {{- /* ---- Pad with nulls up to 14 items total (1 open + up to 14 repos) ---- */ -}}
+    {{- $repoCount := len $repos -}}
+    {{- if lt $repoCount 14 -}}
+      {{- $pad := int (sub 14 $repoCount) -}}
+      {{- range $j := until $pad }}
+      null,
+      {{- end -}}
+    {{- end }}
+    {
+      "action": {
+        "controllers": [
+          "Keypad"
+        ],
+        "disable_automatic_states": false,
+        "icon": "plugins/com.amansprojects.starterpack.sdPlugin/icons/switchProfile.png",
+        "name": "Switch Profile",
+        "plugin": "com.amansprojects.starterpack.sdPlugin",
+        "property_inspector": "plugins/com.amansprojects.starterpack.sdPlugin/propertyInspector/switchProfile.html",
+        "states": [
+          {
+            "alignment": "middle",
+            "colour": "#FFFFFF",
+            "family": "Liberation Sans",
+            "image": "plugins/com.amansprojects.starterpack.sdPlugin/icons/switchProfile.png",
+            "name": "",
+            "show": true,
+            "size": 16,
+            "style": "Regular",
+            "text": "",
+            "underline": false
+          }
+        ],
+        "supported_in_multi_actions": true,
+        "tooltip": "Switch the selected profile",
+        "uuid": "com.amansprojects.starterpack.switchprofile",
+        "visible_in_action_list": true
+      },
+      "children": null,
+      "context": "Keypad.14.0",
+      "current_state": 0,
+      "settings": {
+        "device": "sd-AL45K2C58783",
+        "profile": "pedro/landing_page"
+      },
+      "states": [
+        {
+          "alignment": "middle",
+          "colour": "#FFFFFF",
+          "family": "Liberation Sans",
+          "image": "0.png",
+          "name": "",
+          "show": true,
+          "size": 16,
+          "style": "Regular",
+          "text": "",
+          "underline": false
+        }
+      ]
+    }
+  ],
+  "sliders": []
+}

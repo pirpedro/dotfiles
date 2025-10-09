@@ -17,5 +17,14 @@
     "dot_curlrc": "ini",
     "*/external/*": "toml"
   },
-  "cSpell.words": ["chezmoi", "chezmoipackages", "codespace", "codespaces"]
+  "cSpell.words": [
+    "chezmoi",
+    "chezmoipackages",
+    "codespace",
+    "codespaces",
+    "darwin",
+    "streamdeck",
+    "tmpl",
+    "vimrc"
+  ]
 }

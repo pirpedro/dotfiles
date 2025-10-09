@@ -18,16 +18,36 @@ die() { echo "streamdeck-exec: $*" >&2; exit 1; }
 has_just() { command -v just >/dev/null 2>&1; }
 has_xdotool() { command -v xdotool >/dev/null 2>&1; }
 has_wmctrl() { command -v wmctrl >/dev/null 2>&1; }
+has_flatpak() { command -v flatpak >/dev/null 2>&1; }
 
 has_justfile() { [[ -f "$1/Justfile" || -f "$1/justfile" ]]; }
 has_devcontainer() { [[ -f "$1/.devcontainer/devcontainer.json" ]]; }
 
-[[ $# -ge 2 ]] || { echo "Usage: $0 <open|close|cmd> /path/to/project [args...]" >&2; exit 1; }
 
-cmd="$1"; shift
-target="$1"; shift
-target=$(realpath "$target")
-[[ -e "$target" ]] || die "Target path does not exist: $target"
+focus_or_launch_flatpak() {
+  local appid="$1"; shift || true
+  local app_args=( "$@" )
+
+  if ! has_flatpak; then
+    die "flatpak not found in PATH"
+  fi
+
+  # Ex.: org.ferdium.Ferdium -> "ferdium"
+  local class_guess="${appid##*.}"  # lower
+
+  # Se estivermos em X11 e houver xdotool, tente focar
+  if has_xdotool && [[ "${XDG_SESSION_TYPE:-x11}" != "wayland" ]]; then
+    if wid="$(xdotool search --onlyvisible --class "$class_guess" 2>/dev/null | head -n1)"; then
+      xdotool windowactivate --sync "$wid" || true
+      xdotool windowraise "$wid" || true
+      return 0
+    fi
+  fi
+
+  # Se não deu para focar (Wayland/sem janela), lance o app
+  flatpak run "$appid" "${app_args[@]}" >/dev/null 2>&1 &
+  return 0
+}
 
 run_in_project() {
   local cmd="$1"; shift
@@ -55,6 +75,19 @@ run_in_new_terminal() {
     kitty --directory "$project_path" bash -lc "$cmd$args_quoted; echo; read -n1 -s -r -p 'Press any key to close.';"
   fi
 }
+
+[[ $# -ge 2 ]] || { echo "Usage: $0 <cmd|flatpak> /path/to/project [args...]" >&2; exit 1; }
+
+cmd="$1"; shift
+target="$1"; shift
+
+if [[ "$cmd" == "flatpak" ]]; then
+  focus_or_launch_flatpak "$target" "$@"
+  exit 0
+fi
+
+target=$(realpath "$target")
+[[ -e "$target" ]] || die "Target path does not exist: $target"
 
 case "$cmd" in
   logs|shell|test)

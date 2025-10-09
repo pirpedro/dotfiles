@@ -1,0 +1,133 @@
+{{ if (lookPath "opendeck") -}}
+#!/usr/bin/env bash
+
+# .config/nvm/init.vim hash: {{ include ".chezmoigit.yaml" | sha256sum }}
+
+{{ $repoDir := joinPath .chezmoi.homeDir ".config/opendeck/profiles/sd-AL45K2C58783/repo" -}}
+{{ $baseProfilesDir := joinPath .chezmoi.homeDir ".config/opendeck/profiles/sd-AL45K2C58783/pedro" -}}
+{{ $gitReposFile := joinPath $baseProfilesDir "git_repos.json" -}}
+{{- $imgBase := joinPath .chezmoi.homeDir ".config/opendeck/images/sd-AL45K2C58783/repo" -}}
+{{- $profileImgBase := joinPath .chezmoi.homeDir ".config/opendeck/images/sd-AL45K2C58783/pedro" -}}
+{{- $iconsSrc := joinPath .chezmoi.sourceDir "dot_local/share/streamdeck/icons/git-buttons" -}}
+
+
+mkdir -p {{ $repoDir }}
+mkdir -p {{ $baseProfilesDir }}
+
+{{- /* Export OUTDIR for use in included templates */ -}}
+
+{{- $cfg := fromYaml (output "chezmoi" "execute-template" (include ".chezmoigit.yaml" | trim)) -}}
+{{- $repos := list -}}
+{{- /* Iterate all workspaces and repos */ -}}
+{{- range $wsName, $ws := $cfg.workspaces }}
+  {{- $root := $ws.root -}}
+  {{- range $repo := $ws.repos }}
+    {{- /* include only when streamdeck is present (true or map) */ -}}
+    {{- $sd := (dig "streamdeck" false $repo) -}}
+    {{- if $sd }}
+
+      {{- if ne (printf "%T" $sd) "map[string]interface {}" -}}
+        {{- $sd = dict -}}
+      {{- end -}}
+
+      {{- $lastPart := (last (splitList "/" $repo.name)) -}}
+      {{- $subdir := (coalesce $repo.path $lastPart) -}}
+      {{- $dir := (printf "~/%s/%s" $root $subdir) -}}
+      {{- /* title: allow override via streamdeck.title; else use last part of repo name */ -}}
+      {{- $title := (dig "title" $lastPart $sd) -}}
+      {{- /* tasks: allow override via streamdeck.tasks; else use default list */ -}}
+      {{- $tasks := (dig "tasks" (list "install" "build" "clean" "run" "dev" "reset" "test" "sunrise" "sunset" "dc-up" "dc-down" "dc-build" "dc-destroy") $sd) -}}
+       {{- /* filesystem-safe filename: lowercase + replace not [a-zA-Z0-9_-] to '-' */ -}}
+      {{- $fileSafe := lower (regexReplaceAll "[^a-zA-Z0-9_-]" $title "-") -}}
+      {{- $outfile := printf "%s.json" $fileSafe -}}
+      {{- $repos = append $repos $title -}}
+      {{- if joinPath $repoDir $outfile | stat | not -}}
+
+      {{- /* Create images and profile for this repo */ -}}
+      {{- printf "\n" -}}
+
+TITLE_DIR="{{$imgBase}}/{{$title}}"
+mkdir -p "${TITLE_DIR}/Keypad.0.0"
+mkdir -p "${TITLE_DIR}/Keypad.14.0"
+
+
+# open -> 0.png
+SRC_OPEN="{{ $iconsSrc }}/open.png"
+DST_OPEN="${TITLE_DIR}/Keypad.0.0/0.png"
+if [ -f "${SRC_OPEN}" ]; then
+  install -m 0644 -D "${SRC_OPEN}" "${DST_OPEN}"
+  echo "img: ${DST_OPEN} (overwritten if exists)"
+else
+  echo "img-warn: missing ${SRC_OPEN}"
+fi
+
+# return -> 0.png
+SRC_OPEN="{{ $iconsSrc }}/return.png"
+DST_OPEN="${TITLE_DIR}/Keypad.14.0/0.png"
+if [ -f "${SRC_OPEN}" ]; then
+  install -m 0644 -D "${SRC_OPEN}" "${DST_OPEN}"
+  echo "img: ${DST_OPEN} (overwritten if exists)"
+else
+  echo "img-warn: missing ${SRC_OPEN}"
+fi
+
+{{- range $i, $task := $tasks }}
+KEYDIR="${TITLE_DIR}/Keypad.{{ add $i 1 }}.0"
+SRC_TASK="{{ $iconsSrc }}/{{ $task }}.png"
+DST_TASK="${KEYDIR}/0.png"
+mkdir -p "${KEYDIR}"
+if [ -f "${SRC_TASK}" ]; then
+  install -m 0644 -D "${SRC_TASK}" "${DST_TASK}"
+  echo "img: ${DST_TASK} (overwritten if exists)"
+else
+  echo "img-warn: missing ${SRC_TASK}"
+fi
+{{- end }}
+
+# --- profile for {{$title}} ({{$dir}}) ---
+cat > "{{ $repoDir }}/{{$outfile}}" <<'JSON'
+{{- /* Render the reusable profile template with dir/title */ -}}
+{{- printf "\n" -}}
+{{ includeTemplate ".chezmoitemplates/opendeck/profiles/opendeck-profile.json.tmpl" (dict "dir" $dir "title" $title "tasks" $tasks) }}
+JSON
+      {{ end -}}
+
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- if ne (len $repos) 0 -}}
+{{- printf "\n" -}}
+TITLE_DIR="{{$profileImgBase}}/git_repos"
+SRC_HOME="{{ $iconsSrc }}/home.png"
+SRC_REPO="{{ $iconsSrc }}/repo.png"
+mkdir -p "${TITLE_DIR}/Keypad.14.0"
+# return -> 0.png
+DST_HOME="${TITLE_DIR}/Keypad.14.0/0.png"
+if [ -f "${SRC_HOME}" ]; then
+  install -m 0644 -D "${SRC_HOME}" "${DST_HOME}"
+  echo "img: ${DST_HOME} (overwritten if exists)"
+else
+  echo "img-warn: missing ${SRC_HOME}"
+fi
+{{- range $i, $title := $repos -}}
+{{- printf "\n" -}}
+KEYDIR="${TITLE_DIR}/Keypad.{{ $i }}.0"
+DST_REPO="${KEYDIR}/0.png"
+mkdir -p "${KEYDIR}"
+if [ -f "${SRC_REPO}" ]; then
+  install -m 0644 -D "${SRC_REPO}" "${DST_REPO}"
+  echo "img: ${DST_REPO} (overwritten if exists)"
+else
+  echo "img-warn: missing ${SRC_REPO}"
+fi
+{{- end -}}
+
+{{- printf "\n" -}}
+
+cat > "{{ $gitReposFile }}" <<'JSON'
+{{- printf "\n" -}}
+{{ includeTemplate ".chezmoitemplates/opendeck/profiles/opendeck-git-repos.json.tmpl" (dict "repos" $repos) }}
+JSON
+{{- end -}}
+{{ end -}}
