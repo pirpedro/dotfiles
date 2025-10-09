@@ -54,6 +54,6 @@ refreshPeriod = "168h"
 
 [[ template "external/icons" . ]]
 
-[[/* template "external/gitprojects" . */]]
+[[ template "external/gitprojects" . ]]
 
 [[/* template "external/themes" . */]]

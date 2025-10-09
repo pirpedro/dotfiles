@@ -6,8 +6,8 @@ workspaces:
     root: .local/share
     repos:
       - name: pirpedro/dotfiles
-      - path: chezmoi
-      streamdeck: true
+        path: chezmoi
+        streamdeck: true
   personal:
     root: dev/ws/my
     provider: git@github.com
