@@ -2,6 +2,12 @@
 workspaces:
   all:
     root: dev/ws
+  share:
+    root: .local/share
+    repos:
+      - name: pirpedro/dotfiles
+      - path: chezmoi
+      streamdeck: true
   personal:
     root: dev/ws/my
     provider: git@github.com
@@ -9,6 +15,13 @@ workspaces:
       - name: pirpedro/dev-gadgets
         streamdeck: 
           title: gadgets
+      - name: pirpedro/features
+        streamdeck: true
+      - name: pirpedro/homelab
+        streamdeck: 
+          title: homelab
+      - name: pirpedro/devcontainers
+      - name: pirpedro/dotfiles
       - name: pirpedro/pirpedro.github.io
         path: blog/personal
       - name: psrandom/psrandom.github.io.git
@@ -17,13 +30,16 @@ workspaces:
         path: MBA-CEMEAI/Disciplinas
       - name: pirpedro/CEMEAI_TCC
         path: MBA-CEMEAI/TCC
+  archived:
+    root: dev/ws/archived
+    provider: git@github.com
+    repos:
       - name: pirpedro/docker
-      - name: pirpedro/features
-        streamdeck: true
       - name: pirpedro/bootstrapping
         path: rule-them-all
       - name: pirpedro/Inquirer.sh
       - name: pirpedro/bash-common
+      - name: pirpedro/my-config
   fullcycle:
     root: dev/ws/fullcycle
     provider: git@github.com
