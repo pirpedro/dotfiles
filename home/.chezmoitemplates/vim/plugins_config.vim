@@ -183,6 +183,12 @@ nnoremap <silent> <F8> :TagbarToggle<CR>
 let g:rooter_patterns = ['.git', 'Makefile', 'package.json', 'pyproject.toml', 'setup.py', 'requirements.txt']
 
 " ============================
+" => Gutentags (ctags integration)
+" ============================
+let g:gutentags_cache_dir = expand('~/.cache/tags')
+let g:gutentags_project_root = ['.git', '.hg', '.svn', '.root']
+
+" ============================
 " => Airline
 " ============================
 let g:airline#extensions#tabline#enabled = 1
