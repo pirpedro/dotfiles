@@ -1,4 +1,4 @@
-{{ if (lookPath "opendeck") -}}
+{{ if or true (lookPath "opendeck") -}}
 #!/usr/bin/env bash
 
 # .config/nvm/init.vim hash: {{ include ".chezmoigit.yaml" | sha256sum }}
@@ -46,7 +46,7 @@ mkdir -p {{ $baseProfilesDir }}
       {{- /* Create images and profile for this repo */ -}}
       {{- printf "\n" -}}
 
-TITLE_DIR="{{$imgBase}}/{{$title}}"
+TITLE_DIR="{{$imgBase}}/{{replace " " "-" $title | lower}}"
 mkdir -p "${TITLE_DIR}/Keypad.0.0"
 mkdir -p "${TITLE_DIR}/Keypad.14.0"
 

@@ -43,7 +43,7 @@
       "settings": {
         "device": "sd-AL45K2C58783",
         "profile":
-          {{- printf "%s/%s" "repo" $repo | toJson }}
+          {{- printf "%s/%s" "repo" (replace " " "-" $repo) | toJson }}
       },
       "states": [
         {
