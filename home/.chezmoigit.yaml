@@ -4,31 +4,60 @@ workspaces:
     root: dev/ws
   personal:
     root: dev/ws/my
+    provider: git@github.com
     repos:
-      - name: pirpedro/pirpedro.github.io:blog/personal
-      - name: psrandom/psrandom.github.io.git:blog/psrandom
-      - name: pirpedro/CEMEAI-USP:MBA-CEMEAI/Disciplinas
-      - name: pirpedro/CEMEAI_TCC:MBA-CEMEAI/TCC
+      - name: pirpedro/dev-gadgets
+        streamdeck: 
+          title: gadgets
+      - name: pirpedro/pirpedro.github.io
+        path: blog/personal
+      - name: psrandom/psrandom.github.io.git
+        path: blog/psrandom
+      - name: pirpedro/CEMEAI-USP
+        path: MBA-CEMEAI/Disciplinas
+      - name: pirpedro/CEMEAI_TCC
+        path: MBA-CEMEAI/TCC
       - name: pirpedro/docker
-      - name: pirpedro/git-gadgets
-      - name: pirpedro/my-config
-      - name: pirpedro/bootstrapping:rule-them-all
+      - name: pirpedro/features
+        streamdeck: true
+      - name: pirpedro/bootstrapping
+        path: rule-them-all
       - name: pirpedro/Inquirer.sh
       - name: pirpedro/bash-common
   fullcycle:
     root: dev/ws/fullcycle
+    provider: git@github.com
     repos:
-      - name: pirpedro/flix-catalog:catalog
-      - name: pirpedro/flix-encoder:encoder
-      - name: pirpedro/flix-auth:micro-auth
-      - name: pirpedro/flix-micro-catalog:micro-catalog
-      - name: pirpedro/flix-message-broker:rabbitmq
+      - name: pirpedro/flix-catalog
+        path: catalog
+      - name: pirpedro/flix-encoder
+        path: encoder
+      - name: pirpedro/flix-auth
+        path: micro-auth
+      - name: pirpedro/flix-micro-catalog
+        path: micro-catalog
+      - name: pirpedro/flix-message-broker
+        path: rabbitmq
+  MDS:
+    root: dev/ws/MDS
+    provider: git@git.mds.gov.br
+    repos:
+      - name: uff/sisct-cadastro-nacional-web-src
+        path: sisct-web
+        streamdeck: 
+          title: sisct web
+      - name: uff/sisct-cadastro-nacional-api-src
+        path: sisct-api
+        streamdeck: 
+          title: sisct api
   UFF:
     root: dev/ws/UFF
+    provider: git@github.com
     repos:
       - name: pirpedro/pgfa
       - name: nees-uff/pef
       - name: b2in-tech/prepaf
-      - name: nees-uff/prepaf:polar-scout
+      - name: nees-uff/prepaf
+        path: polar-scout
       - name: b2in-tech/fund-of-funds
 {{ end -}}

@@ -1,16 +1,30 @@
-{{ if and .is.personal (not .is.ephemeral) (not .is.headless) -}}
-{{ $yaml := fromYaml (output "chezmoi" "execute-template" (include ".chezmoigit.yaml" | trim ) ) -}}
-{{  range (keys $yaml.workspaces) -}}
-{{    $ws:= get $yaml.workspaces . -}}
-{{    $root:=ternary $ws.root "" (ne $ws.root nil) -}}
-{{    range $ws.repos -}}
-{{      $provider:=ternary .provider "git@github.com" (ne .provider nil) -}}
-{{      $repo := split ":" .name -}}
-{{      $repo_name := $repo._0 -}}
-{{      $repo_path := ternary $repo._1 (split "/" $repo_name)._1 (ne $repo._1 "") -}}
-{{ list "[" (joinPath $root $repo_path | quote) "]" | join "" }}
-  type = "git-repo"
-  url = {{ list $provider ":" $repo_name | join "" | quote }}
-{{    end -}}
-{{  end -}}
-{{ end -}}
+{{- /* if and .is.personal (not .is.ephemeral) (not .is.headless) */ -}}
+{{- $yaml := fromYaml (output "chezmoi" "execute-template" (include ".chezmoigit.yaml" | trim)) -}}
+
+{{- range $wsName := keys $yaml.workspaces | sortAlpha -}}
+  {{- $ws := index $yaml.workspaces $wsName -}}
+  {{- $root := default "" $ws.root -}}
+  {{- $wsProvider := default "git@github.com" $ws.provider -}}
+
+  {{- range $r := $ws.repos -}}
+    {{- /* repo canonical: owner/name[.git] */ -}}
+    {{- $repoName := $r.name -}}
+    {{- /* se não houver path, usa basename do repo */ -}}
+    {{- $basename := (index (splitList "/" $repoName) 1) | trimSuffix ".git" -}}
+    {{- $repoPath := default $basename $r.path -}}
+    {{- /* provider por repo (se algum dia existir) > provider do workspace */ -}}
+    {{- $provider := default $wsProvider $r.provider -}}
+
+{{ printf "[%q]" (joinPath $root $repoPath) }}
+type = "git-repo"
+url  = {{ printf "%s:%s" $provider $repoName | quote }}
+{{- if $r.branch }}
+branch  = {{ $r.branch | quote }}
+{{- end }}
+{{- if $r.shallow }}
+shallow = true
+{{- end }}
+{{ printf "\n" }}
+  {{- end -}}
+{{- end -}}
+{{- /* end */ -}}

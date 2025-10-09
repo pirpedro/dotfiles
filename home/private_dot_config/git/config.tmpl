@@ -396,7 +396,6 @@
   # Use git-filter-repo if available
   subrepo    = "!sh -c 'if command -v git-filter-repo >/dev/null 2>&1; then git filter-repo --path \"$1\" --force; else git filter-branch --prune-empty --subdirectory-filter \"$1\" $(git mainbranch); fi' -"
 
-  human   = name-rev --name-only --refs=refs/heads/*
   serve   = "!git daemon --reuseaddr --verbose --base-path=. --export-all ./.git"
 
   # --- Quick commits / undo ---
@@ -459,12 +458,17 @@
     done; \
   }; f"
 
-{{ if and .is.personal (not .is.ephemeral) (not .is.headless) -}}
-{{   $yaml := fromYaml (output "chezmoi" "execute-template" (include ".chezmoigit.yaml" | trim ) ) -}}
+{{ printf "\n" }}
+{{- if and .is.personal (not .is.ephemeral) (not .is.headless) -}}
+{{- $yaml := fromYaml (output "chezmoi" "execute-template" (include ".chezmoigit.yaml" | trim)) -}}
 [bulkworkspaces]
-{{  range (keys $yaml.workspaces | sortAlpha) -}}
-{{    $ws:= get $yaml.workspaces . -}}
-{{    $root:=ternary $ws.root "" (ne $ws.root nil) -}}
-{{ printf "  %s = %s/%s" . $.chezmoi.homeDir $root}}
-{{  end -}}
-{{ end -}}
+{{- printf "\n" -}}
+{{- range $wsName := keys $yaml.workspaces | sortAlpha -}}
+  {{- $ws := index $yaml.workspaces $wsName -}}
+  {{- $root := default "" $ws.root -}}
+{{ printf "  %s = %s/%s\n" $wsName $.chezmoi.homeDir $root -}}
+{{- end -}}
+
+{{- end -}}
+
+
